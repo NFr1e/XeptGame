@@ -1,0 +1,20 @@
+{
+    "name": "XeptGame.Editor",
+    "rootNamespace": "XeptGame.Editor",
+    "references": [
+        "XeptGame",
+        "XeptKit",
+        "XeptKit.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

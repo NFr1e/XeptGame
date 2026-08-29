@@ -1,0 +1,22 @@
+{
+    "name": "XeptGame",
+    "rootNamespace": "XeptGame",
+    "references": [
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem",
+        "UniTask",
+        "UniTask.Addressables",
+        "XeptKit"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
