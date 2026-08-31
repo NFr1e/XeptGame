@@ -6,8 +6,11 @@
         "Unity.ResourceManager",
         "Unity.TextMeshPro",
         "Unity.InputSystem",
+        "DOTween.Modules",
         "UniTask",
+        "UniTask.DOTween",
         "UniTask.Addressables",
+        "KinematicCharacterController",
         "XeptKit"
     ],
     "includePlatforms": [],

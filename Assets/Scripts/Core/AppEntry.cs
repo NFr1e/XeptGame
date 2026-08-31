@@ -8,6 +8,7 @@ using XeptKit.Input;
 using XeptKit.Scenes;
 using XeptKit.Localization;
 using XeptKit.UI.Manager;
+using XeptGame.Core.Input;
 
 namespace XeptGame
 {
@@ -31,6 +32,8 @@ namespace XeptGame
 #if UNITY_EDITOR
         private static IAssetLoader _editorLoader;
 #endif
+        public static GameInput GlobalInput { get; private set; }
+
         private static bool _shutdown;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
@@ -59,6 +62,7 @@ namespace XeptGame
             InputManager = new InputManager();
             LocalizationManager = new LocalizationManager(EventBus, AssetLoader);
             UIManager = new UIManager(EventBus);
+            GlobalInput = new GameInput();
 
             #endregion
 

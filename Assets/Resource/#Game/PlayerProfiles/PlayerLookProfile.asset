@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0316ff655b0cf2e42a21b8ce36a65f1f, type: 3}
+  m_Name: PlayerLookProfile
+  m_EditorClassIdentifier: 
+  sensitivityX: 0.05
+  sensitivityY: 0.05
+  minPitch: -89
+  maxPitch: 89
+  invertY: 0
+  stickDeadzone: 0.15
