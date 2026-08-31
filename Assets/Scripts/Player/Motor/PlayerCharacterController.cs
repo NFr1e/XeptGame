@@ -1,4 +1,4 @@
-﻿using KinematicCharacterController;
+using KinematicCharacterController;
 using UnityEngine;
 using XeptKit.Core;
 using XeptKit.FSM;
@@ -43,7 +43,7 @@ namespace XeptGame.Player
 
         public void PostGroundingUpdate(float deltaTime)
         {
-            // 物理转移统一在 Fsm.Tick（PlayerMotor.FixedUpdate，执行序晚于电机）判定；
+            // 物理转移统一在 Fsm.Tick（PlayerController.Update，执行序晚于电机）判定；
             // 本钩子保留为执行顺序被改动时的备选挂点（设计决议 §3.1）。
         }
 

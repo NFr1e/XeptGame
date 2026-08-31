@@ -31,6 +31,7 @@ namespace XeptGame.Player
         public Vector3 TransientPosition => _motor.TransientPosition;
         public Quaternion TransientRotation => _motor.TransientRotation;
         public Vector3 Velocity => _motor.Velocity;
+        public Vector3 OwnVelocity => _motor.Velocity - _motor.AttachedRigidbodyVelocity;
         public Vector3 AttachedRigidbodyVelocity => _motor.AttachedRigidbodyVelocity;
         public bool MustUnground => _motor.MustUnground();
         public float MaxStableSlopeAngle => _motor.MaxStableSlopeAngle;

@@ -13,6 +13,9 @@ namespace XeptGame.Player
     {
         public override void ApplyVelocity(ref Vector3 velocity, float deltaTime)
         {
+            // 捕获带入速度的垂直下落速度（落地事件用；必须在最顶部——ref 为投影处理前的真实速度）
+            CaptureFallSpeed(ref velocity);
+
             // KCC 真实表面法线：接地探测已覆盖全部碰撞层（KCC 修改点，见设计决议 §5.4），
             // GroundingStatus.GroundNormal 为真实法线（不可站立层与稳定层坡面均适用）。
             var surfaceNormal = Ctx.Motor.Ground.GroundNormal;

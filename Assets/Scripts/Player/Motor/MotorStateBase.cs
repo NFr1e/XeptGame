@@ -143,6 +143,23 @@ namespace XeptGame.Player
             // 保持当前旋转（不修改）：body 不随视角旋转
         }
 
+        /// <summary>
+        /// 捕获本物理步"带入速度"的垂直下落速度（落地事件用，见 3C_CameraFeel_Design.md §3.1）。
+        /// 在 <see cref="ApplyVelocity"/> **顶部**调用：ref velocity = 上一物理步结算后的真实速度
+        /// （尚未被本步的 sweep 碰撞/投影处理）。取**离地会话内最大值**——
+        /// KCC 会在移动 sweep 命中几何时把速度投影/清零（贴墙/贴边下落时垂直分量被投影归零，
+        /// 读结算后速度会丢失真实冲击），而带入速度在投影前仍保留真实下落速度；
+        /// 会话起点由 AirborneState.OnEnter 重置（每次离地新周期）。
+        /// </summary>
+        protected void CaptureFallSpeed(ref Vector3 velocity)
+        {
+            float fallSpeed = Mathf.Max(0f, -Vector3.Dot(velocity, Ctx.Motor.CharacterUp));
+            if (fallSpeed > Ctx.LastAirborneVerticalSpeed)
+            {
+                Ctx.LastAirborneVerticalSpeed = fallSpeed;
+            }
+        }
+
         /// <summary>消费通用加力通道（AddVelocity 注入的击退/推力）。</summary>
         protected void ConsumeAddVelocity(ref Vector3 velocity)
         {

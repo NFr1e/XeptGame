@@ -51,6 +51,14 @@ namespace XeptGame.Player
         Vector3 Velocity { get; }
 
         /// <summary>
+        /// **自主运动速度**（不含贴附移动平台贡献）= 决策层写出的速度（KCC Velocity - AttachedRigidbodyVelocity）。
+        /// 移动平台上站立时 ≈ 0（平台速度在 <see cref="AttachedRigidbodyVelocity"/>），手动行走时 = 行走速度。
+        /// 供"玩家自主运动"驱动的观感效果使用（如 HeadBob 位移积分）——被动移动（平台携带）不应触发；
+        /// 而需要"实际世界运动"的场合（落地水平动量等）应使用 <see cref="Velocity"/>（合成后）。
+        /// </summary>
+        Vector3 OwnVelocity { get; }
+
+        /// <summary>
         /// 贴附移动平台在当前角色位置处的速度（含垂直分量）。
         /// 跳跃动量保留用：升降平台起跳需把平台垂直速度并入起跳冲量
         /// （否则 Fall 消费冲量时 Project 掉垂直分量 → Y 轴惯性丢失）。

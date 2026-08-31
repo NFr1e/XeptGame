@@ -13,6 +13,10 @@ namespace XeptGame.Core
             public const string PlayerLookProfileMenuName = PlayerProfileMenuName + "/PlayerLookProfile";
             public const string PlayerLookProfileFileName = "PlayerLookProfile";
             public const int PlayerLookProfileOrder = 1;
+
+            public const string PlayerCameraFeelProfileMenuName = PlayerProfileMenuName + "/PlayerCameraFeelProfile";
+            public const string PlayerCameraFeelProfileFileName = "PlayerCameraFeelProfile";
+            public const int PlayerCameraFeelProfileOrder = 2;
         }
     }
 }

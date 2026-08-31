@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace XeptGame.Player
@@ -40,6 +41,31 @@ namespace XeptGame.Player
 
         /// <summary>通用加力通道（受击击退等；任意状态可注入）。</summary>
         public Vector3 AddVelocityAccumulator { get; set; }
+
+        // ============================================================
+        // 着陆事件（观感层订阅；设计决议 docs/modules/3C_CameraFeel_Design.md §3.1）
+        // ============================================================
+
+        /// <summary>
+        /// 着陆事件：<see cref="GroundedState.OnEnter"/> 内探测上一根状态为 Airborne 时触发
+        /// （初始进场不触发，排除出生伪落地）。订阅方：LandingKick（落地镜头缓冲）、
+        /// HeadBob（落地恢复窗口）等观感层效果源。
+        /// </summary>
+        public event Action<MotorLandingInfo> Landing;
+
+        /// <summary>
+        /// 离地会话内最大垂直下落速度（&gt;0；Fall/UnstableGround 的 ApplyVelocity 顶部经
+        /// <see cref="MotorStateBase.CaptureFallSpeed"/> 记录，AirborneState.OnEnter 重置，落地时消费）。
+        /// 读取 sweep 投影前的"带入速度"并取会话最大值——KCC 贴墙/贴边下落时会把结算后速度投影归零，
+        /// 直接读 Motor.Velocity 会丢失真实冲击（实测：-18.9 m/s 在落地前被投影为 0）。
+        /// </summary>
+        public float LastAirborneVerticalSpeed { get; set; }
+
+        /// <summary>触发着陆事件（由 GroundedState.OnEnter 在探测到上一状态为 Airborne 时调用）。</summary>
+        public void RaiseLanding(Vector3 groundNormal)
+        {
+            Landing?.Invoke(new MotorLandingInfo(LastAirborneVerticalSpeed, groundNormal));
+        }
 
         // ============================================================
         // 便捷判定（Sprint/Crouch 已在输入层折叠为 Held 持续值，直接读取）
@@ -89,5 +115,23 @@ namespace XeptGame.Player
         public bool IsOnNonStableLayer
             => Motor.GroundColliderLayer >= 0
                && (Motor.StableGroundLayers.value & (1 << Motor.GroundColliderLayer)) == 0;
+    }
+
+    /// <summary>
+    /// 着陆信息（<see cref="PlayerMotorContext.Landing"/> 事件载荷）。
+    /// </summary>
+    public readonly struct MotorLandingInfo
+    {
+        /// <summary>最后空中帧捕获的垂直下落速度（&gt;0；未受落地碰撞响应影响）。</summary>
+        public readonly float ImpactSpeed;
+
+        /// <summary>接地法线（冲击方向参考）。</summary>
+        public readonly Vector3 GroundNormal;
+
+        public MotorLandingInfo(float impactSpeed, Vector3 groundNormal)
+        {
+            ImpactSpeed = impactSpeed;
+            GroundNormal = groundNormal;
+        }
     }
 }

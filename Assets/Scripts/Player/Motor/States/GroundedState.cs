@@ -23,6 +23,14 @@ namespace XeptGame.Player
             // 确保站立胶囊尺寸按 Profile 配置（场景胶囊可能被调整过；Crouch 子状态切换不触发本钩子）
             var profile = Ctx.Profile;
             Ctx.Motor.SetCapsuleDimensions(profile.capsuleRadius, profile.standingHeight, profile.standingYOffset);
+
+            // 着陆事件（观感层订阅，见 3C_CameraFeel_Design.md §3.1）：
+            // 仅在"上一根状态为 Airborne"时触发——此刻 Fsm._current 仍是旧状态（RootState 探测），
+            // Fall/UnstableGround → Grounded 均覆盖；初始进场（RootState=null）不触发，排除出生伪落地。
+            if (RootFsm.RootState is AirborneState)
+            {
+                Ctx.RaiseLanding(Ctx.Motor.Ground.GroundNormal);
+            }
         }
 
         public override void Update(float deltaTime)

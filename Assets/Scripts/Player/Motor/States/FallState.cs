@@ -10,6 +10,9 @@ namespace XeptGame.Player
     {
         public override void ApplyVelocity(ref Vector3 velocity, float deltaTime)
         {
+            // 捕获带入速度的垂直下落速度（落地事件用；必须在最顶部——ref 为投影处理前的真实速度）
+            CaptureFallSpeed(ref velocity);
+
             // 起跳初速度（跳跃转移时写入）：冲量 + 保留水平分量、替换垂直分量
             if (Ctx.PendingJumpImpulse.sqrMagnitude > 0f)
             {
