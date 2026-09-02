@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace XeptGame.Player
 {
@@ -11,8 +11,8 @@ namespace XeptGame.Player
     {
         public override void OnEnter()
         {
-            var profile = Ctx.Profile;
-            Ctx.Motor.SetCapsuleDimensions(profile.capsuleRadius, profile.crouchedHeight, profile.crouchedYOffset);
+            // 蹲伏胶囊 + 同步眼位目标（眼位 = 胶囊顶部，CrouchEye 效果源消费）
+            Ctx.ApplyCapsule(true);
         }
 
         public override void ApplyVelocity(ref Vector3 velocity, float deltaTime)
@@ -42,7 +42,7 @@ namespace XeptGame.Player
 
             if (!blocked)
             {
-                Ctx.Motor.SetCapsuleDimensions(profile.capsuleRadius, profile.standingHeight, profile.standingYOffset);
+                Ctx.ApplyCapsule(false);
                 Fsm.RequestChange<IdleState>();
             }
         }

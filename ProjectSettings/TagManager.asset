@@ -12,7 +12,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Ground
   - 
   - 
   - 
@@ -22,16 +22,16 @@ TagManager:
   - 
   - 
   - Interactable
+  - DynamicProp
   - 
   - 
   - 
+  - Enemy
+  - NPC
   - 
   - 
   - 
-  - 
-  - 
-  - 
-  - 
+  - PostProcessMask
   - 
   - 
   - 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace XeptGame.Player
 {
@@ -16,13 +16,7 @@ namespace XeptGame.Player
 
         public override void Update(float deltaTime)
         {
-            // 蹲伏意图优先（互斥：冲刺中按蹲 = 取消冲刺进蹲）
-            if (Ctx.WantCrouch)
-            {
-                Fsm.RequestChange<CrouchState>();
-                return;
-            }
-
+            // 蹲伏意图由父状态（GroundedState）统一处理（冲刺中按蹲 = 取消冲刺进蹲，互斥语义）
             if (!Ctx.WantSprint || Ctx.WorldMoveIntent.sqrMagnitude <= 0f)
             {
                 Fsm.RequestChange<WalkState>();

@@ -51,15 +51,23 @@ namespace XeptKit.UI.Manager
 
         /// <summary>
         /// 推送 UI 上下文（推模式，纯显式接线）：设置组根挂载父级与 UI 相机，可随时调用（场景加载后经 <see cref="UIComponent"/> 推送）。
-        /// **上下文切换契约（终审决议）**：canvasRoot 引用变化 = 旧 UI 世界作废 → 先 <see cref="Clear"/>() 并销毁旧组根再覆盖
-        /// （陈旧实例/追踪/组根缓存一并清除；场景重载后新根引用变化即触发）。相机单独变化不清场，但**重注入全部存活表单**
-        /// （链上/关闭中/休眠——相机变更刷新契约：推送相机持续生效，见 <see cref="ReapplyUICameraToAll"/>）。
+        /// **上下文切换契约（修订）**：canvasRoot 引用变化 = 旧组根**整体迁移**到新 root——表单随组根存活，
+        /// 不销毁（适配"多 UI 世界共存、上下文切换"场景，如菜单 canvas → HUD canvas；迁移也消解了
+        /// "表单先于上下文推送打开"的竞态：先挂旧根的组根随迁移存活）；已被销毁的组根（假 null，
+        /// 场景卸载路径）直接丢弃；**新 root 为 null（上下文清除/降级）= 旧 UI 世界作废** → Clear + 销毁组根（原语义）。
+        /// 相机单独变化不清场，但**重注入全部存活表单**（链上/关闭中/休眠——相机变更刷新契约：推送相机持续生效，见 <see cref="ReapplyUICameraToAll"/>）。
         /// 未推送时降级运行：组根不建、表单不重挂父级、相机注入跳过。
         /// 边界：**持久 UI 根（DontDestroyOnLoad）+ 场景重载**时根引用未变、不会自动清场——该场景由组合根在场景卸载时显式 <c>Clear()</c>。
         /// </summary>
         public void SetUIContext(Transform canvasRoot, Camera uiCamera)
         {
-            if (!ReferenceEquals(_canvasRoot, canvasRoot))
+            bool rootChanged = !ReferenceEquals(_canvasRoot, canvasRoot);
+
+            if (rootChanged && canvasRoot != null)
+            {
+                ReparentGroupRoots(canvasRoot); // 修订：活根整体迁移，表单存活
+            }
+            else if (rootChanged) // canvasRoot == null：上下文清除/降级 → 旧世界作废（无迁移目标）
             {
                 Clear();
                 DestroyGroupRoots();
@@ -73,6 +81,39 @@ namespace XeptKit.UI.Manager
             {
                 ReapplyUICameraToAll(); // 相机变更刷新：已存活表单（含休眠）重注入新相机；变更为 null = 降级，不清除已注入
             }
+        }
+
+        /// <summary>
+        /// 组根整体迁移到新 root（上下文切换修订语义）：存活组根重挂（表单随组根存活）；
+        /// **已被销毁的组根（假 null，场景卸载路径）丢弃并从字典移除**——其表单随销毁，迁移无从谈起；
+        /// 残留假 null 会导致后续 <see cref="SortGroupRoots"/> 触碰已销毁对象（MissingReferenceException）。
+        /// 迁移后重排 sibling 序（SetParent 追加到新根末尾，字典迭代序 ≠ Depth 序）。
+        /// </summary>
+        private void ReparentGroupRoots(Transform newRoot)
+        {
+            List<UIGroupConfig> stale = null;
+
+            foreach (var kv in _groupRoots)
+            {
+                var root = kv.Value;
+                if (root == null)
+                {
+                    (stale ??= new List<UIGroupConfig>()).Add(kv.Key); // 假 null：收集待清理（不可在遍历中改字典）
+                    continue;
+                }
+
+                root.SetParent(newRoot, false);
+            }
+
+            if (stale != null)
+            {
+                foreach (var key in stale)
+                {
+                    _groupRoots.Remove(key);
+                }
+            }
+
+            SortGroupRoots();
         }
 
         /// <summary>销毁全部组根（上下文切换「旧世界作废」：旧组根属旧 canvasRoot，销毁并清缓存）。</summary>
@@ -247,10 +288,6 @@ namespace XeptKit.UI.Manager
         /// <summary>建组根节点（Group Root 模型）：挂 canvasRoot 下、拉伸铺满，按 Depth 排 sibling 序（高 Depth 在上）。</summary>
         internal RectTransform EnsureGroupRoot(UIGroupConfig config)
         {
-            if (_canvasRoot == null)
-            {
-                return null; // 降级模式：未推送 canvasRoot，不建组根（表单不重挂父级）
-            }
 
             if (_groupRoots.TryGetValue(config, out var root) && root != null)
             {
@@ -278,7 +315,10 @@ namespace XeptKit.UI.Manager
             var roots = new List<KeyValuePair<UIGroupConfig, RectTransform>>(_groupRoots.Count);
             foreach (var kv in _groupRoots)
             {
-                roots.Add(kv);
+                if (kv.Value != null)
+                {
+                    roots.Add(kv); // 防御：残留假 null 条目（场景卸载路径）跳过，避免 SetSiblingIndex 触碰已销毁对象
+                }
             }
 
             roots.Sort((a, b) => a.Key.Depth.CompareTo(b.Key.Depth));

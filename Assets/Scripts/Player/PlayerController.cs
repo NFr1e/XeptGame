@@ -79,9 +79,6 @@ namespace XeptGame.Player
             {
                 var motorAdapter = new KccMotorAdapter(motor);
 
-                motorAdapter.SetCapsuleDimensions(
-                    motorProfile.capsuleRadius, motorProfile.standingHeight, motorProfile.standingYOffset);
-
                 // KCC sweep 迭代配置：凸曲面/贴墙下落时 sweep 命中法线持续变化、迭代频繁超限，
                 // 默认 MaxMovementIterations=5 + KillVelocityWhenExceedMaxMovementIterations=true
                 // 会清零整个速度（含垂直下落速度）导致"坠落速度丢失/滑行停住"。增大迭代上限并保留超限速度
@@ -92,6 +89,9 @@ namespace XeptGame.Player
                 motor.transform.rotation = Quaternion.identity;
 
                 MotorContext = new PlayerMotorContext(motorAdapter, _motorInput, motorProfile);
+                // 初始站立胶囊 + 眼位目标（胶囊唯一配置源 = Profile；KCC ValidateData 会覆盖场景胶囊，
+                // 见 3C_CharacterMotor_Design.md §5.3；眼位 = 胶囊顶部，CrouchEye 消费）
+                MotorContext.ApplyCapsule(false);
 
                 MotorFsm = new Fsm(MotorContext);
                 MotorFsm.RequestChange<GroundedState>(KitLifecycle.GlobalToken);
@@ -126,9 +126,13 @@ namespace XeptGame.Player
             var ctx = MotorContext;
             // 自主运动速度（不含平台贡献）：移动平台上被动携带不应驱动 HeadBob（见设计决议 §3.2/§4.1）
             float horizontalSpeed = Vector3.ProjectOnPlane(ctx.Motor.OwnVelocity, ctx.Motor.CharacterUp).magnitude;
+            float verticalVelocity = Vector3.Dot(ctx.Motor.OwnVelocity, ctx.Motor.CharacterUp);
 
             return new FeelSnapshot(
                 horizontalSpeed,
+                verticalVelocity,
+                ctx.TargetEyeHeight,
+                ctx.Profile.standingYOffset + ctx.Profile.standingHeight * 0.5f, // 站立眼位（胶囊顶部）
                 MotorFsm.IsInHierarchy(typeof(GroundedState)),
                 MotorFsm.CurrentStateType,
                 MotorFsm.IsInHierarchy(typeof(CrouchState)),

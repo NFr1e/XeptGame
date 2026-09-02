@@ -21,7 +21,8 @@ namespace XeptGame
                 AsyncOperationHandle initHandle = Addressables.InitializeAsync();
                 await initHandle.ToUniTask(cancellationToken: cancellationToken);
 
-                Fsm.RequestChange<StartingState>();
+                //移动到了AppEntry中的AfterSceneLoaded中
+                //Fsm.RequestChange<StartingState>();
             }
             catch (OperationCanceledException)
             {
@@ -34,6 +35,7 @@ namespace XeptGame
                     "提示：若为 Addressables 加载错误，请确认已创建 Addressable Asset Settings 并构建内容" +
                     "（Window > Asset Management > Addressables > Groups，首次打开会提示创建 Settings）。",
                     ex);
+                App.FailureSource = AppFailureSource.Startup; // ErrorState 重试路径据此分派
                 Fsm.RequestChange<ErrorState>();
             }
             #endregion

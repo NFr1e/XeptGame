@@ -20,9 +20,9 @@ namespace XeptGame.Player
             Ctx.JumpConsumed = false;
             Ctx.TimeSinceLastAbleToJump = 0f;
 
-            // 确保站立胶囊尺寸按 Profile 配置（场景胶囊可能被调整过；Crouch 子状态切换不触发本钩子）
-            var profile = Ctx.Profile;
-            Ctx.Motor.SetCapsuleDimensions(profile.capsuleRadius, profile.standingHeight, profile.standingYOffset);
+            // 确保站立胶囊尺寸按 Profile 配置（场景胶囊可能被调整过；Crouch 子状态切换不触发本钩子），
+            // 并同步眼位目标（眼位 = 胶囊顶部，CrouchEye 效果源消费）
+            Ctx.ApplyCapsule(false);
 
             // 着陆事件（观感层订阅，见 3C_CameraFeel_Design.md §3.1）：
             // 仅在"上一根状态为 Airborne"时触发——此刻 Fsm._current 仍是旧状态（RootState 探测），
@@ -46,6 +46,15 @@ namespace XeptGame.Player
             if (!ground.IsStableOnGround || Ctx.IsOnNonStableLayer)
             {
                 Fsm.RequestChange<AirborneState>();
+                return;
+            }
+
+            // 蹲伏（姿态级输入，父状态统一）：任何接地子状态（Idle/Walk/Sprint）按下即蹲。
+            // 与"档位级"输入（Sprint 依赖移动，留在子状态）分离——子状态无需重复检查。
+            // 先于跳跃：同帧蹲+跳 = 先蹲，蹲中禁跳（跳跃分支已排除 Crouch）。
+            if (Ctx.WantCrouch)
+            {
+                SubMachine.RequestChange<CrouchState>();
                 return;
             }
 

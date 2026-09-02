@@ -104,6 +104,32 @@ namespace XeptGame.Player
             public float speedThreshold = 0.5f;
         }
 
+        [System.Serializable]
+        public class JumpInertiaSection
+        {
+            [Header("幅度（度）")]
+            [Tooltip("最大俯仰偏移（正 = 低头）。起跳身体上加速 → 头部惯性滞后 → 下偏；越过最高点下落 → 上偏")]
+            public float maxPitchOffset = 2.5f;
+
+            [Tooltip("垂直速度映射系数（度/(m/s)）：pitchOffset = clamp(v_y × 此值, ±max)")]
+            public float velocityScale = 0.15f;
+
+            [Header("平滑/门控")]
+            [Tooltip("平滑时间（秒；指数/阻尼平滑——v_y 是物理帧步进值，渲染帧必须平滑）")]
+            public float smoothingTime = 0.12f;
+
+            [Tooltip("死区（m/s）：|v_y| 低于此值无偏移（最高点附近微抖消除）")]
+            public float deadZone = 1f;
+        }
+
+        [System.Serializable]
+        public class CrouchEyeSection
+        {
+            [Header("过渡")]
+            [Tooltip("眼位降低/恢复过渡时间（秒；SmoothDamp）。眼位**目标**由电机域发布（胶囊顶部），此处只调过渡手感")]
+            public float transitionTime = 0.12f;
+        }
+
         [Header("FOV")]
         public FovSection fov = new();
 
@@ -112,6 +138,12 @@ namespace XeptGame.Player
 
         [Header("HeadBob")]
         public HeadBobSection headBob = new();
+
+        [Header("JumpInertia")]
+        public JumpInertiaSection jumpInertia = new();
+
+        [Header("CrouchEye")]
+        public CrouchEyeSection crouchEye = new();
 
         /// <summary>运行时默认配置（未挂资产时使用）。非资产实例，不可在资源库中编辑。</summary>
         public static PlayerCameraFeelProfile Default

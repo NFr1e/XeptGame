@@ -27,6 +27,31 @@ namespace XeptGame.Player
         public PlayerMotorProfile Profile { get; }
 
         // ============================================================
+        // 眼位目标（观感层消费；眼位约定 = 胶囊顶部 = yOffset + height/2，见 3C_CameraFeel_Design.md §4.5）
+        // ============================================================
+
+        /// <summary>
+        /// 眼位目标高度（相对角色 transform）。由 <see cref="ApplyCapsule"/> 与胶囊同步设置
+        /// （站立 = 站立胶囊顶，蹲伏 = 蹲伏胶囊顶）；CrouchEye 效果源据此做相机降低过渡。
+        /// 归属说明：**目标属 3C 正确性（跟胶囊走，防穿模/掩体遮挡），过渡属感受层**（混合归属）。
+        /// </summary>
+        public float TargetEyeHeight { get; set; }
+
+        /// <summary>
+        /// 按 Profile 应用胶囊尺寸并**同步眼位目标**（防两者发散）：站立/蹲伏共用。
+        /// 眼位 = 胶囊顶部（yOffset + height/2）；调用点：GroundedState.OnEnter（站立）、
+        /// CrouchState.OnEnter/起身（蹲伏/站立）、PlayerController.Awake（初始站立）。
+        /// </summary>
+        public void ApplyCapsule(bool crouching)
+        {
+            var p = Profile;
+            float height = crouching ? p.crouchedHeight : p.standingHeight;
+            float yOffset = crouching ? p.crouchedYOffset : p.standingYOffset;
+            Motor.SetCapsuleDimensions(p.capsuleRadius, height, yOffset);
+            TargetEyeHeight = yOffset + height * 0.5f; // 眼位 = 胶囊顶部
+        }
+
+        // ============================================================
         // 会话数据（状态类读写；不得存状态字段）
         // ============================================================
 

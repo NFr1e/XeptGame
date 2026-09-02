@@ -29,10 +29,26 @@ namespace XeptGame.Player
         /// <summary>是否冲刺中。</summary>
         public readonly bool IsSprinting;
 
-        public FeelSnapshot(float horizontalSpeed, bool isGrounded, Type leafState,
-            bool isCrouching, bool isSprinting)
+        /// <summary>
+        /// 垂直**自主**速度（dot(Motor.OwnVelocity, up)，正 = 向上；不含平台被动运动）。
+        /// JumpInertia 用：起跳 v_y&gt;0 → 相机下偏（惯性滞后），下落 v_y&lt;0 → 上偏。
+        /// </summary>
+        public readonly float VerticalVelocity;
+
+        /// <summary>眼位目标高度（相对角色 transform；眼位 = 胶囊顶部，电机域发布，CrouchEye 用）。</summary>
+        public readonly float TargetEyeHeight;
+
+        /// <summary>站立眼位高度（相对角色 transform；Profile 常量，CrouchEye 偏移基准）。</summary>
+        public readonly float StandingEyeHeight;
+
+        public FeelSnapshot(float horizontalSpeed, float verticalVelocity,
+            float targetEyeHeight, float standingEyeHeight,
+            bool isGrounded, Type leafState, bool isCrouching, bool isSprinting)
         {
             HorizontalSpeed = horizontalSpeed;
+            VerticalVelocity = verticalVelocity;
+            TargetEyeHeight = targetEyeHeight;
+            StandingEyeHeight = standingEyeHeight;
             IsGrounded = isGrounded;
             LeafState = leafState;
             IsCrouching = isCrouching;

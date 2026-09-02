@@ -307,16 +307,22 @@ namespace XeptKit.Scenes
 
         /// <inheritdoc />
         public bool IsSceneLoaded(SceneReference sceneRef)
+            => IsSceneLoaded(sceneRef.ScenePath);
+
+        /// <summary>
+        /// **世界事实查询**：场景是否已在 Unity 世界中加载（无状态，直接查 Unity——
+        /// 对任意方式加载的场景有效：ScenesManager 发起的、启动场景（index 0 / Editor 直接 Play）、
+        /// 外部直接加载的）。与 <see cref="LoadedScenes"/>（管理视角：ScenesManager 发起的加载）
+        /// **语义分离**——本查询为世界视角（管理/查询分离决议，见 XeptKit Scene 反馈文档）。
+        /// </summary>
+        public bool IsSceneLoaded(string scenePath)
         {
-            for (int i = 0; i < _loadedScenes.Count; i++)
+            if (string.IsNullOrEmpty(scenePath))
             {
-                if (_loadedScenes[i].SceneRef == sceneRef &&
-                    _loadedScenes[i].State == SceneState.Active)
-                {
-                    return true;
-                }
+                return false;
             }
-            return false;
+
+            return SceneManager.GetSceneByPath(scenePath).isLoaded;
         }
 
         /// <inheritdoc />

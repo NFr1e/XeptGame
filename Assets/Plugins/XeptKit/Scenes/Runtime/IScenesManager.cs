@@ -45,7 +45,7 @@ namespace XeptKit.Scenes
             SceneGroupHandle groupHandle,
             CancellationToken cancellationToken = default);
 
-        /// <summary>当前所有已加载的场景句柄（含排队中）。</summary>
+        /// <summary>当前本管理器加载中的场景句柄（**管理视角**：不含启动场景/外部直接加载的场景，见 <see cref="IsSceneLoaded(string)"/> 世界查询）。</summary>
         IReadOnlyList<SceneHandle> LoadedScenes { get; }
 
         /// <summary>当前主场景句柄。未设置时为 null。</summary>
@@ -54,8 +54,15 @@ namespace XeptKit.Scenes
         /// <summary>场景是否在 Build Settings 中注册（运行时单轨，经 SceneUtility 校验）。</summary>
         bool SceneExists(SceneReference sceneRef);
 
-        /// <summary>指定场景是否已加载且处于 <see cref="SceneState.Active"/> 状态。</summary>
+        /// <summary>
+        /// **世界事实查询**：场景是否已在 Unity 世界中加载（无状态，直接查 Unity——对任意方式加载的场景
+        /// 有效：本管理器发起的、启动场景（index 0 / Editor 直接 Play）、外部直接加载的）。
+        /// 与 <see cref="LoadedScenes"/>（管理视角）语义分离（管理/查询分离决议，见 XeptKit Scene 反馈文档）。
+        /// </summary>
         bool IsSceneLoaded(SceneReference sceneRef);
+
+        /// <summary>同上，裸路径形式（<see cref="SceneReference.ScenePath"/> 委托到本方法）。</summary>
+        bool IsSceneLoaded(string scenePath);
 
         /// <summary>将指定场景设为 Unity 活跃场景（转发到句柄 <see cref="SceneHandle.SetAsActiveScene"/>）。</summary>
         void SetActiveScene(SceneHandle handle);

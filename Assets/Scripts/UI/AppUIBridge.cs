@@ -11,7 +11,7 @@ namespace XeptGame
 
         private IUIManager _uiMgr;
 
-        private void OnEnable()
+        private void Awake()
         {
             _uiMgr ??= AppEntry.UIManager;
 

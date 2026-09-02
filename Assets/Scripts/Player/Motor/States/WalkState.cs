@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace XeptGame.Player
 {
@@ -25,12 +25,6 @@ namespace XeptGame.Player
             if (Ctx.WantSprint)
             {
                 Fsm.RequestChange<SprintState>();
-                return;
-            }
-
-            if (Ctx.WantCrouch)
-            {
-                Fsm.RequestChange<CrouchState>();
             }
         }
     }

@@ -28,6 +28,7 @@ namespace XeptGame
         public static IInputManager InputManager { get; private set; }
         public static ILocalizationManager LocalizationManager { get; private set; }
         public static IUIManager UIManager { get; private set; }
+        public static CameraManager CameraManager { get; private set; }
 
 #if UNITY_EDITOR
         private static IAssetLoader _editorLoader;
@@ -63,6 +64,7 @@ namespace XeptGame
             LocalizationManager = new LocalizationManager(EventBus, AssetLoader);
             UIManager = new UIManager(EventBus);
             GlobalInput = new GameInput();
+            CameraManager = new CameraManager(); // 跨场景相机栈仲裁（CameraNotifier 自报，见 CameraManager）
 
             #endregion
 
@@ -73,7 +75,7 @@ namespace XeptGame
             Application.quitting -= Shutdown;
             Application.quitting += Shutdown;
 
-            AppManager.StartApp();
+            AppManager.LaunchApp();
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -85,6 +87,8 @@ namespace XeptGame
             }
             .AddComponent<AppLifecycleBridge>()
             .Bind(AppManager);
+
+            AppManager.StartApp();
         }
 
 #if UNITY_EDITOR
@@ -121,6 +125,7 @@ namespace XeptGame
             LocalizationManager?.Clear();
             InputManager?.Clear();
             ScenesManager?.Clear();
+            CameraManager?.Clear();
             AppManager?.Dispose();
 
             KitLifecycle.Shutdown();
