@@ -52,7 +52,8 @@ namespace XeptGame.Player
             }
 
             // 土狼时间跳跃（不转移：仍在空中，仅施加冲量）。
-            // 与 PerformJump 一致：ForceUnground 跳过起跳后接地探测，防止 Fall→UnstableGround 链。
+            // 与 MotorActionDispatcher 的接地跳一致：ForceUnground 跳过起跳后接地探测，
+            // 防止 Fall→UnstableGround 链。
             if (Ctx.Input.JumpPressed && !Ctx.JumpConsumed
                 && Ctx.TimeSinceLastAbleToJump <= Ctx.Profile.jumpPostGroundingGraceTime)
             {

@@ -5,9 +5,11 @@ using XeptKit.FSM;
 namespace XeptGame.Player
 {
     /// <summary>
-    /// 稳定接地复合状态（父）：共享跳跃检测与物理转移，子状态管速度档位/姿态参数。
+    /// 稳定接地复合状态（父）：共享接地周期重置、着陆事件与物理转移；子状态管速度档位/姿态参数。
     /// 子机器：{ Idle, Walk, Sprint, Crouch }（互斥同层，设计决议 §2）。
-    /// 跳跃为接地共享能力（Crouch 禁跳）；离地/不稳定接地 → Airborne。
+    /// 蹲伏/接地跳跃等姿态级动作已解耦为独立调度器 <see cref="MotorActionDispatcher"/>
+    /// （能力 Marker <see cref="ICrouchable"/>/<see cref="IJumpable"/> 准入，设计决议 §2.4）；
+    /// 本父状态不再判定输入，离地/不稳定接地 → Airborne 的物理转移仍在此。
     /// </summary>
     public sealed class GroundedState : CompositeStateBase
     {
@@ -43,42 +45,12 @@ namespace XeptGame.Player
             // （初始子状态 Fall，由 Fall 判定是否转 UnstableGround）。
             // 注意：非 StableGroundLayers 上 KCC 法线角判定为稳定（IsStableOnGround=true），
             // 但语义上不可站立，需主动转移。
+            // 蹲伏/跳跃不在此判定（动作调度已上移 MotorActionDispatcher，于 Fsm.Tick 后驱动——
+            // 本转移先收敛，调度器看到的叶子即真实接地分支）。
             if (!ground.IsStableOnGround || Ctx.IsOnNonStableLayer)
             {
                 Fsm.RequestChange<AirborneState>();
-                return;
             }
-
-            // 蹲伏（姿态级输入，父状态统一）：任何接地子状态（Idle/Walk/Sprint）按下即蹲。
-            // 与"档位级"输入（Sprint 依赖移动，留在子状态）分离——子状态无需重复检查。
-            // 先于跳跃：同帧蹲+跳 = 先蹲，蹲中禁跳（跳跃分支已排除 Crouch）。
-            if (Ctx.WantCrouch)
-            {
-                SubMachine.RequestChange<CrouchState>();
-                return;
-            }
-
-            // 跳跃（Crouch 禁跳；蹲需先起身）
-            if (!(Fsm.CurrentState is CrouchState) && Ctx.Input.JumpPressed && !Ctx.JumpConsumed)
-            {
-                PerformJump();
-            }
-        }
-
-        private void PerformJump()
-        {
-            var up = Ctx.Motor.CharacterUp;
-
-            // 平台垂直速度并入起跳冲量：移动平台（升降）起跳时，KCC 的动量保持会把平台
-            // 全速度（含垂直）加回 BaseVelocity，但 Fall 消费冲量时 Project 掉垂直分量——
-            // 若不补回，升降平台跳跃会丢失 Y 轴惯性（X/Z 保留、Y 丢失）。
-            var platformVertical = Vector3.Project(Ctx.Motor.AttachedRigidbodyVelocity, up);
-
-            Ctx.PendingJumpImpulse = up * Ctx.Profile.jumpUpSpeed + platformVertical;
-            Ctx.Motor.ForceUnground();
-            Ctx.JumpConsumed = true;
-
-            Fsm.RequestChange<AirborneState>();
         }
     }
 }

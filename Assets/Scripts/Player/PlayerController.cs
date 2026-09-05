@@ -14,7 +14,9 @@ namespace XeptGame.Player
     /// - 创建 PlayerInputSettings / PlayerInputController / PlayerLookController /
     ///   KccMotorAdapter / PlayerMotorContext / PlayerMotor FSM，构造注入装配；
     /// - 注入 PlayerLook（相机消费端）；帧驱动：Fsm.Tick 挂 Update（输入零延迟），
-    ///   输入边沿标记（JumpPressed）挂 FixedUpdate 清除；
+    ///   输入边沿标记（JumpPressed）挂 LateUpdate 清除；
+    /// - 创建并帧驱动 MotorActionDispatcher（离散动作：蹲伏/接地跳跃，能力 Marker 准入；
+    ///   于 Fsm.Tick 之后驱动——物理转移先收敛，见类注释）；
     /// - 把 PlayerCharacterController（KCC 回调翻译器）挂接到场景中的 KCC 电机；
     /// - 帧驱动：InputController.Update（输入层阻断检测）；
     /// - OnDestroy 释放（退订输入 + 释放 Fsm；GlobalInput 为 AppEntry 全局单例，由组合根管理）。
@@ -39,6 +41,9 @@ namespace XeptGame.Player
         public PlayerInputSettings InputSettings { get; private set; }
         public PlayerLookController LookController { get; private set; }
         public KinematicCharacterMotor Motor => motor;
+
+        /// <summary>电机离散动作调度器（蹲伏/接地跳跃：能力 Marker 准入 + 转移请求，见 MotorActionDispatcher）。</summary>
+        public MotorActionDispatcher MotorActions { get; private set; }
 
         private void Awake()
         {
@@ -96,6 +101,8 @@ namespace XeptGame.Player
                 MotorFsm = new Fsm(MotorContext);
                 MotorFsm.RequestChange<GroundedState>(KitLifecycle.GlobalToken);
 
+                MotorActions = new MotorActionDispatcher(MotorFsm, MotorContext);
+
                 motor.CharacterController = new PlayerCharacterController(MotorFsm);
             }
         }
@@ -104,6 +111,11 @@ namespace XeptGame.Player
         {
             InputController?.Update();
             MotorFsm?.Tick(Time.deltaTime);
+
+            // 离散动作调度须在 Tick 之后：Tick 内父状态先做物理转移（Grounded→Airborne），
+            // 转移收敛后叶子状态即真实分支——调度器按叶子能力（ICrouchable/IJumpable）准入，
+            // 避免"已离地帧仍按接地态动作"（详见 MotorActionDispatcher 类注释）。
+            MotorActions?.Dispatch();
         }
 
         private void LateUpdate()

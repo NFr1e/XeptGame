@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace XeptGame.Player
 {
-    /// <summary>静止（速度阻尼到零）。转移：有移动意图 → Walk。</summary>
-    public sealed class IdleState : MotorStateBase
+    /// <summary>
+    /// 静止（速度阻尼到零）。转移：有移动意图 → Walk。
+    /// 能力：可蹲可跳（<see cref="ICrouchable"/>/<see cref="IJumpable"/>，由 MotorActionDispatcher 准入判定）。
+    /// </summary>
+    public sealed class IdleState : MotorStateBase, ICrouchable, IJumpable
     {
         public override void ApplyVelocity(ref Vector3 velocity, float deltaTime)
         {

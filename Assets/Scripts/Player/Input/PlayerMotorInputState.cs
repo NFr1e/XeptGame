@@ -6,7 +6,7 @@ namespace XeptGame.Player
     /// 运动输入意图（PlayerInputController 写入，PlayerMotor FSM 读取）。
     /// Sprint/Crouch 已在输入层折叠为 Held 持续值（长按=按住激活，切换=按下翻转），
     /// 不再使用"按下边沿 + 帧末清除"的双轨表达——Motor 只读 Held，无切换保持/时序问题。
-    /// 仅跳跃保留边沿标记（瞬时事件语义：一次按下只触发一次跳跃），由 PlayerController.FixedUpdate 清除。
+    /// 仅跳跃保留边沿标记（瞬时事件语义：一次按下只触发一次跳跃），由 PlayerController.LateUpdate 清除。
     /// </summary>
     public class PlayerMotorInputState
     {
@@ -15,7 +15,7 @@ namespace XeptGame.Player
         /// </summary>
         public Vector2 MoveInput;
         /// <summary>
-        /// 跳跃按下（边沿，PlayerController.FixedUpdate 清除）
+        /// 跳跃按下（边沿，PlayerController.LateUpdate 清除）
         /// </summary>
         public bool JumpPressed;
         /// <summary>
@@ -36,7 +36,7 @@ namespace XeptGame.Player
         public Vector3 LocalMoveIntent;
 
         /// <summary>
-        /// PlayerController.FixedUpdate 调用：清除边沿标记（当前仅跳跃；Sprint/Crouch 为持续值无需清除）。
+        /// PlayerController.LateUpdate 调用：清除边沿标记（当前仅跳跃；Sprint/Crouch 为持续值无需清除）。
         /// 命名 EndFrame 而非 LateUpdate：本类为纯 C# 状态类（非 MonoBehaviour），
         /// 避免与 Unity 生命周期方法名混淆。
         /// </summary>
