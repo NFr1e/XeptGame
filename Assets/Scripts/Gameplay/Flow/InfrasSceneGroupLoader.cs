@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using XeptKit.Asset;
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 基础设施场景组加载辅助（纯 C# 静态，应用级与玩法级共用）：

@@ -4,7 +4,7 @@ using UnityEngine;
 using XeptKit.Core;
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 关卡自举（关卡场景根，**关卡模板的一部分**，GameplayFlow_Design.md §2.4/§7.3）：

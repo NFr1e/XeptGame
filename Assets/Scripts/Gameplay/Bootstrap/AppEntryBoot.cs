@@ -4,7 +4,7 @@ using UnityEngine;
 using XeptKit.Core;
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 测试用，模拟Splash -> MainMenu流程。

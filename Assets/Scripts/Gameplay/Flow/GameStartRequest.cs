@@ -1,6 +1,6 @@
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 启动请求（GameplayFlow_Design.md §4.1）：场景组件（主菜单"开始游戏"按钮 / LevelBoot / LoadLevelButton）写入，

@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using XeptKit.Core;
 using XeptKit.Event;
 using XeptKit.FSM;
-using XeptGame.Gameplay;
+using XeptGame.Game;
 
 namespace XeptGame
 {
@@ -36,7 +36,7 @@ namespace XeptGame
             AppFSM.StateChanged += s => Log.Info($"[AppFSM] State change from {s.From?.ToString() ?? "启动"} to {s.To}");
 
             // 接收 GameplayFSM 死亡信号（GameplayFlow_Design.md §4.5）——AppFSM 不管理其生命周期，但转 ErrorState 接管
-            _errorSubscription = context.EventBus.Subscribe<GameplayFlowErrorEvent>(OnGameplayFlowError);
+            _errorSubscription = context.EventBus.Subscribe<GameFlowErrorEvent>(OnGameplayFlowError);
         }
 
         /// <summary>启动应用：进入 <see cref="InitializingState"/>（fire-and-forget；失败显式自救进 ErrorState）。</summary>
@@ -72,7 +72,7 @@ namespace XeptGame
         /// <summary>
         /// 重试游戏流程（**游戏流程失败**路径，<see cref="AppFailureSource.GameplayFlow"/>，ErrorState UI 调用）：
         /// 回 <see cref="StartingState"/> 重建——AppCore 组幂等加载（已加载则跳过）+ 新建 GameplayContext +
-        /// <see cref="GameplayManager.Start"/>（ErrorState.OnEnter 已 Shutdown 收尾，可安全重建）。
+        /// <see cref="GameManager.Start"/>（ErrorState.OnEnter 已 Shutdown 收尾，可安全重建）。
         /// 启动请求门若已置位（上次已 RequestStart）→ 新 RunAsync 立即消费并**重放同一请求**（重试语义）。
         /// </summary>
         public void RetryGame()
@@ -141,7 +141,7 @@ namespace XeptGame
         /// 仅从运行/启动/暂停态可转（Error 已是终态/转移中时忽略——RequestChange 幂等由 FSM 保证；
         /// 含 Paused：平台暂停期间加载失败，恢复后仍须收敛到 ErrorState，不留泄漏）。
         /// </summary>
-        private void OnGameplayFlowError(GameplayFlowErrorEvent e)
+        private void OnGameplayFlowError(GameFlowErrorEvent e)
         {
             Context.LastError = e.Exception ?? new Exception(e.Message);
             Context.FailureSource = AppFailureSource.GameplayFlow; // ErrorState 重试路径据此分派（RetryGame）

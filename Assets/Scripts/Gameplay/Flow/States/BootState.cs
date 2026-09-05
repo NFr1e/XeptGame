@@ -1,7 +1,7 @@
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 游戏流程启动态（GameplayFlow_Design.md §4.1）：**停驻**——系统就绪、等待内容入口。
@@ -9,7 +9,7 @@ namespace XeptGame.Gameplay
     /// GameLoadingManager 消费请求门后推进。请求源：主菜单"开始游戏"按钮（<c>LoadLevelButton</c> 形态）/
     /// LevelBoot（Editor 直接 Play 关卡）/ LoadLevelButton（Editor 直接 Play 基座场景测试）。纯 C#，无场景依赖。
     /// </summary>
-    public sealed class BootState : GameplayStateBase
+    public sealed class BootState : GameStateBase
     {
         public override UniTask EnterAsync(CancellationToken cancellationToken = default)
         {

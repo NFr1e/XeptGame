@@ -4,7 +4,7 @@ using UnityEngine.UI;
 using XeptKit.Core;
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 进入关卡按钮（测试/验证组件，GameplayFlow_Design.md §4.1）：点击发起开始游戏请求

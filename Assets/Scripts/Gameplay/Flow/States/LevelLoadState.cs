@@ -3,15 +3,16 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 游戏流程加载阶段二：**关卡组加载**（执行器，GameplayFlow_Design.md §4.2）——
-    /// 幂等加载 <see cref="GameplayContext.LevelGroup"/>（启动请求写入；null 或主场景已加载则跳过——
-    /// 覆盖 Editor 直接 Play 关卡，只做基座/模块初始化），完成后置位 <see cref="GameplayContext.LevelReady"/>
-    /// （**不自驱**，GameLoadingManager 消费推进 → Playing）。
+    /// **EnterAsync**：幂等加载 <see cref="GameContext.LevelGroup"/>（null/主场景已加载则跳过——
+    /// 覆盖 Editor 直接 Play 关卡），完成后置位 <see cref="GameContext.LevelReady"/>（**不自驱**）。
+    /// 业务模块随关卡场景激活自生命周期初始化（不进加载门控）。
+    /// 失败：关卡组加载失败 Fail + 停驻（不置位门——错误路径收敛）。
     /// </summary>
-    public sealed class LevelLoadState : GameplayStateBase
+    public sealed class LevelLoadState : GameStateBase
     {
         public override async UniTask EnterAsync(CancellationToken cancellationToken = default)
         {

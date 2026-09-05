@@ -1,6 +1,6 @@
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 加载辅助（纯 C# 静态，供状态类复用）：

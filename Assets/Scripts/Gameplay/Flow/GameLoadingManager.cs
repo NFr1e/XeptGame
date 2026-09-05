@@ -4,7 +4,7 @@ using Cysharp.Threading.Tasks;
 using XeptKit.Core;
 using XeptKit.Scenes;
 
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 游戏加载编排器（纯 C#，GameplayFlow_Design.md §4）：**读门控、推进状态**——
@@ -52,8 +52,8 @@ namespace XeptGame.Gameplay
         private static async UniTask RunCoreAsync(CancellationToken cancellationToken)
         {
             var app = AppManager.Context;
-            var game = GameplayManager.Context;
-            var fsm = GameplayManager.GameplayFSM;
+            var game = GameManager.Context;
+            var fsm = GameManager.GameFSM;
             if (app == null || game == null || fsm == null)
             {
                 return;

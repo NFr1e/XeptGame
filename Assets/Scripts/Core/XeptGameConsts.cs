@@ -4,7 +4,10 @@ namespace XeptGame.Core
     {
         public struct Editor
         {
-            private const string PlayerProfileMenuName = "XeptGame/Profiles/Player";
+            #region CreateAssetMenu 配置
+
+            #region Player
+            private const string PlayerProfileMenuName = "XeptGame/Player";
 
             public const string PlayerMotorProfileMenuName = PlayerProfileMenuName + "/PlayerMotorProfile";
             public const string PlayerMotorProfileFileName = "PlayerMotorProfile";
@@ -17,12 +20,34 @@ namespace XeptGame.Core
             public const string PlayerCameraFeelProfileMenuName = PlayerProfileMenuName + "/PlayerCameraFeelProfile";
             public const string PlayerCameraFeelProfileFileName = "PlayerCameraFeelProfile";
             public const int PlayerCameraFeelProfileOrder = 2;
+            #endregion
 
-            private const string InteractionProfileMenuRoot = "XeptGame/Profiles/Interaction";
+            #region Interaction
+            private const string InteractionProfileMenuRoot = "XeptGame/Interaction";
 
             public const string InteractionProfileMenuName = InteractionProfileMenuRoot + "/InteractionProfile";
             public const string InteractionProfileFileName = "InteractionProfile";
             public const int InteractionProfileOrder = 0;
+            #endregion
+
+            #region Items
+            private const string ItemMenuRoot = "XeptGame/Items";
+            private const string ItemFacetMenuRoot = ItemMenuRoot + "/Facets";
+
+            public const string ItemDefinitionMenuName = ItemMenuRoot + "/ItemDefinition";
+            public const string ItemDefinitionFileName = "ItemDefinition";
+            public const int ItemDefinitionOrder = 0;
+
+            public const string ItemWorldFacetProfileMenuName = ItemFacetMenuRoot + "/WorldFacetProfile";
+            public const string ItemWorldFacetProfileFileName = "WorldFacetProfile";
+            public const int ItemWorldFacetProfileOrder = 0;
+
+            public const string ItemHoldableFacetProfileMenuName = ItemFacetMenuRoot + "/HoldFacetProfile";
+            public const string ItemHoldableFacetProfileFileName = "HoldFacetProfile";
+            public const int ItemHoldableFacetProfileOrder = 1;
+            #endregion
+
+            #endregion
         }
 
         /// <summary>

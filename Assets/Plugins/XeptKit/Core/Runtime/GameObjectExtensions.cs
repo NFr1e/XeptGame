@@ -11,5 +11,19 @@ namespace XeptKit.Core
             var component = gameObject.GetComponent<T>() ?? gameObject.AddComponent<T>();
             return component;
         }
+
+        public static void Destroy(this GameObject gameObject)
+        {
+            Guard.NotNull(gameObject, nameof(gameObject));
+
+            if (Application.isPlaying)
+            {
+                GameObject.Destroy(gameObject);
+            }
+            else
+            {
+                GameObject.DestroyImmediate(gameObject);
+            }
+        }
     }
 }

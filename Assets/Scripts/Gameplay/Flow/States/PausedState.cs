@@ -1,4 +1,4 @@
-namespace XeptGame.Gameplay
+namespace XeptGame.Game
 {
     /// <summary>
     /// 游戏流程暂停态（GameplayFlow_Design.md §4.4）：**游戏菜单暂停**（与 AppFSM.Paused 的**平台级暂停**
@@ -7,7 +7,7 @@ namespace XeptGame.Gameplay
     /// 联动策略（如"平台已暂停时不重复进菜单"）实现期细化。
     /// 骨架：占位（当前无菜单场景）。
     /// </summary>
-    public sealed class PausedState : GameplayStateBase
+    public sealed class PausedState : GameStateBase
     {
     }
 }

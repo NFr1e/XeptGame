@@ -12,7 +12,10 @@ namespace XeptGame.World.Interactables
     /// <item><b>选中事件视觉反馈</b>：<see cref="OnSelected"/>/<see cref="OnDeselected"/> 切换
     /// 渲染器材质高亮（Inspector 指定，可选；留空则仅日志）。</item>
     /// </list>
-    /// 挂带 Collider 的对象（或父级）；日志走 XeptKit.Core.Log。首版无 UI，表现以日志 + 高亮为主。
+    /// **只承载业务交互核心**（ISelectable/IInteractable + 内容数据 IInteractionLabel）——
+    /// 表现（提示/图标等）属上层业务模块，经契约观察本对象（表现与业务解耦，见
+    /// docs/modules/Presentation_Rebuild_Design.md——效果器不解释显示决策）。
+    /// 挂带 Collider 的对象（或父级）；日志走 XeptKit.Core.Log。
     /// </summary>
     public sealed class DebugInteractable : MonoBehaviour, ISelectable, IInteractable, IInteractionLabel
     {

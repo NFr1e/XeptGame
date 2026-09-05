@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b61950acfd8c4441b6cedfee02c97b0, type: 3}
+  m_Name: '#StoneItemDefinition'
+  m_EditorClassIdentifier: 
+  id: item.weapon.pistol
+  iconKind: 1
+  iconSprite: {fileID: 21300000, guid: ca317ebf6d866a94c87d8b63936af9f1, type: 3}
+  iconTexture: {fileID: 0}
+  facets:
+  - rid: 135043234695217160
+  - rid: 135043234695217158
+  - rid: 135043234695217157
+  - rid: 135043234695217159
+  references:
+    version: 2
+    RefIds:
+    - rid: 135043234695217157
+      type: {class: ConsumableFacet, ns: XeptGame.Items, asm: XeptGame}
+      data: 
+    - rid: 135043234695217158
+      type: {class: HoldableFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 144963953c92e4d49ad3b57f94064ace, type: 2}
+    - rid: 135043234695217159
+      type: {class: ResourceFacet, ns: XeptGame.Items, asm: XeptGame}
+      data: 
+    - rid: 135043234695217160
+      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: e0f7fd8c5d99a12409a6303f5f130780, type: 2}

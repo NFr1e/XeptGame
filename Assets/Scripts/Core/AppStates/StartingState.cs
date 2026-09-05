@@ -2,7 +2,7 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using XeptGame.Core;
-using XeptGame.Gameplay;
+using XeptGame.Game;
 
 namespace XeptGame
 {
@@ -27,8 +27,8 @@ namespace XeptGame
                     XeptGameConsts.AssetKeys.AppCoreGroup, cancellationToken);
 
                 // Gameplay 域上下文：自建域 EventBus（隔离）+ 服务注入；启动请求经 GameLoadingManager.RequestStart 写入
-                var context = new GameplayContext(AppEntry.EventBus, AppEntry.ScenesManager, AppEntry.AssetLoader);
-                GameplayManager.Start(context);
+                var context = new GameContext(AppEntry.EventBus, AppEntry.ScenesManager, AppEntry.AssetLoader);
+                GameManager.Start(context);
             }
             catch (OperationCanceledException)
             {
