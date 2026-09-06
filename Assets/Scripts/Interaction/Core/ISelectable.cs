@@ -11,10 +11,10 @@ namespace XeptGame.Interaction
     /// <item><see cref="IsSelected"/>：**状态查询**（业务消费）——初始化效果、
     /// 运行时补挂组件、其他系统同步查询；由实现方在状态事件中维护。</item>
     /// </list>
-    /// 与 <see cref="IInteractable"/> 的关系：**平级组合，无继承**——可交互对象
-    /// 通常同时实现两者（解析器以并集识别目标）；需要"只选中不交互"（纯高亮/观察反馈）
-    /// 的对象只实现本接口即可；同一对象上可有多个 ISelectable 组件（如逻辑 + 视觉），
-    /// 选中事件会扇出到全部组件。
+    /// 与动作（<see cref="IInteractionAction"/>）的关系：**宿主与动作解耦**——本接口是"宿主"身份
+    /// （被选中节点即宿主）；需要"只选中不交互"（纯高亮/观察反馈）的对象只实现本接口即可；
+    /// 可交互对象的动作组件（每动作一个 IInteractionAction 组件）可同挂或上挂于宿主链，
+    /// 由执行器在宿主推送时收集（v3，见 Interaction_Prompt_V3_Design.md）。
     /// </summary>
     public interface ISelectable
     {

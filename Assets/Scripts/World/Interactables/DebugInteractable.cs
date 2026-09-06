@@ -1,23 +1,17 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using XeptGame.Interaction;
+using XeptKit.Core;
 
 namespace XeptGame.World.Interactables
 {
     /// <summary>
-    /// 调试用可交互对象（验证示例）：覆盖两阶段门控与选中事件的完整验证面——
-    /// <list type="bullet">
-    /// <item><b>CanSelect 门控（目标性）</b>：<see cref="maxInteractions"/> 耗尽后不可再选（目标性动态失效）；</item>
-    /// <item><b>CanInteract 门控（可交互性）</b>：<see cref="cooldown"/> 冷却期不可交互（可交互性动态失效，
-    /// 供 Executor 按下重判与提示层灰态翻转验证）；</item>
-    /// <item><b>选中事件视觉反馈</b>：<see cref="OnSelected"/>/<see cref="OnDeselected"/> 切换
-    /// 渲染器材质高亮（Inspector 指定，可选；留空则仅日志）。</item>
-    /// </list>
-    /// **只承载业务交互核心**（ISelectable/IInteractable + 内容数据 IInteractionLabel）——
-    /// 表现（提示/图标等）属上层业务模块，经契约观察本对象（表现与业务解耦，见
-    /// docs/modules/Presentation_Rebuild_Design.md——效果器不解释显示决策）。
-    /// 挂带 Collider 的对象（或父级）；日志走 XeptKit.Core.Log。
+    /// 调试用交互对照物（v3.1 宿主模型）：同时是**宿主（ISelectable + IInteractionActionsHost）**，
+    /// 唯一动作 = 内部纯 C# <see cref="DebugAction"/>（Primary"交互"，构造注入宿主）。覆盖验证面：
+    /// CanSelect 门控（maxInteractions 耗尽不可选）/ 动作冷却门控（cooldown 期间灰态/按下重判）/ 选中高亮。
     /// </summary>
-    public sealed class DebugInteractable : MonoBehaviour, ISelectable, IInteractable, IInteractionLabel
+    public sealed class DebugInteractable : MonoBehaviour, ISelectable, IInteractionActionsHost
     {
         [Header("CanSelect 门控（目标性：耗尽后不可选）")]
         [Tooltip("最大交互次数；< 0 = 不限")]
@@ -34,13 +28,7 @@ namespace XeptGame.World.Interactables
         [Tooltip("选中高亮颜色")]
         [SerializeField] private Color highlightColor = Color.yellow;
 
-        [Header("显示信息（IInteractionLabel，拾取提示用）")]
-        [Tooltip("显示名；为空回退 GameObject 名")]
-        [SerializeField] private string displayName = "";
-
-        [Tooltip("提示文案；为空回退默认文案")]
-        [SerializeField] private string hintText = "";
-
+        private readonly List<IInteractionAction> _actions = new();
         private int _interactCount;
         private bool _isSelected;
         private float _cooldownEndTime;
@@ -53,17 +41,19 @@ namespace XeptGame.World.Interactables
         /// <inheritdoc />
         public bool IsSelected => _isSelected;
 
-        /// <summary>当前是否处于交互冷却期。</summary>
+        /// <inheritdoc />
+        public IReadOnlyList<IInteractionAction> Actions => _actions;
+
+        /// <summary>成员恒定（单动作），事件保留接口语义（不触发）。</summary>
+        public event Action ActionsChanged;
+
+        /// <summary>当前是否处于交互冷却期（动作门控数据源）。</summary>
         public bool IsCoolingDown => Time.time < _cooldownEndTime;
-
-        /// <inheritdoc />
-        public string DisplayName => displayName;
-
-        /// <inheritdoc />
-        public string HintText => hintText;
 
         private void Awake()
         {
+            _actions.Add(new DebugAction(this));
+
             if (highlightRenderer != null)
             {
                 _hasHighlight = true;
@@ -88,20 +78,6 @@ namespace XeptGame.World.Interactables
             => maxInteractions < 0 || _interactCount < maxInteractions;
 
         /// <inheritdoc />
-        public bool CanInteract(InteractionContext context)
-            => !IsCoolingDown;
-
-        /// <inheritdoc />
-        public void Interact(InteractionContext context)
-        {
-            _interactCount++;
-            _cooldownEndTime = Time.time + cooldown;
-
-            var remaining = maxInteractions < 0 ? "∞" : (maxInteractions - _interactCount).ToString();
-            //Log.Info($"[DebugInteractable] {name} 第 {_interactCount} 次交互（剩余 {remaining}）");
-        }
-
-        /// <inheritdoc />
         public void OnSelected(InteractionContext context)
         {
             _isSelected = true;
@@ -109,7 +85,6 @@ namespace XeptGame.World.Interactables
             {
                 highlightRenderer.material.color = highlightColor;
             }
-            //Log.Info($"[DebugInteractable] {name} 被选中（交互者 {context.Interactor.name}）");
         }
 
         /// <inheritdoc />
@@ -120,7 +95,41 @@ namespace XeptGame.World.Interactables
             {
                 highlightRenderer.material.color = _defaultColor;
             }
-            //Log.Info($"[DebugInteractable] {name} 取消选中");
+        }
+
+        /// <summary>执行交互（动作 Interact 收口）。</summary>
+        public bool TryInteract()
+        {
+            if (IsCoolingDown)
+            {
+                return false;
+            }
+
+            _interactCount++;
+            _cooldownEndTime = Time.time + cooldown;
+
+            var remaining = maxInteractions < 0 ? "∞" : (maxInteractions - _interactCount).ToString();
+            Log.Info($"[DebugInteractable] {name} 第 {_interactCount} 次交互（剩余 {remaining}）");
+            return true;
+        }
+
+        /// <summary>交互动作（纯 C#，构造注入宿主）。</summary>
+        private sealed class DebugAction : IInteractionAction
+        {
+            private readonly DebugInteractable _host;
+
+            public DebugAction(DebugInteractable host)
+            {
+                _host = host;
+            }
+
+            public InputSlot Slot => InputSlot.Primary;
+
+            public string PromptText => "交互";
+
+            public bool CanInteract(InteractionContext context) => !_host.IsCoolingDown;
+
+            public void Interact(InteractionContext context) => _host.TryInteract();
         }
     }
 }

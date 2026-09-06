@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "com.unity.addressables": "1.22.3",
+    "com.unity.burst": "1.8.25",
     "com.unity.collab-proxy": "2.12.4",
+    "com.unity.collections": "1.2.4",
     "com.unity.feature.development": "1.0.1",
     "com.unity.feature.worldbuilding": "1.0.1",
     "com.unity.inputsystem": "1.14.2",

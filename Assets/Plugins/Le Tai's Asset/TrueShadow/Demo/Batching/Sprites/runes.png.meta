@@ -1,0 +1,1148 @@
+fileFormatVersion: 2
+guid: 83b2ce92825b018408490de639fc9995
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1696474179858790576
+    second: runeGrey_slab_031(Clone)
+  - first:
+      213: -4509917555109618367
+    second: runeGrey_slab_025(Clone)
+  - first:
+      213: 6545374271915000554
+    second: runeGrey_slab_028(Clone)
+  - first:
+      213: -3671641937212834874
+    second: runeGrey_slab_036(Clone)
+  - first:
+      213: 3478122640245142507
+    second: runeGrey_slab_008(Clone)
+  - first:
+      213: -483615758259900402
+    second: runeGrey_slab_017(Clone)
+  - first:
+      213: 3285634792690526228
+    second: runeGrey_slab_013(Clone)
+  - first:
+      213: 2770677415569582456
+    second: runeGrey_slab_027(Clone)
+  - first:
+      213: 4925872702012137003
+    second: runeGrey_slab_012(Clone)
+  - first:
+      213: -1645113888817855296
+    second: runeGrey_slab_023(Clone)
+  - first:
+      213: -5531129478704827375
+    second: runeGrey_slab_029(Clone)
+  - first:
+      213: 5339787088628690440
+    second: runeGrey_slab_005(Clone)
+  - first:
+      213: 7270520903949020647
+    second: runeGrey_slab_019(Clone)
+  - first:
+      213: 3675329189534368329
+    second: runeGrey_slab_024(Clone)
+  - first:
+      213: 788063755350050729
+    second: runeGrey_slab_026(Clone)
+  - first:
+      213: -4650562585511213672
+    second: runeGrey_slab_011(Clone)
+  - first:
+      213: -3800784675514170818
+    second: runeGrey_slab_015(Clone)
+  - first:
+      213: -653460123213547604
+    second: runeGrey_slab_034(Clone)
+  - first:
+      213: -6569749021344029521
+    second: runeGrey_slab_021(Clone)
+  - first:
+      213: -372246196946726315
+    second: runeGrey_slab_002(Clone)
+  - first:
+      213: 3845510198187607424
+    second: runeGrey_slab_007(Clone)
+  - first:
+      213: 3909439432554434178
+    second: runeGrey_slab_009(Clone)
+  - first:
+      213: -739611530231831392
+    second: runeGrey_slab_020(Clone)
+  - first:
+      213: 9195468360655440329
+    second: runeGrey_slab_032(Clone)
+  - first:
+      213: -3066882363973331940
+    second: runeGrey_slab_006(Clone)
+  - first:
+      213: 2288998139764113044
+    second: runeGrey_slab_004(Clone)
+  - first:
+      213: 7672852161241843497
+    second: runeGrey_slab_022(Clone)
+  - first:
+      213: -4968161978677419109
+    second: runeGrey_slab_033(Clone)
+  - first:
+      213: 2917927341017765308
+    second: runeGrey_slab_003(Clone)
+  - first:
+      213: 90300596094635294
+    second: runeGrey_slab_035(Clone)
+  - first:
+      213: -8153132811745104993
+    second: runeGrey_slab_018(Clone)
+  - first:
+      213: -214963477809167155
+    second: runeGrey_slab_010(Clone)
+  - first:
+      213: 5260426957167849703
+    second: runeGrey_slab_016(Clone)
+  - first:
+      213: -7252536872401900174
+    second: runeGrey_slab_030(Clone)
+  - first:
+      213: -2321733364173984993
+    second: runeGrey_slab_014(Clone)
+  - first:
+      213: 1135649878396407250
+    second: runeGrey_slab_001(Clone)
+  - first:
+      213: 7196150672316608609
+    second: runeGrey_slab_031
+  - first:
+      213: -8804067888815024512
+    second: runeGrey_slab_025
+  - first:
+      213: 2298255288681329545
+    second: runeGrey_slab_028
+  - first:
+      213: 2481598494001517578
+    second: runeGrey_slab_036
+  - first:
+      213: 8102341539740232732
+    second: runeGrey_slab_008
+  - first:
+      213: -7924881376563435232
+    second: runeGrey_slab_017
+  - first:
+      213: -5423902378240978249
+    second: runeGrey_slab_013
+  - first:
+      213: 6736543751572219935
+    second: runeGrey_slab_027
+  - first:
+      213: 3774282143397957402
+    second: runeGrey_slab_012
+  - first:
+      213: 7229371545767555279
+    second: runeGrey_slab_023
+  - first:
+      213: -1422426884508864170
+    second: runeGrey_slab_029
+  - first:
+      213: -1648504085130010849
+    second: runeGrey_slab_005
+  - first:
+      213: 5371442455399155730
+    second: runeGrey_slab_019
+  - first:
+      213: -7296289912056853498
+    second: runeGrey_slab_024
+  - first:
+      213: -1362078879787269310
+    second: runeGrey_slab_026
+  - first:
+      213: 1529793097015259817
+    second: runeGrey_slab_011
+  - first:
+      213: -2789179535063385593
+    second: runeGrey_slab_015
+  - first:
+      213: -7234327961435271684
+    second: runeGrey_slab_034
+  - first:
+      213: 7934788161984598176
+    second: runeGrey_slab_021
+  - first:
+      213: -6160571239914010829
+    second: runeGrey_slab_002
+  - first:
+      213: -2993192206273637858
+    second: runeGrey_slab_007
+  - first:
+      213: 9209781698720625198
+    second: runeGrey_slab_009
+  - first:
+      213: 935369405093044613
+    second: runeGrey_slab_020
+  - first:
+      213: 2462004039597955237
+    second: runeGrey_slab_032
+  - first:
+      213: 1600531809126085005
+    second: runeGrey_slab_006
+  - first:
+      213: -6167168621612235080
+    second: runeGrey_slab_004
+  - first:
+      213: -2150489459862852689
+    second: runeGrey_slab_022
+  - first:
+      213: -2055485455571954808
+    second: runeGrey_slab_033
+  - first:
+      213: -4744983117584430364
+    second: runeGrey_slab_003
+  - first:
+      213: -6533537169511738153
+    second: runeGrey_slab_035
+  - first:
+      213: -3803934730511462562
+    second: runeGrey_slab_018
+  - first:
+      213: 187297115099618205
+    second: runeGrey_slab_010
+  - first:
+      213: -7025749164600550970
+    second: runeGrey_slab_016
+  - first:
+      213: 5733093291410294630
+    second: runeGrey_slab_030
+  - first:
+      213: -8171797365694599319
+    second: runeGrey_slab_014
+  - first:
+      213: 4327062845557758868
+    second: runeGrey_slab_001
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 0
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: runeGrey_slab_031
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ae6685984e2dac4886b07809b24261d
+      internalID: 7196150672316608609
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_025
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c177fe2edb137684d831e11b7dc2ac99
+      internalID: -8804067888815024512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_028
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: da5b308fb825b1a43a108c28b2db583f
+      internalID: 2298255288681329545
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_036
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7ef10bc33c4c0649b05ee51c8998b9a
+      internalID: 2481598494001517578
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_008
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0deed6c749300ef419d8c95351d4bc81
+      internalID: 8102341539740232732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_017
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e52a1950460605644b1ea3942b3e4faa
+      internalID: -7924881376563435232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_013
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 741e67825fdba3841af2cbec003012de
+      internalID: -5423902378240978249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_027
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4afa0df6d07b7eb4ea41fe6ea0eb8c82
+      internalID: 6736543751572219935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_012
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cacd2284ee167842b7a86762e5ecb2d
+      internalID: 3774282143397957402
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_023
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 64d73eab843de3d42b42820d780449d2
+      internalID: 7229371545767555279
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_029
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ec074e54cd1940488e6d55386d40af2
+      internalID: -1422426884508864170
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_005
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e99ba5ac626aa1146b54b56f82c7e7ce
+      internalID: -1648504085130010849
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_019
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a4a54631a29ee3847abd9f389e83dd49
+      internalID: 5371442455399155730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_024
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fbff40c0d7c8c714cb3ad08bb3cc9e7a
+      internalID: -7296289912056853498
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_026
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b013f0fcb9bac04d90dcb82ed84bf2b
+      internalID: -1362078879787269310
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_011
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31e3e21a3fff3a24085daf5e8b38e114
+      internalID: 1529793097015259817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_015
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 0
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5271a1381ae641b4688b7341adf9b3ff
+      internalID: -2789179535063385593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_034
+      rect:
+        serializedVersion: 2
+        x: 448
+        y: 93
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ce07a6070e34fd04fb81ae0504bdea8d
+      internalID: -7234327961435271684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_021
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 072d36377898ba949a0c69da79921c51
+      internalID: 7934788161984598176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_002
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0e2ad491ab6b98148a87a5874cbad53f
+      internalID: -6160571239914010829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_007
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8451444efe522df43919914fbbea53ff
+      internalID: -2993192206273637858
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_009
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 99bc64499b0d6db4d864357a6cc01561
+      internalID: 9209781698720625198
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_020
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bcf374257f78624bacd8fea9e6c6601
+      internalID: 935369405093044613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_032
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 22565daa812521b40b0657a730fa678d
+      internalID: 2462004039597955237
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_006
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 576233f3b2199d04db282a5014a8a238
+      internalID: 1600531809126085005
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_004
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58f9d42bd9cc2e84ca712861cb79921b
+      internalID: -6167168621612235080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_022
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 372
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 531fe76386c086b44a8e3c9c9a1876f9
+      internalID: -2150489459862852689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_033
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8b99c55bdb7e4b4db427a4d0d161c71
+      internalID: -2055485455571954808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_003
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ff2908e9cfd591a46b687f286ea2d426
+      internalID: -4744983117584430364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_035
+      rect:
+        serializedVersion: 2
+        x: 168
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: df2913be1042e274bbe8dd62266fe5de
+      internalID: -6533537169511738153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_018
+      rect:
+        serializedVersion: 2
+        x: 224
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 75b8022abfb78e4469a46ed2d85a4b34
+      internalID: -3803934730511462562
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_010
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2baebce81443eb346949e3ead92ca092
+      internalID: 187297115099618205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_016
+      rect:
+        serializedVersion: 2
+        x: 336
+        y: 279
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d1e028817c5a4c4e9c7d7e92442a9d7
+      internalID: -7025749164600550970
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_030
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 372
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4db33ba0bef3fcc43bc0d2d229127658
+      internalID: 5733093291410294630
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_014
+      rect:
+        serializedVersion: 2
+        x: 392
+        y: 186
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03524a081eb44f24f94e19faa33c518e
+      internalID: -8171797365694599319
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: runeGrey_slab_001
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 372
+        width: 52
+        height: 89
+      alignment: 0
+      pivot: {x: 26, y: 44.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 61b41e1a0d394c840b30ba9ed7bc8fdb
+      internalID: 4327062845557758868
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 21fab31b34964614680dcb53be2692d1
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      runeGrey_slab_001: 4327062845557758868
+      runeGrey_slab_002: -6160571239914010829
+      runeGrey_slab_003: -4744983117584430364
+      runeGrey_slab_004: -6167168621612235080
+      runeGrey_slab_005: -1648504085130010849
+      runeGrey_slab_006: 1600531809126085005
+      runeGrey_slab_007: -2993192206273637858
+      runeGrey_slab_008: 8102341539740232732
+      runeGrey_slab_009: 9209781698720625198
+      runeGrey_slab_010: 187297115099618205
+      runeGrey_slab_011: 1529793097015259817
+      runeGrey_slab_012: 3774282143397957402
+      runeGrey_slab_013: -5423902378240978249
+      runeGrey_slab_014: -8171797365694599319
+      runeGrey_slab_015: -2789179535063385593
+      runeGrey_slab_016: -7025749164600550970
+      runeGrey_slab_017: -7924881376563435232
+      runeGrey_slab_018: -3803934730511462562
+      runeGrey_slab_019: 5371442455399155730
+      runeGrey_slab_020: 935369405093044613
+      runeGrey_slab_021: 7934788161984598176
+      runeGrey_slab_022: -2150489459862852689
+      runeGrey_slab_023: 7229371545767555279
+      runeGrey_slab_024: -7296289912056853498
+      runeGrey_slab_025: -8804067888815024512
+      runeGrey_slab_026: -1362078879787269310
+      runeGrey_slab_027: 6736543751572219935
+      runeGrey_slab_028: 2298255288681329545
+      runeGrey_slab_029: -1422426884508864170
+      runeGrey_slab_030: 5733093291410294630
+      runeGrey_slab_031: 7196150672316608609
+      runeGrey_slab_032: 2462004039597955237
+      runeGrey_slab_033: -2055485455571954808
+      runeGrey_slab_034: -7234327961435271684
+      runeGrey_slab_035: -6533537169511738153
+      runeGrey_slab_036: 2481598494001517578
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

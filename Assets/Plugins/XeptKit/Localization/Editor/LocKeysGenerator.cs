@@ -73,16 +73,17 @@ namespace XeptKit.Localization
         }
 
         /// <summary>
-        /// 将下划线/连字符/空格分隔的 key 转换为 PascalCase。
+        /// 将下划线/连字符/点/空格分隔的 key 转换为 PascalCase。
         /// </summary>
         /// <example>
         /// "menu_start" → "MenuStart"
         /// "hud_player_hp" → "HudPlayerHp"
+        /// "item.rock.name" → "ItemRockName"
         /// "npc_dialog_choice_1" → "NpcDialogChoice1"
         /// </example>
         private static string ToPascalCase(string key)
         {
-            var parts = key.Split(new[] { '_', '-', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = key.Split(new[] { '_', '-', ' ', '.' }, StringSplitOptions.RemoveEmptyEntries);
             var sb = new StringBuilder();
 
             for (int i = 0; i < parts.Length; i++)

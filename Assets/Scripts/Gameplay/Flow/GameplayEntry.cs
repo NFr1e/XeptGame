@@ -35,6 +35,16 @@ namespace XeptGame.Game.Flow
             }
         }
 
+        /// <summary>
+        /// 非抛出式取当前一轮入口（未初始化/已卸载返回 false）——场景侧组件（WorldItem 等）的无异常防御访问口，
+        /// 避免把"启动时序错误"做成异常控制流。
+        /// </summary>
+        public static bool TryGetInstance(out GameplayEntry entry)
+        {
+            entry = _instance;
+            return _instance != null;
+        }
+
         /// <summary>一轮游戏会话的业务状态容器（Inventory 起步；与入口同生共死，Dispose 后不可访问）。</summary>
         public GameplaySession Session
         {

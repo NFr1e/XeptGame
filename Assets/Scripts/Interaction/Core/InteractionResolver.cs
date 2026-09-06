@@ -14,7 +14,7 @@ namespace XeptGame.Interaction
     /// 选中严格由 ISelectable 门控（单一门控者，v2 移除"纯交互对象恒可选中"特殊规则）；</item>
     /// <item>探测快照：同步记录 <see cref="ProbeInfo"/>（画的是实际判定用的那次探测）。</item>
     /// </list>
-    /// IInteractable 不在此管线（v2）：由选中系统在目标变化时沿链查询并直接推给 Executor。
+    /// 动作（IInteractionAction）不在此管线（v3）：宿主推送后由执行器沿宿主链收集动作集。
     /// 探测源（<see cref="IInteractionProbeSource"/>）与解析逻辑解耦：任何消费方共用本管线。
     /// </summary>
     public static class InteractionResolver

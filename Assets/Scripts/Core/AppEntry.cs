@@ -81,7 +81,7 @@ namespace XeptGame
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void CreateLifecycleBridge()
         {
-            new GameObject("AppLifecycleBridge")
+            new GameObject("[AppLifecycleBridge]")
             {
                 hideFlags = HideFlags.NotEditable
             }

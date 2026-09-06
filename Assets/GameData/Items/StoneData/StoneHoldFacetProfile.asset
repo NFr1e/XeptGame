@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 302404123359b074b9d9dee6a970daa2, type: 3}
+  m_Script: {fileID: 11500000, guid: 564b4cea7db46b64d93d27d112bf1e2d, type: 3}
   m_Name: StoneHoldFacetProfile
   m_EditorClassIdentifier: 
   category: 1

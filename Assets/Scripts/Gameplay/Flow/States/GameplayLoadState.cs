@@ -20,7 +20,7 @@ namespace XeptGame.Game
     {
         public override UniTask InitAsync(CancellationToken cancellationToken = default)
         {
-            Game.LifecycleBridge = new GameObject("GameplayLifecycleBridge")
+            Game.LifecycleBridge = new GameObject("[GameplayLifecycleBridge]")
             {
                 hideFlags = HideFlags.NotEditable
             }

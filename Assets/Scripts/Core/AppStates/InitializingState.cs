@@ -21,6 +21,10 @@ namespace XeptGame
                 AsyncOperationHandle initHandle = Addressables.InitializeAsync();
                 await initHandle.ToUniTask(cancellationToken: cancellationToken);
 
+                // 【仅测试用】默认语言临时写死 zh-CN——供 Prompt 交互物名字本地化解析/切换演示。
+                // 正式：默认语言应来自设置持久化（启动时读取用户设置后调用）。
+                await AppEntry.LocalizationManager.SetLanguageAsync("zh-CN", cancellationToken);
+
                 //移动到了AppEntry中的AfterSceneLoaded中
                 //Fsm.RequestChange<StartingState>();
             }

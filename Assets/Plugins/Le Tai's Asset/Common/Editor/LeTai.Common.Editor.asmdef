@@ -1,0 +1,16 @@
+{
+    "name": "LeTai.Common.Editor",
+    "rootNamespace": "LeTai.Common.Editor",
+    "references": ["GUID:07cd4d3e8f0583542ab74e7b8b032f7e"],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

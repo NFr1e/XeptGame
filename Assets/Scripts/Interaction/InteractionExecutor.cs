@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using XeptKit.Core;
@@ -6,50 +7,61 @@ using XeptKit.Core;
 namespace XeptGame.Interaction
 {
     /// <summary>
-    /// 交互执行器（执行系统，引擎壳 MonoBehaviour，实现 <see cref="IInteractionExecutor"/>，契约模型 v2）：
-    /// 持有当前可交互者（由选中系统**唯一推送**，单写者纪律），执行交互动作。
+    /// 交互执行器（v3.1，引擎壳 MonoBehaviour，实现 <see cref="IInteractionExecutor"/>）：
+    /// 持有当前**宿主 + 动作集**，按**输入槽**分派执行。
     /// <list type="bullet">
-    /// <item><b>单一契约消费</b>：本组件是 <see cref="IInteractable"/>（交互能力）的唯一消费者——
-    /// 从 <see cref="CurrentInteractable"/> 取交互入口；选中检测（<see cref="ISelectable"/>）不在此组件
-    /// （见 <c>InteractionDetector</c>）；</item>
-    /// <item><b>被推而非拉取（v2）</b>：不序列化目标源、不消费目标源接口——CurrentInteractable 由
-    /// Detector 在目标变化时直接推入（含 null）；执行器不感知目标从哪来（探测/选中是选中系统职责）；</item>
-    /// <item><b>输入层阻断自动生效</b>：经 <see cref="AppEntry.InputManager"/> 以 <c>GameplayInputLayer</c>
-    /// 绑定，菜单打开（层失活）时回调被 InputManager 直接跳过，交互输入与移动输入同步失效；</item>
-    /// <item><b>职责</b>：绑定 Interact 输入（Gameplay map）、交互门控（按下时重判
-    /// <see cref="IInteractable.CanInteract"/>，状态帧间可能变化）、执行 <see cref="IInteractable.Interact"/>
-    /// 并发布 <see cref="Interacted"/>。</item>
+    /// <item><b>宿主推送</b>：<see cref="ApplyHost"/> 由选中系统在选中变化时调用（单写者纪律，含 null）；</item>
+    /// <item><b>动作集权威 = 宿主</b>：宿主实现 <see cref="IInteractionActionsHost"/>（Actions 列表 + ActionsChanged
+    /// 事件）——执行器读列表快照并订阅成员事件（不再组件扫描/enable 过滤）；纯 C# 动作由宿主管辖；</item>
+    /// <item><b>槽输入绑定</b>：Primary = Gameplay.Interact（E）、Secondary = Gameplay.InteractSecondary（F），
+    /// 均以 GameplayInputLayer 绑定；</item>
+    /// <item><b>分派</b>：槽输入 performed → 快照中找该槽且 CanInteract 的动作 → Interact →
+    /// 刷新快照（宿主在动作执行中可能已改成员并触发事件，双保险幂等）；</item>
+    /// <item><b>同槽互斥</b>：一个槽取首个可用动作（多可用需菜单，决议 §2.2 禁止）。</item>
     /// </list>
     /// </summary>
     public sealed class InteractionExecutor : MonoBehaviour, IInteractionExecutor
     {
-        private IInteractable _currentInteractable;
         private readonly CompositeDisposable _disposables = new();
 
-        /// <inheritdoc cref="IInteractionExecutor.CurrentInteractable"/>
-        /// <summary>当前可交互者（选中系统唯一推，含 null）。设置时发布 <see cref="InteractableChanged"/>。</summary>
-        public IInteractable CurrentInteractable
-        {
-            get => _currentInteractable;
-            set
-            {
-                if (_currentInteractable == value)
-                {
-                    return;
-                }
+        private ISelectable _host;
+        private IInteractionActionsHost _hostActions;
+        private IInteractionAction[] _actions = Array.Empty<IInteractionAction>();
 
-                var previous = _currentInteractable;
-                _currentInteractable = value;
-                InteractableChanged?.Invoke(new InteractableChangeArgs(value, previous));
+        /// <inheritdoc />
+        public ISelectable CurrentHost => _host;
+
+        /// <inheritdoc />
+        public IReadOnlyList<IInteractionAction> CurrentActions => _actions;
+
+        /// <inheritdoc />
+        public event Action<InteractionHostChangedArgs> HostChanged;
+
+        /// <summary>
+        /// 选中系统推送宿主（含 null）：切换动作集权威并重读快照，变化时发布 <see cref="HostChanged"/>。
+        /// </summary>
+        public void ApplyHost(ISelectable host)
+        {
+            if (_hostActions != null)
+            {
+                _hostActions.ActionsChanged -= OnHostActionsChanged;
             }
+
+            _host = host;
+            _hostActions = host as IInteractionActionsHost;
+
+            if (_hostActions != null)
+            {
+                _hostActions.ActionsChanged += OnHostActionsChanged;
+            }
+
+            RefreshAndNotify();
         }
 
-        /// <inheritdoc cref="IInteractionExecutor.InteractableChanged"/>
-        /// <summary>交互者变化事件（负载含旧/新交互者；提示层/手持物 HUD 消费）。</summary>
-        public event Action<InteractableChangeArgs> InteractableChanged;
-
-        /// <summary>交互执行事件（参数 = 被交互对象）。</summary>
-        public event Action<IInteractable> Interacted;
+        private void OnHostActionsChanged()
+        {
+            RefreshAndNotify();
+        }
 
         private void OnEnable()
         {
@@ -59,7 +71,11 @@ namespace XeptGame.Interaction
             }
 
             _disposables.Add(AppEntry.InputManager.Bind<GameplayInputLayer>(
-                AppEntry.GlobalInput.Gameplay.Interact, OnInteract));
+                AppEntry.GlobalInput.Gameplay.Interact,
+                ctx => OnSlotInput(InputSlot.Primary, ctx)));
+            _disposables.Add(AppEntry.InputManager.Bind<GameplayInputLayer>(
+                AppEntry.GlobalInput.Gameplay.InteractSecondary,
+                ctx => OnSlotInput(InputSlot.Secondary, ctx)));
         }
 
         private void OnDisable()
@@ -67,27 +83,83 @@ namespace XeptGame.Interaction
             _disposables.Dispose();
         }
 
-        private void OnInteract(InputAction.CallbackContext ctx)
+        private void OnSlotInput(InputSlot slot, InputAction.CallbackContext ctx)
         {
             if (!ctx.performed)
             {
                 return;
             }
 
-            // 按下时重判：目标/交互状态在帧间可能变化（冷却/锁定/耗尽/移开）
-            var interactable = _currentInteractable;
-            if (interactable == null || !interactable.CanInteract(new InteractionContext(transform)))
+            var action = FindAvailable(slot);
+            if (action == null)
             {
                 return;
             }
 
-            interactable.Interact(new InteractionContext(transform));
+            action.Interact(new InteractionContext(transform));
+            Log.Info($"[InteractionExecutor] 执行动作 {action.GetType().Name}（槽 {slot}）");
 
-            Log.Info($"[InteractionExecutor] 交互执行：{GetInteractableName(interactable)}");
-            Interacted?.Invoke(interactable);
+            // 动作执行可能改宿主成员（宿主已发 ActionsChanged）——快照刷新兜底（比较幂等，防重复事件）
+            RefreshAndNotify();
         }
 
-        private static string GetInteractableName(IInteractable interactable)
-            => interactable is Component component ? component.name : interactable.GetType().Name;
+        private IInteractionAction FindAvailable(InputSlot slot)
+        {
+            var ctx = new InteractionContext(transform);
+            for (int i = 0; i < _actions.Length; i++)
+            {
+                var action = _actions[i];
+                if (action.Slot == slot && action.CanInteract(ctx))
+                {
+                    return action;
+                }
+            }
+
+            return null;
+        }
+
+        private void RefreshAndNotify()
+        {
+            IInteractionAction[] next = _hostActions != null && _hostActions.Actions != null
+                ? Copy(_hostActions.Actions)
+                : Array.Empty<IInteractionAction>();
+
+            if (SequenceEquals(_actions, next))
+            {
+                return;
+            }
+
+            _actions = next;
+            HostChanged?.Invoke(new InteractionHostChangedArgs(_host, _actions));
+        }
+
+        private static IInteractionAction[] Copy(IReadOnlyList<IInteractionAction> source)
+        {
+            var array = new IInteractionAction[source.Count];
+            for (int i = 0; i < source.Count; i++)
+            {
+                array[i] = source[i];
+            }
+
+            return array;
+        }
+
+        private static bool SequenceEquals(IInteractionAction[] current, IInteractionAction[] next)
+        {
+            if (current.Length != next.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < current.Length; i++)
+            {
+                if (!ReferenceEquals(current[i], next[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 }

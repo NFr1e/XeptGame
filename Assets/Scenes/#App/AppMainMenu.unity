@@ -181,8 +181,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u4E3B\u83DC\u5355\u5360\u4F4D"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 07e77c5570aa5a74785107a2dcd1e4ec, type: 2}
-  m_sharedMaterial: {fileID: 4249953511980015904, guid: 07e77c5570aa5a74785107a2dcd1e4ec, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 6607fa12ac39f62428093ee6baecb465, type: 2}
+  m_sharedMaterial: {fileID: 5051610113657905889, guid: 6607fa12ac39f62428093ee6baecb465, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -339,7 +339,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 698117642}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1865519843}
+        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+        m_MethodName: SetActive
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &698117642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -450,8 +462,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u5F00\u59CB\u6E38\u620F"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 07e77c5570aa5a74785107a2dcd1e4ec, type: 2}
-  m_sharedMaterial: {fileID: 4249953511980015904, guid: 07e77c5570aa5a74785107a2dcd1e4ec, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 6607fa12ac39f62428093ee6baecb465, type: 2}
+  m_sharedMaterial: {fileID: 5051610113657905889, guid: 6607fa12ac39f62428093ee6baecb465, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

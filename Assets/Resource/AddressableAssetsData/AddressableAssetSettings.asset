@@ -44,6 +44,7 @@ MonoBehaviour:
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
+  - {fileID: 11400000, guid: 19b40c476f5a93b47b3eba199ef6173f, type: 2}
   - {fileID: 11400000, guid: d3dc88373abdda3479f12092faa0f731, type: 2}
   - {fileID: 11400000, guid: eb27d4818d67d16459786d1d483f6579, type: 2}
   - {fileID: 11400000, guid: f533842cc180df648958ef6777eeca7a, type: 2}
@@ -91,6 +92,7 @@ MonoBehaviour:
     - default
     - app
     - gameplay
+    - localization
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: be646fc21696347489b289e4769bbff2, type: 2}
