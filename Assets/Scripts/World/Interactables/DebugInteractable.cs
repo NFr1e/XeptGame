@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using XeptGame.Interaction;
@@ -43,9 +42,6 @@ namespace XeptGame.World.Interactables
 
         /// <inheritdoc />
         public IReadOnlyList<IInteractionAction> Actions => _actions;
-
-        /// <summary>成员恒定（单动作），事件保留接口语义（不触发）。</summary>
-        public event Action ActionsChanged;
 
         /// <summary>当前是否处于交互冷却期（动作门控数据源）。</summary>
         public bool IsCoolingDown => Time.time < _cooldownEndTime;

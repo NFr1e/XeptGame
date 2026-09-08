@@ -1,5 +1,7 @@
 using System;
 using UnityEngine;
+using XeptGame.Equip;
+using XeptGame.Items;
 
 namespace XeptGame.Game.Flow
 {
@@ -18,6 +20,7 @@ namespace XeptGame.Game.Flow
     {
         private static GameplayEntry _instance;
         private GameplaySession _session;
+        private EquipCommands _commands;
 
         /// <summary>当前一轮入口（未 Instantiate 访问抛异常，提示初始化顺序错误）。</summary>
         public static GameplayEntry Instance
@@ -61,6 +64,25 @@ namespace XeptGame.Game.Flow
             }
         }
 
+        /// <summary>
+        /// 装备命令层（行为轴唯一写入口，与 Session 同生共死；Equip_FPV 决议 §2.3/§3.3）：
+        /// 拾取路由 / 收起等意图命令收口于此，场景宿主（WorldItem 动作、G 输入桥）只发命令。
+        /// </summary>
+        public EquipCommands Commands
+        {
+            get
+            {
+                if (_commands is not null)
+                {
+                    return _commands;
+                }
+                else
+                {
+                    throw new InvalidOperationException("EquipCommands is not initialized. Call Instantiate() first.");
+                }
+            }
+        }
+
         /// <summary>创建一轮入口（幂等）：首次创建并装配 <see cref="GameplaySession"/>。</summary>
         public static GameplayEntry Instantiate()
         {
@@ -68,16 +90,30 @@ namespace XeptGame.Game.Flow
             {
                 _instance = new GameplayEntry();
                 _instance._session = new GameplaySession();
+                _instance._commands = new EquipCommands(
+                    _instance._session.Inventory,
+                    _instance._session.Equipment,
+                    _instance.PublishAcquired);
             }
 
             return _instance;
         }
 
-        /// <summary>卸载一轮会话（幂等）：弃 Session 并置空入口引用。</summary>
+        /// <summary>卸载一轮会话（幂等）：弃 Session 与命令层并置空入口引用。</summary>
         public void Dispose()
         {
             _session = null;
+            _commands = null;
             _instance = null;
+        }
+
+        /// <summary>命令层一次性播报接缝：路由成功（获得总量 N）→ Gameplay 域总线（事件轨；装配点适配）。</summary>
+        private void PublishAcquired(ItemAcquiredEvent acquired)
+        {
+            if (GameManager.Context != null)
+            {
+                GameManager.Context.EventBus.Publish(acquired);
+            }
         }
 
         #region LifecycleDriver

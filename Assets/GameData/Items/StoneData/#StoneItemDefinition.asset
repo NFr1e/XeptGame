@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b61950acfd8c4441b6cedfee02c97b0, type: 3}
   m_Name: '#StoneItemDefinition'
   m_EditorClassIdentifier: 
-  id: item.medicine
+  id: item.stone
   iconKind: 1
   iconSprite: {fileID: 21300000, guid: cf33e55e7d19c2842b1235cd7d3bcb82, type: 3}
   iconTexture: {fileID: 0}

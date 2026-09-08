@@ -64,5 +64,12 @@ namespace XeptGame.Core
             /// <summary>玩法级基座场景组（Gameplay 场景组：GameplayCore 主场景），GameplayLoadState 加载。</summary>
             public const string GameplaySceneGroup = "#GameplayCoreSceneGroup";
         }
+
+        /// <summary>交互执行参数。</summary>
+        public struct Interaction
+        {
+            /// <summary>E 长按判定阈值（秒）：按住超过该时长且宿主有可用 Hold 动作 → 升级为 Hold 分派（tap 取消）。</summary>
+            public const float HoldPressThresholdSeconds = 0.35f;
+        }
     }
 }

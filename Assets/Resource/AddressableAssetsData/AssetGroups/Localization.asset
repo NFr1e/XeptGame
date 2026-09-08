@@ -17,17 +17,15 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 2d891545d92c96841802c86e8776203d
   m_SerializeEntries:
-  - m_GUID: 08f00e9be60c54c4896026032e3757a3
-    m_Address: Localization/en
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - localization
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fa620458b84c19a4e80e985efcb5f933
+  - m_GUID: 7e9cf51e8fa05e547872c61a426ddbbc
     m_Address: Localization/zh-CN
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - localization
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ff2171d5a67cb734397f73b33e113b30
+    m_Address: Localization/en
+    m_ReadOnly: 0
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 595557324e777654d81aa64f42d81133, type: 2}

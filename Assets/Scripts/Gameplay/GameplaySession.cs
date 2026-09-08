@@ -1,3 +1,4 @@
+using XeptGame.Equip;
 using XeptGame.Inv;
 
 namespace XeptGame.Game
@@ -16,5 +17,11 @@ namespace XeptGame.Game
     {
         /// <summary>背包容器（一轮级，起步字段；后续 Equip/局内进度按需生长）。</summary>
         public Inventory Inventory { get; } = new();
+
+        /// <summary>
+        /// 身体容器（一轮级，Equip_FPV_Design.md §2.3/§3.2）：槽位容器，v1 = 手槽单位位
+        /// （配置驱动：构造时注入 HandSlot）。占有 = 背包与身体两容器分布，无"总拥有"概念。
+        /// </summary>
+        public Equipment Equipment { get; } = new Equipment(new ISlot[] { new HandSlot() });
     }
 }

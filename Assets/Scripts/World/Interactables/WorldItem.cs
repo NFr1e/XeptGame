@@ -1,7 +1,6 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using XeptGame.Game;
+using XeptGame.Equip;
 using XeptGame.Game.Flow;
 using XeptGame.Interaction;
 using XeptGame.Items;
@@ -10,12 +9,17 @@ using XeptKit.Core;
 namespace XeptGame.World.Interactables
 {
     /// <summary>
-    /// 世界可拾取物（v3.1 宿主模型；WorldItem_Design.md）：场景直摆可拾取载体——
-    /// 序列化持有 ItemDefinition，扮演**宿主（ISelectable + IInteractionActionsHost）**；
-    /// 唯一动作 = 内部纯 C# <see cref="PickupAction"/>（Primary 拾取，构造注入宿主，无 Unity 生命周期纠缠）。
-    /// 拾取逻辑收口在 <see cref="TryPickup"/>：加背包 → 发布 ItemAcquiredEvent（事件轨）→ 隐藏自身（防重复拾取、不销毁）。
+    /// 【测试用】世界可拾取物（宿主模型 v3.1+；WorldItem_Design.md + Equip_FPV 决议 DP5）：场景直摆可拾取载体——
+    /// 序列化持有 ItemDefinition，扮演宿主（ISelectable + IInteractionActionsHost + IInteractionInfoContext）。
+    /// <list type="bullet">
+    /// <item><b>双动作（成员恒定）</b>：Primary = 拾取（tap → 路由：手空且可持则 1 上手 N−1 入包，否则全入包）；
+    /// Hold = 拿取（长按 E → 强制上手，手满先回包）——由 InteractionExecutor 的 E 手势判别分派；</item>
+    /// <item><b>拾取逻辑收口命令层</b>：经 <c>GameplayEntry.Instance.Commands.TryPickupRoute</c>（DP3 守卫纪律——
+    /// 宿主只发命令，不直接读写容器）；入包/上手状态轨与播报（事件轨）都由命令层统一处理；</item>
+    /// <item>拾取成功隐藏自身（防重复拾取、不 Destroy——可复位/重生系统接管）。</item>
+    /// </list>
     /// </summary>
-    public sealed class WorldItem : MonoBehaviour, ISelectable, IInteractionActionsHost, IInteractionDisplayInfo
+    public sealed class WorldItem : MonoBehaviour, ISelectable, IInteractionActionsHost, IInteractionInfoContext
     {
         [Tooltip("对应的物品定义（WorldFacet 等条目数据源）；必填——缺失时不可交互")]
         [SerializeField] private ItemDefinition definition;
@@ -25,6 +29,7 @@ namespace XeptGame.World.Interactables
 
         private readonly List<IInteractionAction> _actions = new();
         private PickupAction _pickup;
+        private TakeInHandAction _takeInHand;
         private bool _isSelected;
 
         /// <summary>绑定的物品定义。</summary>
@@ -36,10 +41,7 @@ namespace XeptGame.World.Interactables
         /// <inheritdoc />
         public IReadOnlyList<IInteractionAction> Actions => _actions;
 
-        /// <summary>成员恒定（单动作），事件保留接口语义（不触发）。</summary>
-        public event Action ActionsChanged;
-
-        // ---- IInteractionDisplayInfo（提示头部：名字 = Definition 本地化键；图标 = Definition，IconKind 感知）----
+        // ---- IInteractionInfoContext（交互信息：名字 = Definition 本地化键；图标 = Definition，IconKind 感知）----
 
         /// <inheritdoc />
         public string DisplayNameKey => definition != null ? definition.DisplayNameKey : string.Empty;
@@ -61,14 +63,19 @@ namespace XeptGame.World.Interactables
             }
 
             _pickup = new PickupAction(this);
+            _takeInHand = new TakeInHandAction(this);
             _actions.Add(_pickup);
+            _actions.Add(_takeInHand);
         }
 
         /// <summary>是否可拾取（动作门控数据源）。</summary>
         public bool CanPickup => definition != null && pickupCount > 0;
 
-        /// <summary>执行拾取（动作 Interact 收口）：入包 → 事件轨播报 → 隐藏。</summary>
-        public bool TryPickup()
+        /// <summary>
+        /// 执行拾取（动作 Interact 收口）：把目标/模式交给命令层路由（状态轨 + 播报由命令层统一处理），
+        /// 成功后隐藏自身。
+        /// </summary>
+        public bool TryPickup(PickupMode mode)
         {
             if (definition == null)
             {
@@ -88,10 +95,13 @@ namespace XeptGame.World.Interactables
                 return false;
             }
 
-            entry.Session.Inventory.Add(definition, pickupCount);
-            Log.Info($"[WorldItem] 拾取 {definition.Id} × {pickupCount}（{name}）");
+            if (!entry.Commands.TryPickupRoute(definition, pickupCount, mode))
+            {
+                Log.Error($"[WorldItem] 拾取路由失败 {definition.Id} × {pickupCount}（{mode}，{name}）。");
+                return false;
+            }
 
-            GameManager.Context?.EventBus.Publish(new ItemAcquiredEvent(definition, pickupCount));
+            Log.Info($"[WorldItem] 拾取 {definition.Id} × {pickupCount}（{mode}，{name}）");
 
             gameObject.SetActive(false); // 拾取后隐藏：防重复拾取；不 Destroy（可复位/重生系统接管）
             return true;
@@ -106,7 +116,7 @@ namespace XeptGame.World.Interactables
         /// <inheritdoc />
         public void OnDeselected() => _isSelected = false;
 
-        /// <summary>拾取动作（纯 C#，构造注入宿主）。</summary>
+        /// <summary>拾取动作（tap，Primary；纯 C#，构造注入宿主）。</summary>
         private sealed class PickupAction : IInteractionAction
         {
             private readonly WorldItem _host;
@@ -122,7 +132,26 @@ namespace XeptGame.World.Interactables
 
             public bool CanInteract(InteractionContext context) => _host.CanPickup;
 
-            public void Interact(InteractionContext context) => _host.TryPickup();
+            public void Interact(InteractionContext context) => _host.TryPickup(PickupMode.Tap);
+        }
+
+        /// <summary>拿取动作（长按，Hold；纯 C#，构造注入宿主）。</summary>
+        private sealed class TakeInHandAction : IInteractionAction
+        {
+            private readonly WorldItem _host;
+
+            public TakeInHandAction(WorldItem host)
+            {
+                _host = host;
+            }
+
+            public InputSlot Slot => InputSlot.Hold;
+
+            public string PromptText => "拿取";
+
+            public bool CanInteract(InteractionContext context) => _host.CanPickup;
+
+            public void Interact(InteractionContext context) => _host.TryPickup(PickupMode.ForceHold);
         }
     }
 }

@@ -16,7 +16,7 @@ namespace XeptGame.UI
     /// <list type="bullet">
     /// <item><b>数据源</b>：OnOpenAsync 从 args 收 <see cref="PromptRuntimeContext"/>（executor/相机），
     /// 订阅 <see cref="IInteractionExecutor.HostChanged"/>（宿主变化 → 显隐 + 内容重列）；</item>
-    /// <item><b>头部（图标 + 交互物名字）</b>：宿主实现可选 <see cref="IInteractionDisplayInfo"/> 则展示——
+    /// <item><b>头部（图标 + 交互物名字）</b>：宿主实现可选 <see cref="IInteractionInfoContext"/> 则展示——
     /// 名字走 <c>DisplayNameKey</c> 本地化解析（TryGet，未注册 → 隐名）或 <c>DisplayName</c> 直显回退；
     /// 图标 Sprite/Texture 双通道（<see cref="PromptIconView"/>）；</item>
     /// <item><b>动作行</b>：<see cref="InputPromptView"/> 按动作集生成/销毁（即时创建，池后置），
@@ -140,7 +140,7 @@ namespace XeptGame.UI
         /// <summary>头部内容：名字 = 键解析（未注册隐名）或直显回退；图标 = Sprite/Texture 任一，全空隐藏。</summary>
         private void ApplyHeader(Component hostComponent)
         {
-            var info = hostComponent.GetComponentInParent<IInteractionDisplayInfo>();
+            var info = hostComponent.GetComponentInParent<IInteractionInfoContext>();
             var name = info != null ? ResolveName(info) : string.Empty;
 
             if (headerNameLabel != null)
@@ -176,7 +176,7 @@ namespace XeptGame.UI
         }
 
         /// <summary>名字解析：有键 → LocalizationManager.TryGet（未命中 → 隐名，静默）；无键 → 直显文案。</summary>
-        private static string ResolveName(IInteractionDisplayInfo info)
+        private static string ResolveName(IInteractionInfoContext info)
         {
             if (!string.IsNullOrEmpty(info.DisplayNameKey))
             {

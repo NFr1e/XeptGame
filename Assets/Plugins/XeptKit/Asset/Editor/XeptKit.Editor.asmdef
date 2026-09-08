@@ -5,7 +5,8 @@
         "XeptKit",
         "UniTask",
         "Unity.Addressables.Editor",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [
         "Editor"

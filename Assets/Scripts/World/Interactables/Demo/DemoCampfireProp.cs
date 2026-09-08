@@ -8,12 +8,13 @@ namespace XeptGame.World.Interactables.Demo
 {
     /// <summary>
     /// 演示用双态交互物（火堆占位，仅验证"动作清单/宿主状态翻转"，非生存内容）：
-    /// **宿主（ISelectable + IInteractionActionsHost）**，动作 = 宿主内部纯 C# 列表（构造注入，无 Unity 纠缠）。
+    /// **宿主（ISelectable + IInteractionActionsHost）** + **成员变化通知（IInteractionActionsNotifier，
+    /// 可选能力接口——动作集动态变化才需要）**，动作 = 宿主内部纯 C# 列表（构造注入，无 Unity 纠缠）。
     /// 状态 = { 灭/燃 } × fuel(1..<see cref="MaxFuel"/>)；**成员 = 列表增删**（灭 → 仅 IgniteAction；
     /// 燃 → ExtinguishAction + AddFuelAction），状态迁移时重建列表并触发 <see cref="ActionsChanged"/>（DP3 事件轨）。
     /// </summary>
     [DisallowMultipleComponent]
-    public sealed class DemoCampfireProp : MonoBehaviour, ISelectable, IInteractionActionsHost, IInteractionDisplayInfo
+    public sealed class DemoCampfireProp : MonoBehaviour, ISelectable, IInteractionActionsHost, IInteractionActionsNotifier, IInteractionInfoContext
     {
         public const int MaxFuel = 3;
 
@@ -49,7 +50,7 @@ namespace XeptGame.World.Interactables.Demo
         /// <summary>是否可添柴（燃且未满）。</summary>
         public bool CanAddFuel => IsLit && Fuel < MaxFuel;
 
-        // ---- IInteractionDisplayInfo（提示头部；直配字段，无本地化键）----
+        // ---- IInteractionInfoContext（交互信息；直配字段，无本地化键）----
 
         /// <inheritdoc />
         public string DisplayNameKey => string.Empty;

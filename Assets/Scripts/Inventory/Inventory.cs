@@ -17,7 +17,7 @@ namespace XeptGame.Inv
     /// </list>
     /// 宿主：由 GameplaySession 持有（一轮游戏会话生命周期，ItemLoop_Design.md §2.4）。
     /// </summary>
-    public sealed class Inventory
+    public sealed class Inventory : IItemContainer
     {
         private readonly List<ItemStack> _slots = new();
 
@@ -113,6 +113,17 @@ namespace XeptGame.Inv
             }
 
             return null;
+        }
+
+        // ---- IItemContainer 端口实现（Equip_FPV_Design.md §3.1，T1）：语义零改动 ----
+        // Stacks = Slots 同源（显式实现，不扩充既有公开 API）；TryAdd = Add 的端口形态（行容器恒成功）。
+
+        IReadOnlyList<ItemStack> IItemContainer.Stacks => _slots;
+
+        bool IItemContainer.TryAdd(ItemDefinition definition, int count)
+        {
+            Add(definition, count);
+            return true;
         }
     }
 }
