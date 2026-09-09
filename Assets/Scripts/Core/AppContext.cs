@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Cysharp.Threading.Tasks;
 using XeptKit.Event;
 
@@ -13,7 +13,7 @@ namespace XeptGame
         /// <summary>启动失败（Initializing / Starting 阶段；重试走 RetryLaunch 全量重跑）。</summary>
         Startup,
 
-        /// <summary>游戏流程失败（GameplayFSM 加载阶段 Fail；重试走 RetryGame 重建流程）。</summary>
+        /// <summary>游戏流程失败（GameFSM 加载阶段 Fail；重试走 RetryGame 重建流程）。</summary>
         GameplayFlow,
     }
 

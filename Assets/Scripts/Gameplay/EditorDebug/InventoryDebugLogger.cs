@@ -17,14 +17,14 @@ namespace XeptGame.Game
 
         private void OnEnable()
         {
-            if (GameplayEntry.TryGetInstance(out var entry))
+            if (GameplaySessionEntry.TryGetInstance(out var entry))
             {
-                _inventory = entry.Session.Inventory;
+                _inventory = entry.Context.Inventory;
                 _inventory.Changed += OnChanged;
             }
             else
             {
-                Log.Error("[InventoryDebugLogger] 一轮会话未初始化（GameplayEntry），无法订阅背包变更。");
+                Log.Error("[InventoryDebugLogger] 一轮会话未初始化（GameplaySessionEntry），无法订阅背包变更。");
                 enabled = false;
             }
         }

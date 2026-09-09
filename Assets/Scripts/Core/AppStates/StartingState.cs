@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using XeptGame.Core;
@@ -8,9 +8,9 @@ namespace XeptGame
 {
     /// <summary>
     /// 内容入口（GameplayFlow_Design.md §2.1）：**先加载应用级基础设施组（AppCore 组：UI 上下文/音频等）**，
-    /// 再拉起 GameplayFSM（fire-and-forget——AppFSM 不管理其生命周期），然后进入运行态。
-    /// 层职责：应用级基础设施属 **AppFSM 层**（StartingState 加载 AppCore 组）；玩法级基座属 GameplayFSM 层
-    /// （GameplayLoadState 加载基座组）。GameplayFSM 独立驱动后续流程（Boot 停驻 → 启动请求 → 两阶段加载 → Playing）。
+    /// 再拉起 GameFSM（fire-and-forget——AppFSM 不管理其生命周期），然后进入运行态。
+    /// 层职责：应用级基础设施属 **AppFSM 层**（StartingState 加载 AppCore 组）；玩法级基座属 GameFSM 层
+    /// （GameplayLoadState 加载基座组）。GameFSM 独立驱动后续流程（Boot 停驻 → 启动请求 → 两阶段加载 → Playing）。
     /// 失败（组加载 / GameplayContext 构造异常）→ 写 App.LastError + 转 ErrorState（显式自救）。
     /// </summary>
     public sealed class StartingState : AppStateBase

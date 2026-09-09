@@ -11,8 +11,8 @@ namespace XeptGame
     /// <summary>
     /// 应用门面：持有 AppFSM，对外提供状态查询、启动、全局 Tick、应用暂停接线与 QuitApp。
     /// 职责边界（见 AppFSM 设计决议）：状态语义在 AppFSM；框架收尾在 AppEntry.Shutdown；本类只做编排接线。
-    /// 另：订阅 GameplayFlowErrorEvent（接收 GameplayFSM 死亡信号 → 记失败来源 + 转 ErrorState；
-    /// GameplayFSM 的收尾 Shutdown 统一在 ErrorState.OnEnter 执行——不管理其生命周期，只做接管）。
+    /// 另：订阅 GameplayFlowErrorEvent（接收 GameFSM 死亡信号 → 记失败来源 + 转 ErrorState；
+    /// GameFSM 的收尾 Shutdown 统一在 ErrorState.OnEnter 执行——不管理其生命周期，只做接管）。
     /// 重试入口按 <see cref="AppFailureSource"/> 分派：启动失败 → <see cref="RetryLaunch"/>（全量重跑）；
     /// 游戏流程失败 → <see cref="RetryGame"/>（ErrorState 已收尾，回 StartingState 重建流程）。
     /// </summary>
@@ -24,6 +24,9 @@ namespace XeptGame
         /// <summary>应用上下文（EventBus + 会话数据）。</summary>
         public static AppContext Context { get; private set; }
 
+        /// <summary>语义查询（域内收口状态类）：应用是否处于运行态——供外层/内层取现值，不暴露具体状态类。</summary>
+        public static bool IsRunning => AppFSM != null && AppFSM.CurrentStateType == typeof(RunningState);
+
         private IDisposable _errorSubscription;
 
         /// <summary>组合根装配完成后调用：创建 AppFSM 并订阅状态可观测日志 + 游戏流程错误事件。</summary>
@@ -34,9 +37,19 @@ namespace XeptGame
             Context = context;
             AppFSM = new Fsm(context);
             AppFSM.StateChanged += s => Log.Info($"[AppFSM] State change from {s.From?.ToString() ?? "启动"} to {s.To}");
+            AppFSM.StateChanged += OnAppStateChanged; // App 状态对外广播（下行"铃"）
 
-            // 接收 GameplayFSM 死亡信号（GameplayFlow_Design.md §4.5）——AppFSM 不管理其生命周期，但转 ErrorState 接管
+            // 接收 GameFSM 死亡信号（GameplayFlow_Design.md §4.5）——AppFSM 不管理其生命周期，但转 ErrorState 接管
             _errorSubscription = context.EventBus.Subscribe<GameFlowErrorEvent>(OnGameplayFlowError);
+        }
+
+        /// <summary>App 状态变化 → 广播到 App 域总线（对外发布"铃"；订阅者不解析负载，现值经 <see cref="IsRunning"/> 查询）。</summary>
+        private void OnAppStateChanged(Fsm.StateChangeArgs args)
+        {
+            if (Context != null)
+            {
+                Context.EventBus.Publish(new AppStateChangedEvent(args.To, args.From));
+            }
         }
 
         /// <summary>启动应用：进入 <see cref="InitializingState"/>（fire-and-forget；失败显式自救进 ErrorState）。</summary>
@@ -51,7 +64,7 @@ namespace XeptGame
         /// <see cref="StartingState"/>（首次启动的 Initializing→Starting 由 AfterSceneLoad 桥一次性驱动，
         /// 重试无第二次桥，故在此续接——场景已加载，无场景 Awake 竞态）。
         /// 若初始化再次失败（InitializingState 内部自救转 ErrorState）则跳过续接。
-        /// 游戏流程失败请用 <see cref="RetryGame"/>（本方法不触碰 GameplayFSM）。
+        /// 游戏流程失败请用 <see cref="RetryGame"/>（本方法不触碰 GameFSM）。
         /// </summary>
         public async UniTask RetryLaunch()
         {
@@ -136,8 +149,8 @@ namespace XeptGame
 
         /// <summary>
         /// 游戏流程错误处理（GameplayFlow_Design.md §4.5）：记失败来源（GameplayFlow）+ LastError + 转 ErrorState。
-        /// **不在此收尾 GameplayFSM**——收尾（GameplayManager.Shutdown：取消编排令牌 + Dispose Fsm）统一在
-        /// ErrorState.OnEnter 执行（AppFSM 收敛进 ErrorState 时 GameplayFSM 的失败转移早已结束，时序干净）。
+        /// **不在此收尾 GameFSM**——收尾（GameplayManager.Shutdown：取消编排令牌 + Dispose Fsm）统一在
+        /// ErrorState.OnEnter 执行（AppFSM 收敛进 ErrorState 时 GameFSM 的失败转移早已结束，时序干净）。
         /// 仅从运行/启动/暂停态可转（Error 已是终态/转移中时忽略——RequestChange 幂等由 FSM 保证；
         /// 含 Paused：平台暂停期间加载失败，恢复后仍须收敛到 ErrorState，不留泄漏）。
         /// </summary>

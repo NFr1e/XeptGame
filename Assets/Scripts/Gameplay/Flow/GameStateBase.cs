@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using XeptKit.FSM;
 
 namespace XeptGame.Game
@@ -20,7 +20,7 @@ namespace XeptGame.Game
         protected void Fail(string message, Exception exception)
         {
             Game.LastError = exception;
-            Game.EventBus.Publish(new GameFlowErrorEvent($"[GameplayFSM] {message}", exception));
+            Game.EventBus.Publish(new GameFlowErrorEvent($"[GameFSM] {message}", exception));
         }
     }
 }

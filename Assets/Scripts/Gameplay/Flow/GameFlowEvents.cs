@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using XeptKit.FSM;
 
 namespace XeptGame.Game
@@ -26,7 +26,7 @@ namespace XeptGame.Game
 
     /// <summary>
     /// 游戏流程错误事件（GameplayFlow_Design.md §3.2）：由失败状态（如 Loading）发布到 EventBus。
-    /// AppFSM 侧订阅 → 写 AppContext.LastError + 转 ErrorState（AppFSM 不管理 GameplayFSM 生命周期，
+    /// AppFSM 侧订阅 → 写 AppContext.LastError + 转 ErrorState（AppFSM 不管理 GameFSM 生命周期，
     /// 但**接收死亡信号**）。
     /// </summary>
     public readonly struct GameFlowErrorEvent

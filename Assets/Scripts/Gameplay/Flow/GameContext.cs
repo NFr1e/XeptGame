@@ -8,7 +8,7 @@ using XeptKit.Scenes;
 namespace XeptGame.Game
 {
     /// <summary>
-    /// GameplayFSM 类型化上下文（纯 C# 会话数据，GameplayFlow_Design.md §3.1）：
+    /// GameFSM 类型化上下文（纯 C# 会话数据，GameplayFlow_Design.md §3.1）：
     /// 依据 XeptKit.FSM 约定——状态实例按类型缓存复用、不能构造注入，会话数据必须经 Context 读写。
     /// **域隔离**：EventBus 为本域自建（与 App 域隔离，生命周期归 GameplayManager——Shutdown 时 Clear）；
     /// 跨域事件（错误上报）由 GameplayManager 显式桥接。
@@ -38,9 +38,9 @@ namespace XeptGame.Game
         public IAssetLoader AssetLoader { get; }
 
         /// <summary>
-        /// 生命周期桥接（GameplayEntry 生命周期驱动器，GameplayLoadState 初始化；GameplayUnloadState 卸载）。
+        /// 生命周期桥接（GameplaySessionEntry 生命周期驱动器，GameplayLoadState 初始化；GameplayUnloadState 卸载）。
         /// </summary>
-        public GameplayLifecycleBridge LifecycleBridge { get; set; }
+        public GameplaySessionLifecycleBridge LifecycleBridge { get; set; }
 
         /// <summary>
         /// 当前关卡组（GameLoadingManager 从启动请求写入；null = 已在关卡中/无关卡组，LevelLoad 跳过）。

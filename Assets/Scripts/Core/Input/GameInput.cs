@@ -183,6 +183,15 @@ namespace XeptGame.Core.Input
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PutAway"",
+                    ""type"": ""Button"",
+                    ""id"": ""94af5a75-4d8f-41e9-8078-94b13e4c46c3"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -438,6 +447,17 @@ namespace XeptGame.Core.Input
                     ""action"": ""InteractSecondary"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a24ee0a9-2ec0-42e6-a1e6-18bfa6fbefe2"",
+                    ""path"": ""<Keyboard>/g"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PutAway"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -523,6 +543,7 @@ namespace XeptGame.Core.Input
             m_Gameplay_Reload = m_Gameplay.FindAction("Reload", throwIfNotFound: true);
             m_Gameplay_Interact = m_Gameplay.FindAction("Interact", throwIfNotFound: true);
             m_Gameplay_InteractSecondary = m_Gameplay.FindAction("InteractSecondary", throwIfNotFound: true);
+            m_Gameplay_PutAway = m_Gameplay.FindAction("PutAway", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
@@ -617,6 +638,7 @@ namespace XeptGame.Core.Input
         private readonly InputAction m_Gameplay_Reload;
         private readonly InputAction m_Gameplay_Interact;
         private readonly InputAction m_Gameplay_InteractSecondary;
+        private readonly InputAction m_Gameplay_PutAway;
         /// <summary>
         /// Provides access to input actions defined in input action map "Gameplay".
         /// </summary>
@@ -668,6 +690,10 @@ namespace XeptGame.Core.Input
             /// Provides access to the underlying input action "Gameplay/InteractSecondary".
             /// </summary>
             public InputAction @InteractSecondary => m_Wrapper.m_Gameplay_InteractSecondary;
+            /// <summary>
+            /// Provides access to the underlying input action "Gameplay/PutAway".
+            /// </summary>
+            public InputAction @PutAway => m_Wrapper.m_Gameplay_PutAway;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -724,6 +750,9 @@ namespace XeptGame.Core.Input
                 @InteractSecondary.started += instance.OnInteractSecondary;
                 @InteractSecondary.performed += instance.OnInteractSecondary;
                 @InteractSecondary.canceled += instance.OnInteractSecondary;
+                @PutAway.started += instance.OnPutAway;
+                @PutAway.performed += instance.OnPutAway;
+                @PutAway.canceled += instance.OnPutAway;
             }
 
             /// <summary>
@@ -765,6 +794,9 @@ namespace XeptGame.Core.Input
                 @InteractSecondary.started -= instance.OnInteractSecondary;
                 @InteractSecondary.performed -= instance.OnInteractSecondary;
                 @InteractSecondary.canceled -= instance.OnInteractSecondary;
+                @PutAway.started -= instance.OnPutAway;
+                @PutAway.performed -= instance.OnPutAway;
+                @PutAway.canceled -= instance.OnPutAway;
             }
 
             /// <summary>
@@ -997,6 +1029,13 @@ namespace XeptGame.Core.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnInteractSecondary(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "PutAway" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnPutAway(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

@@ -6,8 +6,8 @@ using XeptKit.FSM;
 namespace XeptGame.Game
 {
     /// <summary>
-    /// 游戏流程门面（纯 C#，镜像 AppManager）：持有 GameplayFSM，提供启动、状态事件发布与**跨域桥接**。
-    /// 职责边界（GameplayFlow_Design.md §2.1）：状态语义在 GameplayFSM；加载编排在 GameLoadingManager；
+    /// 游戏流程门面（纯 C#，镜像 AppManager）：持有 GameFSM，提供启动、状态事件发布与**跨域桥接**。
+    /// 职责边界（GameplayFlow_Design.md §2.1）：状态语义在 GameFSM；加载编排在 GameLoadingManager；
     /// AppFSM 不管理本机生命周期（仅 StartingState 拉起，fire-and-forget；错误时由 ErrorState 收尾 Shutdown）。
     /// 装配器等场景侧经 EventBus 订阅 <see cref="GameStateChangedEvent"/>，**不持本类实例**。
     /// </summary>
@@ -19,6 +19,9 @@ namespace XeptGame.Game
         /// <summary>游戏流程上下文（会话数据唯一载体；Gameplay 域总线生命周期归本类）。</summary>
         public static GameContext Context { get; private set; }
 
+        /// <summary>语义查询（域内收口状态类）：流程是否处于玩法游玩态——供内层取现值，不暴露具体状态类。</summary>
+        public static bool IsPlaying => GameFSM != null && GameFSM.CurrentStateType == typeof(PlayingState);
+
         /// <summary>
         /// 本机生命周期令牌源（linked 到 <see cref="KitLifecycle.GlobalToken"/>）：
         /// 编排器 <see cref="GameLoadingManager.RunAsync"/> 绑定本令牌而非裸 GlobalToken——
@@ -28,7 +31,7 @@ namespace XeptGame.Game
         private static CancellationTokenSource _lifecycleCts;
 
         /// <summary>
-        /// 启动游戏流程：创建 GameplayFSM、订阅状态可观测日志与事件发布、建立跨域桥接，
+        /// 启动游戏流程：创建 GameFSM、订阅状态可观测日志与事件发布、建立跨域桥接，
         /// 进入 BootState（停驻）并启动加载编排（<see cref="GameLoadingManager.RunAsync"/>，fire-and-forget）。
         /// 由 AppFSM.StartingState 调用（fire-and-forget）；幂等（已启动则忽略）。
         /// </summary>

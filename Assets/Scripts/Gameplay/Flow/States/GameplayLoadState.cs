@@ -2,8 +2,6 @@ using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-using XeptKit.Core;
-using XeptKit.Scenes;
 using XeptGame.Core;
 using XeptGame.Game.Flow;
 
@@ -20,12 +18,14 @@ namespace XeptGame.Game
     {
         public override UniTask InitAsync(CancellationToken cancellationToken = default)
         {
-            Game.LifecycleBridge = new GameObject("[GameplayLifecycleBridge]")
+            Game.LifecycleBridge = new GameObject("[GameplaySessionLifecycleBridge]")
             {
                 hideFlags = HideFlags.NotEditable
             }
-            .AddComponent<GameplayLifecycleBridge>()
-            .Bind(GameplayEntry.Instantiate());
+            .AddComponent<GameplaySessionLifecycleBridge>()
+            .Bind(GameplaySessionEntry
+                .Instantiate()
+                .Init());
 
             return UniTask.CompletedTask;
         }

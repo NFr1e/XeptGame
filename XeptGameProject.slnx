@@ -1,0 +1,24 @@
+﻿<Solution>
+  <Project Path="KinematicCharacterController.csproj" />
+  <Project Path="XeptKit.csproj" />
+  <Project Path="UniTask.csproj" />
+  <Project Path="XeptGame.csproj" />
+  <Project Path="UniTask.Linq.csproj" />
+  <Project Path="XeptKit.Tests.csproj" />
+  <Project Path="LeTai.TrueShadow.Demo.csproj" />
+  <Project Path="LeTai.TrueShadow.csproj" />
+  <Project Path="LeTai.Common.csproj" />
+  <Project Path="XeptKit.Editor.csproj" />
+  <Project Path="UniTask.Addressables.csproj" />
+  <Project Path="DOTween.Modules.csproj" />
+  <Project Path="LeTai.TrueShadow.Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="UniTask.TextMeshPro.csproj" />
+  <Project Path="XeptGame.Tests.csproj" />
+  <Project Path="LeTai.Common.Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
+  <Project Path="UniTask.Editor.csproj" />
+  <Project Path="Sirenix.OdinInspector.Modules.UnityMathematics.csproj" />
+  <Project Path="UniTask.DOTween.csproj" />
+  <Project Path="XeptGame.Editor.csproj" />
+</Solution>

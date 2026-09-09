@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using XeptKit.Core;
+using XeptKit.Event;
 using XeptGame.Items;
 
 namespace XeptGame.Inv
@@ -12,17 +13,23 @@ namespace XeptGame.Inv
     /// 无槽位、无总容量、无堆叠上限（E1/E2 决策——迟到清单见 ItemLoop_Design.md §6）；</item>
     /// <item><b>TryRemove 原子</b>："有就扣"是弹药消耗/丢弃/未来合成消耗的公共语义，不足时返回 false 且不改动；</item>
     /// <item><b>状态变更细粒度推送</b>：<see cref="Changed"/> 每单条变更发一次（负载含前后数量，NewCount=0 = 行移除）；
-    /// 一次性播报（拾取提示浮字）是事件非状态，走 Gameplay 域 EventBus，不经本类（两轨分离，§4.3）；</item>
+    /// 一次性播报（拾取提示浮字）是事件非状态，走 GameplaySession 会话域 EventBus，不经本类（两轨分离，§4.3）；</item>
     /// <item>零场景依赖（唯一引擎耦合 = Definition 的 SO 引用）→ XeptGame.Tests EditMode 可单测。</item>
     /// </list>
-    /// 宿主：由 GameplaySession 持有（一轮游戏会话生命周期，ItemLoop_Design.md §2.4）。
+    /// 宿主：由 GameplaySessionContext 持有（一轮域根，GameplaySession_Domain_Design.md）。
     /// </summary>
     public sealed class Inventory : IItemContainer
     {
         private readonly List<ItemStack> _slots = new();
 
-        /// <summary>变更事件：每次实际变更推送一条（负载含 OldCount/NewCount）。</summary>
-        public event Action<InventoryChangeArgs> Changed;
+        /// <summary>变更事件（SafeEvent：异常隔离 + 订阅去重）：每次实际变更推送一条（负载含 OldCount/NewCount）。</summary>
+        private readonly SafeEvent<InventoryChangeArgs> _changed = new();
+
+        public event Action<InventoryChangeArgs> Changed
+        {
+            add => _changed.Add(value);
+            remove => _changed.Remove(value);
+        }
 
         /// <summary>当前内容（稳定顺序：首次加入序；同定义合并不移动）。</summary>
         public IReadOnlyList<ItemStack> Slots => _slots;
@@ -52,12 +59,12 @@ namespace XeptGame.Inv
             {
                 var old = slot.Count;
                 slot.Count += count;
-                Changed?.Invoke(new InventoryChangeArgs(definition, old, slot.Count));
+                _changed.Invoke(new InventoryChangeArgs(definition, old, slot.Count));
                 return;
             }
 
             _slots.Add(new ItemStack(definition, count));
-            Changed?.Invoke(new InventoryChangeArgs(definition, 0, count));
+            _changed.Invoke(new InventoryChangeArgs(definition, 0, count));
         }
 
         /// <summary>
@@ -80,12 +87,12 @@ namespace XeptGame.Inv
             if (remaining == 0)
             {
                 _slots.Remove(slot);
-                Changed?.Invoke(new InventoryChangeArgs(definition, old, 0));
+                _changed.Invoke(new InventoryChangeArgs(definition, old, 0));
             }
             else
             {
                 slot.Count = remaining;
-                Changed?.Invoke(new InventoryChangeArgs(definition, old, remaining));
+                _changed.Invoke(new InventoryChangeArgs(definition, old, remaining));
             }
 
             return true;
@@ -98,7 +105,7 @@ namespace XeptGame.Inv
             {
                 var slot = _slots[i];
                 _slots.RemoveAt(i);
-                Changed?.Invoke(new InventoryChangeArgs(slot.Definition, slot.Count, 0));
+                _changed.Invoke(new InventoryChangeArgs(slot.Definition, slot.Count, 0));
             }
         }
 

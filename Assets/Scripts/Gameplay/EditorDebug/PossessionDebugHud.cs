@@ -12,8 +12,8 @@ namespace XeptGame.Game
     /// 显示一轮会话的<b>身体槽占用</b>（手槽等，遍历 <see cref="BodySlotType"/>——加槽自动显示）与
     /// <b>背包行快照</b>（定义 id × 数量），供拾取路由（tap 上手不収包）等运行验证。
     /// <list type="bullet">
-    /// <item>挂载：GameplayCore 的 Debug 组（场景中默认失活，验证时开启）；F9 开关显示；</item>
-    /// <item>数据源：GameplayEntry.Instance.Session 的两容器（状态轴只读，不写、不发命令）；</item>
+    /// <item>挂载：GameplayCore 的 Debug 组；当前样例启用，F9 开关显示；</item>
+    /// <item>数据源：GameplaySessionEntry.Instance.Context 的数据与服务（状态轴只读，不写、不发命令）；</item>
     /// <item>每帧直读（调试工具，量小；无状态轨缓存逻辑——天然随拾取/换手/收起实时）；</item>
     /// <item>会话未初始化时显示占位提示（不 disable：模块可能先于会话建立激活，OnGUI 每帧重试）。</item>
     /// </list>
@@ -44,19 +44,27 @@ namespace XeptGame.Game
                 return;
             }
 
-            // 面板置于 (10,120)：避开左上角 MotorDebugHud（(10,10)）的 3C 面板
-            GUILayout.BeginArea(new Rect(10f, 120f, 430f, 340f), GUI.skin.box);
+            // MotorDebugHud 高 260：装备面板放在其下，避免状态与操作行叠在一起。
+            GUILayout.BeginArea(new Rect(10f, 280f, 460f, 380f), GUI.skin.box);
             GUILayout.Label("[Possession Debug]  F9 开关");
 
-            if (!GameplayEntry.TryGetInstance(out var entry))
+            if (!GameplaySessionEntry.TryGetInstance(out var entry))
             {
-                GUILayout.Label("一轮会话未初始化（GameplayEntry 未建立）");
+                GUILayout.Label("一轮会话未初始化（GameplaySessionEntry 未建立）");
                 GUILayout.EndArea();
                 return;
             }
 
-            var bag = entry.Session.Inventory;
-            var body = entry.Session.Equipment;
+            var bag = entry.Context.Inventory;
+            var body = entry.Context.Equipment;
+            var equip = entry.Context.EquipBehaviour.Snapshot;
+            GUILayout.Label($"行为：{equip.Phase}  动作：{equip.ActionId}  占用版本：{equip.OccupancyVersion}");
+            GUILayout.Label($"进度：{equip.Progress:P0}  暂停：{equip.Paused}");
+            var operation = entry.Context.Operations.Current ?? entry.Context.Operations.LastResult;
+            if (operation != null)
+            {
+                GUILayout.Label($"操作：{operation.Id} {operation.Status} {operation.Reason}");
+            }
 
             GUILayout.Label("-- 身体槽（装备） --");
             foreach (var slot in BodySlots)

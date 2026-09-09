@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using XeptGame.Inv;
 using XeptGame.Items;
 using XeptKit.Core;
+using XeptKit.Event;
 
 namespace XeptGame.Equip
 {
@@ -26,11 +27,23 @@ namespace XeptGame.Equip
         private readonly Dictionary<BodySlotType, ISlot> _slots;
         private readonly Dictionary<BodySlotType, ItemDefinition> _occupancy;
 
-        /// <summary>槽位占用变化（按槽键控；New = null = 槽空）。</summary>
-        public event Action<SlotChangeArgs> SlotChanged;
+        /// <summary>槽位占用变化（按槽键控；New = null = 槽空；SafeEvent：异常隔离 + 订阅去重）。</summary>
+        private readonly SafeEvent<SlotChangeArgs> _slotChanged = new();
 
-        /// <summary>容器级状态轨（IItemContainer；与 SlotChanged 同源双发，负载 = 单位 0↔1）。</summary>
-        public event Action<InventoryChangeArgs> Changed;
+        public event Action<SlotChangeArgs> SlotChanged
+        {
+            add => _slotChanged.Add(value);
+            remove => _slotChanged.Remove(value);
+        }
+
+        /// <summary>容器级状态轨（IItemContainer；与 SlotChanged 同源双发，负载 = 单位 0↔1；SafeEvent）。</summary>
+        private readonly SafeEvent<InventoryChangeArgs> _changed = new();
+
+        public event Action<InventoryChangeArgs> Changed
+        {
+            add => _changed.Add(value);
+            remove => _changed.Remove(value);
+        }
 
         public Equipment(IReadOnlyList<ISlot> slots)
         {
@@ -159,12 +172,12 @@ namespace XeptGame.Equip
 
         private void RaiseChanged(BodySlotType slot, ItemDefinition oldItem, ItemDefinition newItem)
         {
-            SlotChanged?.Invoke(new SlotChangeArgs(slot, oldItem, newItem));
+            _slotChanged.Invoke(new SlotChangeArgs(slot, oldItem, newItem));
             // 容器级负载：占用单位 0↔1（New=0 = 移除语义）
             var item = newItem ?? oldItem;
             if (item != null)
             {
-                Changed?.Invoke(new InventoryChangeArgs(item, oldItem != null ? 1 : 0, newItem != null ? 1 : 0));
+                _changed.Invoke(new InventoryChangeArgs(item, oldItem != null ? 1 : 0, newItem != null ? 1 : 0));
             }
         }
     }

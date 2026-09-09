@@ -21,6 +21,12 @@ namespace XeptGame.Items
 
         [Tooltip("手里的视觉模型；为空时回退世界模型（FPV 阶段实现回退策略）")]
         public GameObject viewPrefab;
+
+        [Tooltip("拿放时长参数（随本握持配置共享，供物品差异调参；全 0 = 未配置 → 读取时回退默认）")]
+        public EquipTiming timing;
+
+        /// <summary>解析后的拿放时长：未配置（全 0 / 旧资产反序列化）时回退 <see cref="EquipTiming.Default"/>；行为只收解析后的值。</summary>
+        public EquipTiming ResolvedTiming => timing.IsSet ? timing : EquipTiming.Default;
     }
 
     /// <summary>

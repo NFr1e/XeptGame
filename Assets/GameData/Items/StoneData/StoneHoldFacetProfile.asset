@@ -13,4 +13,7 @@ MonoBehaviour:
   m_Name: StoneHoldFacetProfile
   m_EditorClassIdentifier: 
   category: 1
-  viewPrefab: {fileID: 0}
+  viewPrefab: {fileID: 263321515033724565, guid: e8999bae5ef599b48842f159816648f1, type: 3}
+  timing:
+    drawSeconds: 0.3
+    stowSeconds: 0.2

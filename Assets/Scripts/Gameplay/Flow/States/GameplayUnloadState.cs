@@ -11,7 +11,7 @@ namespace XeptGame.Game
         public override UniTask InitAsync(CancellationToken cancellationToken = default)
         {
             Game.LifecycleBridge.gameObject.Destroy();
-            GameplayEntry.Instance?.Dispose();
+            GameplaySessionEntry.Instance?.Dispose();
 
             return UniTask.CompletedTask;
         }

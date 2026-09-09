@@ -39,7 +39,10 @@ namespace XeptGame.Inv
             }
 
             // 目标拒绝 → 回滚：原样退回源（v1 容器全量语义下必然成功）
-            source.TryAdd(definition, count);
+            if (!source.TryAdd(definition, count))
+            {
+                throw new System.InvalidOperationException("容器转移回滚失败，必须停止后续操作并检查占用事实。");
+            }
             return false;
         }
     }

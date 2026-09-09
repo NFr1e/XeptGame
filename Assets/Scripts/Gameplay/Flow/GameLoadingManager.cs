@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using XeptKit.Core;
@@ -8,7 +8,7 @@ namespace XeptGame.Game
 {
     /// <summary>
     /// 游戏加载编排器（纯 C#，GameplayFlow_Design.md §4）：**读门控、推进状态**——
-    /// 状态类（执行器）负责加载/初始化并置位完成门，本管理器统一消费门控驱动 GameplayFSM 转移。
+    /// 状态类（执行器）负责加载/初始化并置位完成门，本管理器统一消费门控驱动 GameFSM 转移。
     /// 门控仅覆盖确定性事项（基座组/关卡组加载完成）；业务模块自生命周期初始化、不进加载门控。
     /// </summary>
     public static class GameLoadingManager
