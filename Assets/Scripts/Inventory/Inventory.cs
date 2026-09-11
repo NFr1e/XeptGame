@@ -1,136 +1,66 @@
 using System;
-using System.Collections.Generic;
-using XeptKit.Core;
-using XeptKit.Event;
+using XeptGame.Container;
+using XeptGame.Core;
 using XeptGame.Items;
 
 namespace XeptGame.Inv
 {
     /// <summary>
-    /// 背包容器（纯 C#，ItemLoop_Design.md §4）：只回答"我有什么、各多少、增删查"。
+    /// 背包容器（SlotStore_Design.md §1/§6）＝槽容器 <see cref="SlotStore"/> 的<b>背包域特化</b>。
     /// <list type="bullet">
-    /// <item><b>列表背包 = 聚合计数</b>：稳定顺序（首次加入序，UI 按序渲染）列表，同定义合并就地；
-    /// 无槽位、无总容量、无堆叠上限（E1/E2 决策——迟到清单见 ItemLoop_Design.md §6）；</item>
-    /// <item><b>TryRemove 原子</b>："有就扣"是弹药消耗/丢弃/未来合成消耗的公共语义，不足时返回 false 且不改动；</item>
-    /// <item><b>状态变更细粒度推送</b>：<see cref="Changed"/> 每单条变更发一次（负载含前后数量，NewCount=0 = 行移除）；
-    /// 一次性播报（拾取提示浮字）是事件非状态，走 GameplaySession 会话域 EventBus，不经本类（两轨分离，§4.3）；</item>
-    /// <item>零场景依赖（唯一引擎耦合 = Definition 的 SO 引用）→ XeptGame.Tests EditMode 可单测。</item>
+    /// <item><b>兼两副面孔</b>：物品面 = <see cref="SlotContainer.Stacks"/>（聚合行，给编排器/世界/调试）；
+    /// 槽位面 = <see cref="SlotContainer.Slots"/>、<see cref="SlotContainer.TryPlaceAt"/>、
+    /// <see cref="SlotStore.TryCompact"/>、<see cref="SlotStore.ApplyCapacity"/>（给背包界面与归位）；</item>
+    /// <item><b>容量 = 基础格数 + 扩容者加成</b>：基础来自 <see cref="InventoryProfile"/>（缺省用常量），
+    /// 扩容者经 <see cref="SetCapacitySource"/> / <see cref="RemoveCapacitySource"/> 以<b>槽位为键</b>登记；
+    /// 合成在 <see cref="ContainerCapacity"/>，应用走 <c>ApplyCapacity</c> 既有路径（尾部增删 + 压缩/丢弃）；</item>
+    /// <item><b>无自有状态</b>：占用事实全在格子里；命名收口随之落地——<c>Stacks</c> 归物品聚合、<c>Slots</c> 归槽位；</item>
+    /// <item><b>物品面零改动</b>：<c>IItemContainer</c> 端口的聚合语义与事件形状保持（编排器/世界/测试不受影响）。</item>
+    /// <item><b>容量入口纪律</b>：域侧改容量一律走 <see cref="SetCapacitySource"/> / <see cref="RemoveCapacitySource"/>
+    /// （或构造时给 profile）；继承来的 <c>SlotStore.ApplyCapacity</c> 是低层"应用到指定格数"的机制口，
+    /// 直接调用会让实际格数与合成值脱钩（仅机制/测试使用）。</item>
     /// </list>
-    /// 宿主：由 GameplaySessionContext 持有（一轮域根，GameplaySession_Domain_Design.md）。
     /// </summary>
-    public sealed class Inventory : IItemContainer
+    public sealed class Inventory : SlotStore, IItemContainer
     {
-        private readonly List<ItemStack> _slots = new();
+        /// <summary>容量合成（基础 + 各扩容来源）；解析值变化时自动应用到本容器。</summary>
+        private readonly ContainerCapacity _capacity;
 
-        /// <summary>变更事件（SafeEvent：异常隔离 + 订阅去重）：每次实际变更推送一条（负载含 OldCount/NewCount）。</summary>
-        private readonly SafeEvent<InventoryChangeArgs> _changed = new();
-
-        public event Action<InventoryChangeArgs> Changed
+        public Inventory(int capacity = XeptGameConsts.Inventory.DefaultCapacity,
+                         Action<ItemDefinition, int> discardSink = null)
+            : base(capacity, discardSink)
         {
-            add => _changed.Add(value);
-            remove => _changed.Remove(value);
+            _capacity = new ContainerCapacity(capacity);
+            _capacity.Changed += OnCapacityResolved;
         }
 
-        /// <summary>当前内容（稳定顺序：首次加入序；同定义合并不移动）。</summary>
-        public IReadOnlyList<ItemStack> Slots => _slots;
-
-        /// <summary>查询某定义的总数量（无 = 0）。</summary>
-        public int CountOf(ItemDefinition definition)
+        /// <summary>按背包侧配置装配（<paramref name="profile"/> 为 null = 用常量默认），窗口给显式装配点。</summary>
+        public Inventory(InventoryProfile profile, Action<ItemDefinition, int> discardSink = null)
+            : this(profile != null ? profile.ResolvedBaseSlots : XeptGameConsts.Inventory.DefaultCapacity, discardSink)
         {
-            Guard.NotNullObject(definition, nameof(definition));
-            var slot = FindSlot(definition);
-            return slot?.Count ?? 0;
         }
 
-        /// <summary>是否持有某定义（数量 &gt; 0）。</summary>
-        public bool Contains(ItemDefinition definition) => CountOf(definition) > 0;
+        /// <summary>当前登记的容量来源数量（装备式扩容者数量）。</summary>
+        public int CapacitySourceCount => _capacity.SourceCount;
 
         /// <summary>
-        /// 添加物品：同定义已存在 → 合并就地；否则按加入序追加新行。
-        /// 每次实际变化推送一条 <see cref="Changed"/>。
+        /// 应用背包侧配置（<b>幂等</b>）：把 <see cref="InventoryProfile.ResolvedBaseSlots"/> 作为容量基准；
+        /// <paramref name="profile"/> 为 null 时回退常量默认。容量变化走既有扩缩容路径（尾部追加 / 压缩 + 溢出丢弃）。
+        /// 装配点（<c>InventoryCapacityModule</c>）在会话建立后调用——会话创建早于基座场景加载，故为后置注入；
+        /// 重复调用安全（同值不动作）。
         /// </summary>
-        public void Add(ItemDefinition definition, int count)
-        {
-            Guard.NotNullObject(definition, nameof(definition));
-            Guard.True(count > 0, "添加数量必须为正。");
-
-            var slot = FindSlot(definition);
-            if (slot != null)
-            {
-                var old = slot.Count;
-                slot.Count += count;
-                _changed.Invoke(new InventoryChangeArgs(definition, old, slot.Count));
-                return;
-            }
-
-            _slots.Add(new ItemStack(definition, count));
-            _changed.Invoke(new InventoryChangeArgs(definition, 0, count));
-        }
+        public bool ApplyProfile(InventoryProfile profile)
+            => _capacity.SetBaseSlots(profile != null ? profile.ResolvedBaseSlots : XeptGameConsts.Inventory.DefaultCapacity);
 
         /// <summary>
-        /// 尝试移除指定数量（原子）：存在且数量足够 → 扣减（扣至 0 移除该行）并返回 true；
-        /// 否则返回 false 且**不做任何改动**、不推送事件。
+        /// 登记/更新一个扩容来源（<b>键 = 所在槽位</b>，见 <see cref="ContainerCapacity"/>；重复键覆盖更新）；
+        /// 解析格数变化时自动应用（扩容追加空格 / 缩容压缩 + 溢出丢弃）。
         /// </summary>
-        public bool TryRemove(ItemDefinition definition, int count)
-        {
-            Guard.NotNullObject(definition, nameof(definition));
-            Guard.True(count > 0, "移除数量必须为正。");
+        public bool SetCapacitySource(object key, int addedSlots) => _capacity.SetSource(key, addedSlots);
 
-            var slot = FindSlot(definition);
-            if (slot == null || slot.Count < count)
-            {
-                return false;
-            }
+        /// <summary>移除一个扩容来源（卸载扩容者 → 自动缩容，溢出按丢弃出口处理）。</summary>
+        public bool RemoveCapacitySource(object key) => _capacity.RemoveSource(key);
 
-            var old = slot.Count;
-            var remaining = old - count;
-            if (remaining == 0)
-            {
-                _slots.Remove(slot);
-                _changed.Invoke(new InventoryChangeArgs(definition, old, 0));
-            }
-            else
-            {
-                slot.Count = remaining;
-                _changed.Invoke(new InventoryChangeArgs(definition, old, remaining));
-            }
-
-            return true;
-        }
-
-        /// <summary>清空：逐行移除并推送（每行一条，NewCount = 0）。</summary>
-        public void Clear()
-        {
-            for (int i = _slots.Count - 1; i >= 0; i--)
-            {
-                var slot = _slots[i];
-                _slots.RemoveAt(i);
-                _changed.Invoke(new InventoryChangeArgs(slot.Definition, slot.Count, 0));
-            }
-        }
-
-        private ItemStack FindSlot(ItemDefinition definition)
-        {
-            for (int i = 0; i < _slots.Count; i++)
-            {
-                if (ReferenceEquals(_slots[i].Definition, definition))
-                {
-                    return _slots[i];
-                }
-            }
-
-            return null;
-        }
-
-        // ---- IItemContainer 端口实现（Equip_FPV_Design.md §3.1，T1）：语义零改动 ----
-        // Stacks = Slots 同源（显式实现，不扩充既有公开 API）；TryAdd = Add 的端口形态（行容器恒成功）。
-
-        IReadOnlyList<ItemStack> IItemContainer.Stacks => _slots;
-
-        bool IItemContainer.TryAdd(ItemDefinition definition, int count)
-        {
-            Add(definition, count);
-            return true;
-        }
+        private void OnCapacityResolved(int resolved) => ApplyCapacity(resolved);
     }
 }

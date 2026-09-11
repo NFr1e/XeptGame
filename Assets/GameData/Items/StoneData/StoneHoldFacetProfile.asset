@@ -9,11 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 564b4cea7db46b64d93d27d112bf1e2d, type: 3}
+  m_Script: {fileID: 11500000, guid: 028656bed0401a545878b005c9b9fe15, type: 3}
   m_Name: StoneHoldFacetProfile
   m_EditorClassIdentifier: 
   category: 1
   viewPrefab: {fileID: 263321515033724565, guid: e8999bae5ef599b48842f159816648f1, type: 3}
   timing:
-    drawSeconds: 0.3
-    stowSeconds: 0.2
+    drawSeconds: 0.4
+    stowSeconds: 0.3

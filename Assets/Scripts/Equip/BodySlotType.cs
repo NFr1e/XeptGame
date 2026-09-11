@@ -3,7 +3,8 @@ namespace XeptGame.Equip
     /// <summary>
     /// 身体槽位标识（一等值，Equip_FPV_Design.md §2.2/§3.2）——v1 唯一成员 = 手部槽；
     /// 甲/背 ⏳ 追加成员 = 扩展（纯新增，消费方合同零改动）。
-    /// 槽的"能放什么"由对应 <c>ISlot</c> 接纳谓词回答（见 <see cref="ISlot"/>）。
+    /// <b>本枚举是身体槽的身份词表</b>：其值即通用槽身份 <c>XeptGame.Container.SlotId</c>；
+    /// 槽的"能放什么/能放多少"由对应槽实现（<c>SlotBase</c> 子类）的接纳谓词与每格上限回答。
     /// </summary>
     public enum BodySlotType
     {

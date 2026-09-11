@@ -27,6 +27,7 @@ namespace XeptGame.World.Interactables
         private void Awake()
         {
             _source = new WorldItemContainer(definition, Mathf.Max(0, pickupCount), () => this != null && isActiveAndEnabled, RefreshView);
+
             _actions.Add(new PickupAction(this, PickupIntent.Tap, InputSlot.Primary, "拾取"));
             _actions.Add(new PickupAction(this, PickupIntent.ForceHold, InputSlot.Hold, "拿取"));
         }

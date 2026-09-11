@@ -1,4 +1,5 @@
 using System;
+using XeptGame.Container;
 using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptKit.Event;
@@ -47,6 +48,13 @@ namespace XeptGame.Items.Operations
         private bool _faulted;
         private bool _externalChange;
         private readonly Func<ItemDefinition, EquipTiming> _timingResolver;
+
+        /// <summary>
+        /// 归位提示（SlotStore_Design.md §6）：装备时"被整格取空"的那个槽，收起时优先放回它。
+        /// 只在"收起目标 = 提示容器"时生效、用后即清；外部改动或会话结束即失效。
+        /// 属"来源/去向"知识 → 归本层（EB 纪律：装备行为不认识来源与去向）。
+        /// </summary>
+        private (SlotContainer Store, SlotId Cell)? _returnHint;
 
         /// <summary>终局通知（SafeEvent 对象事件原语：异常隔离 + 订阅去重——替代 EventBus 的错配用法）。</summary>
         private readonly SafeEvent<OperationReceipt> _operationFinished = new();
@@ -238,6 +246,7 @@ namespace XeptGame.Items.Operations
                 if (_externalChange || !ReferenceEquals(_body.Get(BodySlotType.Hand), _behavior.Snapshot.Item))
                 {
                     _externalChange = false;
+                    _returnHint = null; // 外部改动 → 归位提示失效
                     Sync();
                     if (_active != null)
                     {
@@ -284,8 +293,7 @@ namespace XeptGame.Items.Operations
                         return;
                     }
 
-                    var held = _body.Get(BodySlotType.Hand);
-                    if (!Move(_body, operation.Destination, held, 1))
+                    if (!StowHeld(operation))
                     {
                         Finish(OperationStatus.Failed, "DestinationRejected");
                         return;
@@ -312,12 +320,14 @@ namespace XeptGame.Items.Operations
                     int remaining = operation.Count;
                     if (operation.Equip)
                     {
+                        var hint = FindCellToEmpty(operation.Source, operation.Item, 1);
                         if (!_body.IsEmpty(BodySlotType.Hand) || !Move(operation.Source, _body, operation.Item, 1))
                         {
                             Finish(OperationStatus.Failed, "HandRejected");
                             return;
                         }
 
+                        _returnHint = hint; // 归位提示：仅"整格取出"有意义（同类堆叠不记）
                         if (operation.Pickup)
                         {
                             operation.Receipt.AcquiredCount++;
@@ -389,7 +399,57 @@ namespace XeptGame.Items.Operations
             _behavior.ReconcileOccupancy(item, ++_version, _timingResolver(item));
         }
 
-        /// <summary>默认时长解析：读物品能力面配置（HoldableFacet → HoldProfile.ResolvedTiming）；无配置回退默认。测试可注入恒值。</summary>
+        /// <summary>
+        /// 收起手槽物品：优先"归位"到装备时的原格（尽力而为），失败落回常规分配（SlotStore_Design.md §6）。
+        /// </summary>
+        private bool StowHeld(Operation operation)
+        {
+            var held = _body.Get(BodySlotType.Hand);
+            var hint = _returnHint;
+            _returnHint = null; // 提示一次性：无论成功与否都消费掉
+
+            if (hint is { } target && ReferenceEquals(target.Store, operation.Destination)
+                && ContainerTransfer.MoveAt(_body, target.Store, held, 1, target.Cell))
+            {
+                return true;
+            }
+
+            return Move(_body, operation.Destination, held, 1);
+        }
+
+        /// <summary>
+        /// 归位提示取值：源容器中"恰好一格、且本次取走会清空它"的槽。
+        /// 多候选（同类多格）或源不是槽容器（世界堆/行容器）→ 不记提示：同类物品的位置本无意义，并入才是正确行为。
+        /// </summary>
+        private static (SlotContainer Store, SlotId Cell)? FindCellToEmpty(IItemContainer source, ItemDefinition item, int count)
+        {
+            var store = source as SlotContainer;
+            if (store == null)
+            {
+                return null;
+            }
+
+            SlotId? found = null;
+            for (int i = 0; i < store.Slots.Count; i++)
+            {
+                var slot = store.Slots[i];
+                if (!ReferenceEquals(slot.Item, item) || slot.Count != count)
+                {
+                    continue;
+                }
+
+                if (found != null)
+                {
+                    return null; // 多个候选：位置无意义
+                }
+
+                found = slot.Id;
+            }
+
+            return found.HasValue ? (store, found.Value) : ((SlotContainer, SlotId)?)null;
+        }
+
+        /// <summary>默认时长解析：读物品能力面配置（HoldableFacet → HoldableFacetProfile.ResolvedTiming）；无配置回退默认。测试可注入恒值。</summary>
         private static EquipTiming ResolveTimingFromContent(ItemDefinition item)
             => item?.GetFacet<HoldableFacet>()?.profile?.ResolvedTiming ?? EquipTiming.Default;
 
@@ -486,6 +546,7 @@ namespace XeptGame.Items.Operations
             try
             {
                 _body.SlotChanged -= OnSlotChanged;
+                _returnHint = null;
                 Finish(OperationStatus.Cancelled, "SessionEnded");
                 _operationFinished.Clear();
             }

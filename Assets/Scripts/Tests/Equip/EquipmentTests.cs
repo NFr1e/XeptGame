@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
+using XeptGame.Container;
 using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptGame.Items;
@@ -30,7 +31,7 @@ namespace XeptGame.Tests
             var body = NewBody();
             var a = NewDef("item.a", true);
             var slots = new List<SlotChangeArgs>();
-            var containerChanges = new List<InventoryChangeArgs>();
+            var containerChanges = new List<ContainerChangeArgs>();
             body.SlotChanged += slots.Add;
             body.Changed += containerChanges.Add;
 
@@ -45,9 +46,11 @@ namespace XeptGame.Tests
             Assert.IsTrue(body.Contains(a));
 
             Assert.AreEqual(1, slots.Count, "槽级事件一条（按槽键控）");
-            Assert.AreEqual(BodySlotType.Hand, slots[0].Slot);
+            Assert.AreEqual(new SlotId((int)BodySlotType.Hand), slots[0].Slot);
             Assert.IsNull(slots[0].Old);
+            Assert.AreEqual(0, slots[0].OldCount);
             Assert.AreSame(a, slots[0].New);
+            Assert.AreEqual(1, slots[0].NewCount, "槽级负载带数量（通用形态）");
 
             Assert.AreEqual(1, containerChanges.Count, "容器级事件同源双发（单位 0→1）");
             Assert.AreSame(a, containerChanges[0].Item);
@@ -101,7 +104,7 @@ namespace XeptGame.Tests
             var a = NewDef("item.a", true);
             body.TryAdd(a, 1);
             var slots = new List<SlotChangeArgs>();
-            var containerChanges = new List<InventoryChangeArgs>();
+            var containerChanges = new List<ContainerChangeArgs>();
             body.SlotChanged += slots.Add;
             body.Changed += containerChanges.Add;
 
@@ -114,7 +117,9 @@ namespace XeptGame.Tests
 
             Assert.AreEqual(1, slots.Count);
             Assert.AreSame(a, slots[0].Old);
+            Assert.AreEqual(1, slots[0].OldCount);
             Assert.IsNull(slots[0].New);
+            Assert.AreEqual(0, slots[0].NewCount);
 
             Assert.AreEqual(1, containerChanges.Count);
             Assert.AreEqual(1, containerChanges[0].OldCount);

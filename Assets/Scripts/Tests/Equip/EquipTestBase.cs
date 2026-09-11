@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using XeptGame.Container;
 using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptGame.Items;
@@ -42,7 +43,7 @@ namespace XeptGame.Tests
             return def;
         }
 
-        protected static Equipment NewBody() => new Equipment(new ISlot[] { new HandSlot() });
+        protected static Equipment NewBody() => new Equipment(new SlotBase[] { new HandSlot() });
 
         protected static Inventory NewBag() => new Inventory();
 

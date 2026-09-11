@@ -75,17 +75,26 @@ namespace XeptGame.Game
                     : $"槽 [{slot}]：{FormatId(def)}（1 单位）");
             }
 
-            GUILayout.Label("-- 背包 --");
-            if (bag.Slots.Count == 0)
+            var occupiedCells = 0;
+            for (int i = 0; i < bag.Slots.Count; i++)
+            {
+                if (!bag.Slots[i].IsEmpty)
+                {
+                    occupiedCells++;
+                }
+            }
+
+            GUILayout.Label($"-- 背包（{bag.Capacity} 格，占用 {occupiedCells} 格） --");
+            var stacks = bag.Stacks;
+            if (stacks.Count == 0)
             {
                 GUILayout.Label("(空)");
             }
             else
             {
-                for (int i = 0; i < bag.Slots.Count; i++)
+                for (int i = 0; i < stacks.Count; i++)
                 {
-                    var stack = bag.Slots[i];
-                    GUILayout.Label($"  {FormatId(stack.Definition)} × {stack.Count}");
+                    GUILayout.Label($"  {FormatId(stacks[i].Definition)} × {stacks[i].Count}");
                 }
             }
 

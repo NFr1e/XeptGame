@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b61950acfd8c4441b6cedfee02c97b0, type: 3}
+  m_Name: '#BandageItemDefinition'
+  m_EditorClassIdentifier: XeptGame::XeptGame.Items.ItemDefinition
+  id: item.bandage
+  iconKind: 1
+  iconSprite: {fileID: 21300000, guid: 9087183769e05814bb502406a80617a6, type: 3}
+  iconTexture: {fileID: 0}
+  facets:
+  - rid: 135043302236356693
+  - rid: 135043351233953871
+  - rid: 135043302236356694
+  references:
+    version: 2
+    RefIds:
+    - rid: 135043302236356693
+      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: bd93ff1ebd67a6044bb3f21f09193fd7, type: 2}
+    - rid: 135043302236356694
+      type: {class: ConsumableFacet, ns: XeptGame.Items, asm: XeptGame}
+      data: 
+    - rid: 135043351233953871
+      type: {class: InventoryFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 7d4d530578b460d43b2abcccfd5178cc, type: 2}

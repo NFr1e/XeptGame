@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
+using XeptGame.Container;
 using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptGame.Items;
@@ -45,7 +46,7 @@ namespace XeptGame.Tests
         public void Tap_手空_一手余数入包_完成不双播(int count)
         {
             var item = NewDef("stone", true);
-            var changes = new List<InventoryChangeArgs>();
+            var changes = new List<ContainerChangeArgs>();
             _bag.Changed += changes.Add;
             var receipt = Pickup(item, count);
             Assert.AreEqual(OperationStatus.Pending, receipt.Status);
@@ -130,7 +131,7 @@ namespace XeptGame.Tests
             Assert.IsFalse(_ops.RequestUnequip(_bag).Accepted);
             var item = NewDef("stone", true);
             Hold(item);
-            _bag.Add(item, 2);
+            _bag.TryAdd(item, 2);
             var receipt = _ops.RequestUnequip(_bag);
             Assert.AreEqual(2, _bag.CountOf(item));
             Assert.AreSame(item, _body.Get(BodySlotType.Hand));
@@ -233,7 +234,7 @@ namespace XeptGame.Tests
             var held = NewDef("held", true);
             Hold(held);
             var next = NewDef("next", true);
-            _bag.Add(next, 1);
+            _bag.TryAdd(next, 1);
             var receipt = _ops.RequestEquip(_bag, next, _bag);
             Assert.IsTrue(receipt.Accepted);
             _ops.Tick(1);
@@ -288,7 +289,7 @@ namespace XeptGame.Tests
             Hold(held);
             var next = NewDef("next", true);
             var source = NewBag();
-            source.Add(next, 1);
+            source.TryAdd(next, 1);
             var receipt = _ops.RequestEquip(source, next, _bag);
             _bag.Changed += _ => source.TryRemove(next, 1);
             _ops.Tick(1);
@@ -296,6 +297,106 @@ namespace XeptGame.Tests
             Assert.IsTrue(receipt.OldItemTransferred);
             Assert.IsTrue(_body.IsEmpty(BodySlotType.Hand));
             Assert.AreEqual(1, _bag.CountOf(held));
+        }
+
+        [Test]
+        public void 收起_优先归位回原格()
+        {
+            var bag = new Inventory(4);
+            var blocker = NewDef("item.blocker", false); // 不可持：只为占格
+            var item = NewDef("item.held", true);
+            bag.TryAdd(blocker, 1);    // 格 0
+            bag.TryAdd(item, 1);       // 格 1
+            bag.TryRemove(blocker, 1); // 格 0 空出 → "最小空格"≠ 原格，用于区分归位与兜底
+
+            var equip = _ops.RequestEquip(bag, item, bag);
+            _ops.Tick(1);
+            _ops.Tick(1);
+            Assert.AreEqual(OperationStatus.Completed, equip.Status);
+            Assert.AreSame(item, _body.Get(BodySlotType.Hand));
+
+            var stow = _ops.RequestUnequip(bag);
+            _ops.Tick(1);
+            _ops.Tick(1);
+
+            Assert.IsTrue(stow.Accepted);
+            Assert.AreSame(item, bag.Slots[1].Item, "收起应回到装备时的原格");
+            Assert.IsTrue(bag.Slots[0].IsEmpty, "没有落到更小的空格（兜底分配）");
+        }
+
+        [Test]
+        public void 收起_原格被占_落回常规分配()
+        {
+            var bag = new Inventory(4);
+            var blocker = NewDef("item.blocker", false);
+            var item = NewDef("item.held", true);
+            var later = NewDef("item.later", false);
+            var other = NewDef("item.other", false);
+            bag.TryAdd(blocker, 1);    // 格 0
+            bag.TryAdd(item, 1);       // 格 1
+            bag.TryRemove(blocker, 1); // 格 0 空
+
+            var equip = _ops.RequestEquip(bag, item, bag);
+            _ops.Tick(1);
+            _ops.Tick(1);
+            Assert.AreEqual(OperationStatus.Completed, equip.Status);
+
+            bag.TryAdd(later, 1); // → 格 0（最小空格）
+            bag.TryAdd(other, 1); // → 格 1：正好占了归位目标
+
+            var stow = _ops.RequestUnequip(bag);
+            _ops.Tick(1);
+            _ops.Tick(1);
+
+            Assert.IsTrue(stow.Accepted);
+            Assert.AreSame(item, bag.Slots[2].Item, "归位失败 → 落回常规分配（最小空格）");
+            Assert.AreSame(other, bag.Slots[1].Item, "原格占用者不受影响");
+        }
+
+        [Test]
+        public void 收起_目标换容器_不归位()
+        {
+            var source = new Inventory(2);
+            var target = new Inventory(2);
+            var item = NewDef("item.held", true);
+            source.TryAdd(item, 1); // 格 0
+
+            var equip = _ops.RequestEquip(source, item, source);
+            _ops.Tick(1);
+            _ops.Tick(1);
+            Assert.AreEqual(OperationStatus.Completed, equip.Status);
+
+            var stow = _ops.RequestUnequip(target);
+            _ops.Tick(1);
+            _ops.Tick(1);
+
+            Assert.IsTrue(stow.Accepted);
+            Assert.AreSame(item, target.Slots[0].Item, "换容器时不归位：进目标容器常规分配");
+            Assert.AreEqual(0, source.CountOf(item));
+        }
+
+        [Test]
+        public void 收起_目标满_失败且仍占手槽()
+        {
+            var source = new Inventory(2);
+            var full = new Inventory(1);
+            var blocker = NewDef("item.blocker", false);
+            var item = NewDef("item.held", true);
+            source.TryAdd(item, 1);
+            full.TryAdd(blocker, 1); // 目标唯一格被占
+
+            var equip = _ops.RequestEquip(source, item, source);
+            _ops.Tick(1);
+            _ops.Tick(1);
+            Assert.AreEqual(OperationStatus.Completed, equip.Status);
+
+            var stow = _ops.RequestUnequip(full);
+            _ops.Tick(1);
+            _ops.Tick(1);
+
+            Assert.AreEqual(OperationStatus.Failed, stow.Status);
+            Assert.AreSame(item, _body.Get(BodySlotType.Hand), "转出拒绝 → 仍占手槽");
+            Assert.AreEqual(EquipPhase.Stowed, _behavior.Snapshot.Phase);
         }
 
         private sealed class RejectingContainer : IItemContainer
@@ -306,7 +407,7 @@ namespace XeptGame.Tests
             public bool Contains(ItemDefinition item) => false;
             public bool TryAdd(ItemDefinition item, int count) => false;
             public bool TryRemove(ItemDefinition item, int count) => false;
-            public event Action<InventoryChangeArgs> Changed
+            public event Action<ContainerChangeArgs> Changed
             {
                 add
                 {

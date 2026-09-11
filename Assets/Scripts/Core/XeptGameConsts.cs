@@ -45,6 +45,22 @@ namespace XeptGame.Core
             public const string ItemHoldableFacetProfileMenuName = ItemFacetMenuRoot + "/HoldFacetProfile";
             public const string ItemHoldableFacetProfileFileName = "HoldFacetProfile";
             public const int ItemHoldableFacetProfileOrder = 1;
+
+            public const string ItemInventoryFacetProfileMenuName = ItemFacetMenuRoot + "/InventoryFacetProfile";
+            public const string ItemInventoryFacetProfileFileName = "InventoryFacetProfile";
+            public const int ItemInventoryFacetProfileOrder = 2;
+
+            public const string ItemContainerCapacityExpanderFacetProfileMenuName = ItemFacetMenuRoot + "/ContainerCapacityExpanderProfile";
+            public const string ItemContainerCapacityExpanderFacetProfileFileName = "ContainerCapacityExpanderProfile";
+            public const int ItemContainerCapacityExpanderFacetProfileOrder = 3;
+            #endregion
+
+            #region Inventory（背包域配置）
+            private const string InventoryMenuRoot = "XeptGame/Inventory";
+
+            public const string InventoryProfileMenuName = InventoryMenuRoot + "/InventoryProfile";
+            public const string InventoryProfileFileName = "InventoryProfile";
+            public const int InventoryProfileOrder = 0;
             #endregion
 
             #endregion
@@ -70,6 +86,13 @@ namespace XeptGame.Core
         {
             /// <summary>E 长按判定阈值（秒）：按住超过该时长且宿主有可用 Hold 动作 → 升级为 Hold 分派（tap 取消）。</summary>
             public const float HoldPressThresholdSeconds = 0.35f;
+        }
+
+        /// <summary>背包容器参数（SlotStore_Design.md §6；容量来源为**临时落点**，待背包侧 InventoryProfile 落地后改为多来源合成）。</summary>
+        public struct Inventory
+        {
+            /// <summary>背包默认格数（临时值）：容量有限、装不下走全量拒绝；正常内容下不会触及。</summary>
+            public const int DefaultCapacity = 40;
         }
     }
 }

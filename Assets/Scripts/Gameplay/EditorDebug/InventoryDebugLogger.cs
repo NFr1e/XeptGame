@@ -1,4 +1,5 @@
 using UnityEngine;
+using XeptGame.Container;
 using XeptGame.Game.Flow;
 using XeptGame.Inv;
 using XeptKit.Core;
@@ -38,7 +39,7 @@ namespace XeptGame.Game
             }
         }
 
-        private void OnChanged(InventoryChangeArgs args)
+        private void OnChanged(ContainerChangeArgs args)
             => Log.Info($"[Inventory] {args.Item.Id} × {args.NewCount}（{args.OldCount}→{args.NewCount}）");
     }
 }

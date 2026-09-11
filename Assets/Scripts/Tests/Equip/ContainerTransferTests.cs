@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using XeptGame.Inv;
+using XeptGame.Container;
 using XeptGame.Items;
 
 namespace XeptGame.Tests
@@ -16,7 +16,7 @@ namespace XeptGame.Tests
             var bag = NewBag();
             var body = NewBody();
             var a = NewDef("item.a", true);
-            bag.Add(a, 5);
+            bag.TryAdd(a, 5);
 
             Assert.IsTrue(ContainerTransfer.Move(bag, body, a, 1));
 
@@ -32,7 +32,7 @@ namespace XeptGame.Tests
             var held = NewDef("item.held", true);
             var a = NewDef("item.a", true);
             body.TryAdd(held, 1);
-            bag.Add(a, 5);
+            bag.TryAdd(a, 5);
 
             Assert.IsFalse(ContainerTransfer.Move(bag, body, a, 1), "目标（手槽）占用中必须失败");
 
@@ -46,7 +46,7 @@ namespace XeptGame.Tests
             var bag = NewBag();
             var body = NewBody();
             var a = NewDef("item.a", true);
-            bag.Add(a, 5);
+            bag.TryAdd(a, 5);
 
             Assert.IsFalse(ContainerTransfer.Move(bag, body, a, 2), "身体槽单位制拒绝 count≠1");
             Assert.AreEqual(5, bag.CountOf(a), "回滚后源不变");
@@ -59,7 +59,7 @@ namespace XeptGame.Tests
             var bag = NewBag();
             var body = NewBody();
             var a = NewDef("item.a", true);
-            bag.Add(a, 2);
+            bag.TryAdd(a, 2);
 
             Assert.IsFalse(ContainerTransfer.Move(bag, body, a, 3));
             Assert.AreEqual(2, bag.CountOf(a));
@@ -83,7 +83,7 @@ namespace XeptGame.Tests
             var bag = NewBag();
             var body = NewBody();
             var c = NewDef("item.c", false); // 不可持
-            bag.Add(c, 3);
+            bag.TryAdd(c, 3);
 
             Assert.IsFalse(ContainerTransfer.Move(bag, body, c, 1));
             Assert.AreEqual(3, bag.CountOf(c));

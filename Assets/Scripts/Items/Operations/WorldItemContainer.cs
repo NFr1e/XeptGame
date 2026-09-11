@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using XeptGame.Inv;
+using XeptGame.Container;
 using XeptKit.Event;
 
 namespace XeptGame.Items.Operations
@@ -23,10 +23,10 @@ namespace XeptGame.Items.Operations
         /// <summary>当前世界堆剩余数量，提交批结束后场景壳据此刷新显隐。</summary>
         public int Remaining => _count;
 
-        private readonly SafeEvent<InventoryChangeArgs> _changed = new();
+        private readonly SafeEvent<ContainerChangeArgs> _changed = new();
 
         /// <summary>容器变更（SafeEvent：异常隔离 + 订阅去重）。</summary>
-        public event Action<InventoryChangeArgs> Changed
+        public event Action<ContainerChangeArgs> Changed
         {
             add => _changed.Add(value);
             remove => _changed.Remove(value);
@@ -75,7 +75,7 @@ namespace XeptGame.Items.Operations
 
             var old = _count;
             _count -= count;
-            _changed.Invoke(new InventoryChangeArgs(_item, old, _count));
+            _changed.Invoke(new ContainerChangeArgs(_item, old, _count));
             return true;
         }
 
@@ -89,7 +89,7 @@ namespace XeptGame.Items.Operations
 
             var old = _count;
             _count += count;
-            _changed.Invoke(new InventoryChangeArgs(_item, old, _count));
+            _changed.Invoke(new ContainerChangeArgs(_item, old, _count));
             return true;
         }
 

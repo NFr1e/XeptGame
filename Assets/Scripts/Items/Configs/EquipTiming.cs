@@ -4,12 +4,12 @@ using UnityEngine;
 namespace XeptGame.Items
 {
     /// <summary>
-    /// 可持物的拿放时长参数（内容侧，由 <see cref="HoldProfile"/> 持有；装备行为收解析后的值、不读配置）。
+    /// 可持物的拿放时长参数（内容侧，由 <see cref="HoldableFacetProfile"/> 持有；装备行为收解析后的值、不读配置）。
     /// <list type="bullet">
     /// <item>纯数值对；负 / NaN 非法（行为在 Reconcile 时校验抛错），<b>0 合法</b>（零时长 = 受控更新内立即收敛）；</item>
     /// <item><b>全 0 = 未配置</b>（旧资产反序列化 / 作者留空），由配置读取方
-    /// （<see cref="HoldProfile.ResolvedTiming"/>）回退 <see cref="Default"/>；测试可直接构造显式值；</item>
-    /// <item>物品差异（斧慢/石快）经不同 <see cref="HoldProfile"/> 共享或区分表达——时长随占用携带，行为无全局时长概念。</item>
+    /// （<see cref="HoldableFacetProfile.ResolvedTiming"/>）回退 <see cref="Default"/>；测试可直接构造显式值；</item>
+    /// <item>物品差异（斧慢/石快）经不同 <see cref="HoldableFacetProfile"/> 共享或区分表达——时长随占用携带，行为无全局时长概念。</item>
     /// </list>
     /// </summary>
     [Serializable]

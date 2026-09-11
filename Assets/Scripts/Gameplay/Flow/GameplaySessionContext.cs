@@ -1,7 +1,9 @@
+using XeptGame.Container;
 using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptGame.Items;
 using XeptGame.Items.Operations;
+using XeptKit.Core;
 using XeptKit.Event;
 
 namespace XeptGame.Game.Flow
@@ -32,10 +34,10 @@ namespace XeptGame.Game.Flow
         public EventBus EventBus { get; } = new();
 
         /// <summary>背包行容器（原 GameplaySession 数据并入；可堆叠性的家）。</summary>
-        public Inventory Inventory { get; } = new();
+        public Inventory Inventory { get; } = new(discardSink: OnOverflowDiscarded);
 
         /// <summary>身体容器（手槽单位位，原 GameplaySession 数据并入；占有 = 背包与身体分布，无总拥有）。</summary>
-        public Equipment Equipment { get; } = new Equipment(new ISlot[] { new HandSlot() });
+        public Equipment Equipment { get; } = new Equipment(new SlotBase[] { new HandSlot() });
 
         /// <summary>装备行为（手）：五态 FSM，不认识容器来源与去向（EB 决议）。</summary>
         public EquipController EquipBehaviour { get; private set; }
@@ -71,6 +73,13 @@ namespace XeptGame.Game.Flow
 
         /// <summary>会话域总线广播接缝：仅转发编排已决定的获得播报，不自行判断或补发（EB 单播纪律）。</summary>
         private void PublishAcquired(ItemAcquiredEvent acquired) => EventBus.Publish(acquired);
+
+        /// <summary>
+        /// 背包缩容溢出丢弃出口（SlotStore_Design.md §6）：v1 无世界 Drop，"静默消失"只指没有世界表现，
+        /// 数据上必须可见——聚合轨已按卸载发事件，这里补一条诊断；后期世界 Drop 在同一接缝落地。
+        /// </summary>
+        private static void OnOverflowDiscarded(ItemDefinition item, int count)
+            => Log.Info($"[Inventory] 缩容溢出丢弃 {item?.Id} × {count}（世界 Drop 未实现，按卸载处理）");
 
         /// <summary>弃一轮：先终止操作/行为，再清引用（GameplaySession_Domain_Design.md R5）。</summary>
         public void Dispose()
