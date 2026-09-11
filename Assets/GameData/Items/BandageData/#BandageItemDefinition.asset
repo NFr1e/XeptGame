@@ -31,6 +31,6 @@ MonoBehaviour:
       type: {class: ConsumableFacet, ns: XeptGame.Items, asm: XeptGame}
       data: 
     - rid: 135043351233953871
-      type: {class: InventoryFacet, ns: XeptGame.Items, asm: XeptGame}
+      type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: 7d4d530578b460d43b2abcccfd5178cc, type: 2}

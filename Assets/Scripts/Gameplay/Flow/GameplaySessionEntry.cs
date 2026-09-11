@@ -19,6 +19,13 @@ namespace XeptGame.Game.Flow
     {
         public static GameplaySessionEntry Instance { get; private set; }
 
+        /// <summary>
+        /// 会话创建"铃"（下行通知，Item_Instance_Design.md §5.2 世界层装配用）：<see cref="Context"/> 就绪后触发一次。
+        /// 世界层场景壳在基座场景先于会话加载时无法立即装配——订阅本铃即可，不需要轮询。
+        /// 订阅方<b>必须</b>在自己销毁时退订（静态事件不自清）。
+        /// </summary>
+        public static event Action Created;
+
         /// <summary>一轮域根对象（GameplaySessionContext：EventBus/Inventory/Equipment/Equip 服务；与入口同生共死）。</summary>
         public GameplaySessionContext Context { get; private set; }
 
@@ -59,6 +66,9 @@ namespace XeptGame.Game.Flow
                 _gameGateSubscription = GameManager.Context?.EventBus?.Subscribe<GameStateChangedEvent>(OnGameStateChanged);
                 _appGateSubscription = AppManager.Context?.EventBus?.Subscribe<AppStateChangedEvent>(OnAppStateChanged);
                 ApplyGate();
+
+                // 世界层等"会话已建"的装配方：Context 就绪后立刻通知（先装配后订阅的也不会漏，见 TryGetInstance 现值口）
+                Created?.Invoke();
             }
 
             return Instance;

@@ -40,6 +40,13 @@ namespace XeptGame.Equip
         public ItemDefinition Get(BodySlotType slot)
             => _byType.TryGetValue(slot, out var target) ? target.Item : null;
 
+        /// <summary>
+        /// 读取某槽持有的<b>实例</b>（null = 槽空 / 无状态占用 / 槽未配置）。
+        /// 当前背包推导用：背槽 → <c>ContainerInstance</c>（Item_Instance_Design.md §3）。
+        /// </summary>
+        public ItemInstance GetInstance(BodySlotType slot)
+            => _byType.TryGetValue(slot, out var target) ? target.Instance : null;
+
         /// <summary>槽是否为空。</summary>
         public bool IsEmpty(BodySlotType slot) => Get(slot) == null;
 

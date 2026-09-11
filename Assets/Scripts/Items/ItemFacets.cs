@@ -11,14 +11,14 @@ namespace XeptGame.Items
     /// （可加工/可食用…），消费者是未来的战斗/合成/建造域——**不承担背包归类**（角色收窄，
     /// 见 Inventory_Facet_Design.md §4）；</item>
     /// <item><b>能力面（携带配置）</b>：条目引用该能力的配置资产（SO，可跨物品共享；HoldableFacet→HoldableFacetProfile、
-    /// WorldFacet→WorldFacetProfile、InventoryFacet→InventoryFacetProfile…），回答"能干什么"——<b>条目存在 = 具备该能力</b>，
+    /// WorldFacet→WorldFacetProfile、InventoryItemFacet→InventoryItemFacetProfile…），回答"能干什么"——<b>条目存在 = 具备该能力</b>，
     /// 配置读取经 <c>GetFacet{T}()</c>（有能力语义 → 能力配置）；</item>
     /// </list>
     /// <list type="bullet">
     /// <item><b>存在性可靠</b>：[SerializeReference] 条目仅在作者添加后存在（无内嵌类自动实例化陷阱），
     /// 能力/语义一律以"条目存在"表达，不做空配置默认语义；</item>
     /// <item><b>命名稳定纪律</b>：序列化存类型名——Facet 类改名/移除会致既有资产数据丢失，视为稳定公共 API；</item>
-    /// <item>背包归类/分页/排序不归本层：归类唯一标准 = <see cref="InventoryFacetProfile.category"/>，
+    /// <item>背包归类/分页/排序不归本层：归类唯一标准 = <see cref="InventoryItemFacetProfile.category"/>，
     /// 页签与排序策略归背包侧配置（Inventory_Facet_Design.md §4/§6）。</item>
     /// </list>
     /// 序列化可行性先例：`HudBillboard.cs` 的 [SerializeReference] IHudBillboardClamp 策略缝（Odin 可用）。
@@ -74,15 +74,30 @@ namespace XeptGame.Items
 
     /// <summary>
     /// 背包能力面：条目存在 = 该物品**参与背包系统**（有背包归类与每格上限声明，Inventory_Facet_Design.md §2）。
-    /// 配置 = 对共享配置资产 <see cref="InventoryFacetProfile"/>（SO）的引用（可跨物品复用，如"资源·上限 20"）；
+    /// 配置 = 对共享配置资产 <see cref="InventoryItemFacetProfile"/>（SO）的引用（可跨物品复用，如"资源·上限 20"）；
     /// profile 为 null = 能力已声明但配置未给（Object 引用判空可靠）→ 消费方按"未分类 + 不约束上限"处理并记诊断。
-    /// 物品完全未挂本条目同义（兼容既有资产，零迁移）；参数一律经 <c>GetFacet{InventoryFacet}()?.profile</c> 读取。
+    /// 物品完全未挂本条目同义（兼容既有资产，零迁移）；参数一律经 <c>GetFacet{InventoryItemFacet}()?.profile</c> 读取。
     /// </summary>
     [System.Serializable]
-    public sealed class InventoryFacet : IItemFacet
+    public sealed class InventoryItemFacet : IItemFacet
     {
-        /// <summary>背包面配置资产引用（null = 未配置；见 <see cref="InventoryFacetProfile"/>）。</summary>
-        [InlineEditor] public InventoryFacetProfile profile;
+        /// <summary>背包面配置资产引用（null = 未配置；见 <see cref="InventoryItemFacetProfile"/>）。</summary>
+        [InlineEditor] public InventoryItemFacetProfile profile;
+    }
+
+    /// <summary>
+    /// 容器能力面：条目存在 = <b>该物品自带一个容器</b>（背包类物品；Item_Instance_Design.md §3）。
+    /// 配置 = 对共享配置资产 <see cref="ContainerFacetProfile"/>（SO）的引用；
+    /// profile 为 null = 能力已声明但配置未给 → 容器实例按常量默认格数装配并记诊断。
+    /// <b>与 <see cref="InventoryItemFacet"/> 的区别</b>：那条答"作为背包条目怎么归类、每格上限多少"，
+    /// 本条目答"这个物品自己能不能装东西"——两者可并存（背包既是背包条目，也是容器）。
+    /// 消费方：实例工厂按本条目决定"造堆叠物还是造容器实例"，背槽按本条目做种类门控。
+    /// </summary>
+    [System.Serializable]
+    public sealed class ContainerFacet : IItemFacet
+    {
+        /// <summary>容器配置资产引用（null = 未配置；见 <see cref="ContainerFacetProfile"/>）。</summary>
+        [InlineEditor] public ContainerFacetProfile profile;
     }
 
     /// <summary>

@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d80c7d912856684fbddbea00a6f5d38, type: 3}
   m_Name: StoneWorldFacetProfile
   m_EditorClassIdentifier: 
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 4419307696812114649, guid: f418bec603792a54fa538c19b4851cc1, type: 3}

@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b61950acfd8c4441b6cedfee02c97b0, type: 3}
+  m_Name: '#BackpackItemDefinition'
+  m_EditorClassIdentifier: XeptGame::XeptGame.Items.ItemDefinition
+  id: item.backpack
+  iconKind: 1
+  iconSprite: {fileID: 21300000, guid: 48e18dcda57bde84482def79eafdc45f, type: 3}
+  iconTexture: {fileID: 0}
+  facets:
+  - rid: 135043370555539595
+  - rid: 135043370555539600
+  - rid: 135043370555539623
+  references:
+    version: 2
+    RefIds:
+    - rid: 135043370555539595
+      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 33221763e110b9d498e738f36ddd3b33, type: 2}
+    - rid: 135043370555539600
+      type: {class: ContainerFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 4135f2898eb209f46bc900015956bf99, type: 2}
+    - rid: 135043370555539623
+      type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 71bebbdab185d4b498875665bcc41a4d, type: 2}

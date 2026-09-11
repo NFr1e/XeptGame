@@ -18,6 +18,10 @@ namespace XeptGame.Container
     /// 同一纪律；子类（SlotStore 的扩缩容/压缩）用 <see cref="TryBeginMutation"/> / <see cref="EndMutation"/> 共用同一道门；</item>
     /// <item><b>分配规则</b>（单一实现 <see cref="PlaceWithin"/>）：按槽序升序，先并入同物品未满槽、再占用空槽；
     /// 新增分配与压缩/缩容共用同一套放置算法；移除按槽序（<see cref="TakeOut"/> 报告被清空的槽）。</item>
+    /// <item><b>两种载荷与两个计数口径</b>（Item_Instance_Design.md §2.2）：无状态堆叠行与<b>实例行</b>（各计 1）；
+    /// 公开聚合面（<see cref="CountOf"/> / <see cref="Stacks"/>）<b>包含</b>实例行，而<b>按定义寻址的写入跳过实例行</b>
+    /// ——写可行性读 <see cref="CountOfCore"/>（可写口径），事件负载读 <see cref="TotalCountOfCore"/>（聚合口径）；
+    /// 实例按格寻址：<see cref="TryPlaceInstanceAt"/> / <see cref="TryTakeInstanceAt"/>。</item>
     /// </list>
     /// 消费者：<c>Equipment</c>（身体域）与 <c>SlotStore</c>（机制层/背包域）。
     /// </summary>
@@ -70,11 +74,15 @@ namespace XeptGame.Container
             remove => _slotChanged.Remove(value);
         }
 
-        /// <summary>某物品在当前容器内的总数（跨槽求和；无 = 0）。</summary>
+        /// <summary>
+        /// 某物品在当前容器内的<b>聚合</b>总数（跨槽求和；无 = 0）：<b>包含实例行</b>（每个实例计 1），
+        /// 因此"我有几个背包"查得到（Item_Instance_Design.md §2.2）。
+        /// 注意与写入口径 <see cref="CountOfCore"/> 的区别——后者只数可写的无状态数量。
+        /// </summary>
         public int CountOf(ItemDefinition definition)
         {
             Guard.NotNullObject(definition, nameof(definition));
-            return CountOfCore(definition);
+            return TotalCountOfCore(definition);
         }
 
         /// <summary>是否持有某物品（数量 &gt; 0）。</summary>
@@ -129,7 +137,7 @@ namespace XeptGame.Container
                     return false;
                 }
 
-                var before = CountOfCore(definition);
+                var before = TotalCountOfCore(definition);
                 PlaceWithin(definition, count, _slots.Count);
                 PublishChanged(definition, before, before + count);
                 return true;
@@ -158,12 +166,13 @@ namespace XeptGame.Container
 
             try
             {
-                var before = CountOfCore(definition);
-                if (before < count)
+                // 可行性按"可写口径"判断（实例行不可按定义扣减）；事件按"聚合口径"报告前后总数
+                if (CountOfCore(definition) < count)
                 {
                     return false;
                 }
 
+                var before = TotalCountOfCore(definition);
                 TakeOut(definition, count, out emptiedCell);
                 PublishChanged(definition, before, before - count);
                 return true;
@@ -208,6 +217,106 @@ namespace XeptGame.Container
             }
         }
 
+        /// <summary>
+        /// 定向放入一个<b>实例</b>（按格寻址；Item_Instance_Design.md §2.3）：目标格必须存在、完全为空且接纳其定义，
+        /// 否则整笔失败且零改动。实例数量恒 1（不变量 I2），聚合轨按"实例各计 1"报告前后总数。
+        /// </summary>
+        public bool TryPlaceInstanceAt(SlotId cell, ItemInstance instance)
+        {
+            Guard.NotNull(instance, nameof(instance));
+            if (!TryBeginMutation())
+            {
+                return false;
+            }
+
+            try
+            {
+                var slot = FindSlot(cell);
+                if (slot == null)
+                {
+                    return false;
+                }
+
+                var before = TotalCountOfCore(instance.Definition);
+                if (!slot.TryPlaceInstance(instance))
+                {
+                    return false;
+                }
+
+                PublishChanged(instance.Definition, before, before + 1);
+                return true;
+            }
+            finally
+            {
+                EndMutation();
+            }
+        }
+
+        /// <summary>
+        /// 从指定格取出一个<b>实例</b>（按格寻址）：该格没持实例则失败且零改动。
+        /// 取出的实例仍持有身份——调用方负责把它交给另一个容器或出口（"一个实例一个位置"，不变量 I1）。
+        /// </summary>
+        public bool TryTakeInstanceAt(SlotId cell, out ItemInstance instance)
+        {
+            instance = null;
+            if (!TryBeginMutation())
+            {
+                return false;
+            }
+
+            try
+            {
+                var slot = FindSlot(cell);
+                if (slot == null || !slot.HasInstance)
+                {
+                    return false;
+                }
+
+                var before = TotalCountOfCore(slot.Instance.Definition);
+                if (!slot.TryTakeInstance(out instance))
+                {
+                    instance = null;
+                    return false;
+                }
+
+                PublishChanged(instance.Definition, before, before - 1);
+                return true;
+            }
+            finally
+            {
+                EndMutation();
+            }
+        }
+
+        /// <summary>
+        /// 把实例放进<b>最靠前的可用空格</b>（"随便找个格子"的实例入口；世界背包放进当前背包等）。
+        /// 找不到可用格 = false 且零改动；聚合轨按"实例各计 1"报告。
+        /// </summary>
+        public bool TryPlaceInstance(ItemInstance instance)
+        {
+            Guard.NotNull(instance, nameof(instance));
+            if (!TryBeginMutation())
+            {
+                return false;
+            }
+
+            try
+            {
+                var before = TotalCountOfCore(instance.Definition);
+                if (!PlaceInstanceWithin(instance, _slots.Count))
+                {
+                    return false;
+                }
+
+                PublishChanged(instance.Definition, before, before + 1);
+                return true;
+            }
+            finally
+            {
+                EndMutation();
+            }
+        }
+
         /// <summary>槽集合（可写视图）——仅供子类做容量增删（<c>SlotStore</c> 扩缩容）。</summary>
         protected IReadOnlyList<SlotBase> SlotList => _slots;
 
@@ -228,16 +337,44 @@ namespace XeptGame.Container
         /// <summary>退出提交区。</summary>
         protected void EndMutation() => _mutating = false;
 
-        /// <summary>跨槽求和（不加门、不校验空引用）。</summary>
+        /// <summary>
+        /// 跨槽求和（不加门、不校验空引用）——<b>可写口径</b>：只数无状态行、<b>跳过实例行</b>。
+        /// 用于按定义寻址的写入可行性判断（实例行的身份不可按定义定位，Item_Instance_Design.md §2.2）。
+        /// </summary>
         protected int CountOfCore(ItemDefinition definition)
         {
             var total = 0;
             for (int i = 0; i < _slots.Count; i++)
             {
-                if (ReferenceEquals(_slots[i].Item, definition))
+                var slot = _slots[i];
+                if (slot.HasInstance || !ReferenceEquals(slot.Item, definition))
                 {
-                    total += _slots[i].Count;
+                    continue;
                 }
+
+                total += slot.Count;
+            }
+
+            return total;
+        }
+
+        /// <summary>
+        /// 跨槽求和（不加门、不校验空引用）——<b>聚合口径</b>：无状态行按数量、<b>实例行各计 1</b>。
+        /// 与公开的 <see cref="CountOf"/> / <see cref="Stacks"/> 一致，也是聚合轨
+        /// （<see cref="ContainerChangeArgs"/>）报告前后总数的口径。
+        /// </summary>
+        protected int TotalCountOfCore(ItemDefinition definition)
+        {
+            var total = 0;
+            for (int i = 0; i < _slots.Count; i++)
+            {
+                var slot = _slots[i];
+                if (!ReferenceEquals(slot.Item, definition))
+                {
+                    continue;
+                }
+
+                total += slot.HasInstance ? 1 : slot.Count;
             }
 
             return total;
@@ -271,6 +408,11 @@ namespace XeptGame.Container
                 for (int i = 0; i < limit && remaining > 0; i++)
                 {
                     var slot = _slots[i];
+                    if (slot.HasInstance)
+                    {
+                        continue; // 实例行不参与按定义的合并/分配（不变量 I2）
+                    }
+
                     var merge = pass == 0;
                     if (merge ? (slot.IsEmpty || !ReferenceEquals(slot.Item, definition)) : !slot.IsEmpty)
                     {
@@ -304,9 +446,9 @@ namespace XeptGame.Container
             for (int i = 0; i < _slots.Count && remaining > 0; i++)
             {
                 var slot = _slots[i];
-                if (!ReferenceEquals(slot.Item, definition))
+                if (slot.HasInstance || !ReferenceEquals(slot.Item, definition))
                 {
-                    continue;
+                    continue; // 实例行不参与按定义的扣减（不变量 I2）
                 }
 
                 var take = Math.Min(remaining, slot.Count);
@@ -324,6 +466,25 @@ namespace XeptGame.Container
             }
 
             return count - remaining;
+        }
+
+        /// <summary>
+        /// 把一个实例放进 [0, <paramref name="limit"/>) 内<b>最靠前的空格</b>（机制内部：缩容/压缩安置实例行；
+        /// 不加门、不发聚合轨）。放不下返回 false，此时容器内容未被改动。
+        /// </summary>
+        protected bool PlaceInstanceWithin(ItemInstance instance, int limit)
+        {
+            Guard.NotNull(instance, nameof(instance));
+
+            for (int i = 0; i < limit && i < _slots.Count; i++)
+            {
+                if (_slots[i].TryPlaceInstance(instance))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>按槽身份查找（无 = null）。</summary>

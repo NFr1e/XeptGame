@@ -19,6 +19,7 @@ MonoBehaviour:
   facets:
   - rid: 135043308456247373
   - rid: 135043351233953872
+  - rid: 135043370555539659
   references:
     version: 2
     RefIds:
@@ -27,6 +28,10 @@ MonoBehaviour:
       data:
         profile: {fileID: 11400000, guid: cb842422c6caea844a48234b027afe70, type: 2}
     - rid: 135043351233953872
-      type: {class: InventoryFacet, ns: XeptGame.Items, asm: XeptGame}
+      type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: 3ecf9ee519527cb4e9012afc7605ca3a, type: 2}
+    - rid: 135043370555539659
+      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: fca537192752a0f46a5d341801088257, type: 2}

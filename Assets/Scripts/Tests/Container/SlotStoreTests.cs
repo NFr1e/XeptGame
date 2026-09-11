@@ -212,11 +212,11 @@ namespace XeptGame.Tests
 
             if (maxStack > 0)
             {
-                var profile = ScriptableObject.CreateInstance<InventoryFacetProfile>();
+                var profile = ScriptableObject.CreateInstance<InventoryItemFacetProfile>();
                 _owned.Add(profile);
                 profile.category = InventoryCategory.Resource;
                 profile.maxStack = maxStack;
-                GetFacetsList(def).Add(new InventoryFacet { profile = profile });
+                GetFacetsList(def).Add(new InventoryItemFacet { profile = profile });
             }
 
             return def;

@@ -18,6 +18,9 @@ namespace XeptGame.Container
     /// （装配接缝；v1 记诊断，后期世界 Drop 在同一接缝落地）；</item>
     /// <item><b>整理（<see cref="TryCompact"/>）永不丢弃</b>：无溢出源，只做保留区内缩进；</item>
     /// <item><b>容量下限 0</b>（= 没有背包）：<c>TryAdd</c> 恒失败 → <c>ContainerTransfer.Move</c> 走目标拒绝并回滚源。</item>
+    /// <item><b>两种载荷</b>（Item_Instance_Design.md §2.2）：无状态堆叠行与实例行（数量恒 1、不参与合并）；
+    /// 压缩与缩容把两者<b>同规格搬运</b>（实例连同身份走 <c>TryMoveContentTo</c> / <c>PlaceInstanceWithin</c>，
+    /// 绝不按定义重放——那会丢身份或撞上"实例行不可合并"）。</item>
     /// </list>
     /// 所有变更走基类同一道提交门（<see cref="SlotContainer.TryBeginMutation"/>）。
     /// 非 sealed：背包域以 <c>XeptGame.Inv.Inventory</c> 特化（固定默认格数与丢弃出口），箱子可直接实例化或另行特化。
@@ -124,9 +127,31 @@ namespace XeptGame.Container
                     continue;
                 }
 
+                // 实例行（有状态载荷）：优先安置到保留区最靠前的空格；真的放不下才走出口
+                if (slot.HasInstance)
+                {
+                    var instance = slot.Instance;
+                    var beforeInstance = TotalCountOfCore(instance.Definition);
+                    if (!slot.TryTakeInstance(out _))
+                    {
+                        throw new InvalidOperationException("缩容失败：待裁槽状态与实际不符（" + slot.Id + "）。");
+                    }
+
+                    if (PlaceInstanceWithin(instance, newCapacity))
+                    {
+                        continue;
+                    }
+
+                    // ⏳ T5（WorldDrop 接线）：出口载荷升级为携带实例句柄（整包落地）；今日占位语义只上报定义 + 1
+                    PublishChanged(instance.Definition, beforeInstance, beforeInstance - 1);
+                    _discardSink?.Invoke(instance.Definition, 1);
+                    discarded += 1;
+                    continue;
+                }
+
                 var item = slot.Item;
                 var count = slot.Count;
-                var before = CountOfCore(item);
+                var before = TotalCountOfCore(item);
 
                 if (!slot.TryTake(count))
                 {
@@ -170,15 +195,9 @@ namespace XeptGame.Container
 
                 if (read != write)
                 {
-                    var item = slot.Item;
-                    var count = slot.Count;
-                    if (!slot.TryTake(count))
-                    {
-                        throw new InvalidOperationException("压缩失败：源格状态与实际不符（" + slot.Id + "）。");
-                    }
-
+                    // 两种载荷同规格：实例连同身份一起搬（TryMoveContentTo），不按定义重放
                     var target = SlotList[write];
-                    if (!target.TryPlace(item, count))
+                    if (!slot.TryMoveContentTo(target))
                     {
                         throw new InvalidOperationException("压缩失败：目标格无法容纳（" + target.Id + "）。");
                     }

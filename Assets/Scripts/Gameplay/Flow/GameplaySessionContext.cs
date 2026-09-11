@@ -3,6 +3,7 @@ using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptGame.Items;
 using XeptGame.Items.Operations;
+using XeptGame.World;
 using XeptKit.Core;
 using XeptKit.Event;
 
@@ -10,8 +11,8 @@ namespace XeptGame.Game.Flow
 {
     /// <summary>
     /// 一轮 GameplaySession 域根对象（GameplaySession_Domain_Design.md §3，R2 裁定）：
-    /// 持<b>会话域事件总线</b> + <b>数据</b>（背包行容器 / 身体容器，原纯数据 GameplaySession 并入）+ <b>一轮服务</b>
-    /// （装备行为 / 操作编排）。
+    /// 持<b>会话域事件总线</b> + <b>数据</b>（身体容器 = 身体槽占用；<b>当前背包由背槽推导、无包为 null</b>）
+    /// + <b>一轮服务</b>（实例工厂 / 装备行为 / 操作编排）。
     /// <list type="bullet">
     /// <item><b>定位</b>：域根对象（会被 Tick 驱动），<b>非 FSM Context</b>——不适用 XeptKit.FSM 的 Context 纪律
     /// （该纪律约束 Game 域 FSM）；</item>
@@ -33,11 +34,41 @@ namespace XeptGame.Game.Flow
         /// <summary>会话域事件总线（一轮生命周期，随一轮清空）——拾取获得等会话内业务事件走本总线。</summary>
         public EventBus EventBus { get; } = new();
 
-        /// <summary>背包行容器（原 GameplaySession 数据并入；可堆叠性的家）。</summary>
-        public Inventory Inventory { get; } = new(discardSink: OnOverflowDiscarded);
+        /// <summary>实例 id 签发器（会话内单调；存档层 T6 持久化 <c>NextInstanceId</c> 以续发）。</summary>
+        public InstanceIdAllocator InstanceIds { get; } = new();
 
-        /// <summary>身体容器（手槽单位位，原 GameplaySession 数据并入；占有 = 背包与身体分布，无总拥有）。</summary>
-        public Equipment Equipment { get; } = new Equipment(new SlotBase[] { new HandSlot() });
+        /// <summary>实例工厂（<b>唯一创建实例的地方</b>：签发 id + 按 facet 装配容器 + 注入溢出出口）。</summary>
+        public ItemInstanceFactory Instances { get; }
+
+        /// <summary>
+        /// 世界记录表（<b>记录层是真相</b>；Item_Instance_Design.md §5.1）：按关卡分组 + 条目上限 + 增删改事件。
+        /// 会话持有它；场景视图只订阅，不直接增删记录。
+        /// </summary>
+        public WorldRecordStore WorldRecords { get; }
+
+        /// <summary>世界掉落工厂（把"要落到世界的东西"变成记录；视图由视图生成器订阅记录表产生）。</summary>
+        public WorldDropFactory WorldDropFactory { get; }
+
+        /// <summary>
+        /// 世界掉落口（换包交接 + 收起失败落地：Item_Instance_Design.md §4/§5.3）：
+        /// 由<b>世界层场景壳</b>在会话建立后注入（它才知道玩家位置）；null = 未接线 → 换包拒绝、收起失败保持原语义（DP6）。
+        /// </summary>
+        public IWorldDropPort WorldDrop { get; set; }
+
+        /// <summary>身体容器（手槽 + 背槽；占有 = 背包与身体分布，无总拥有）。</summary>
+        public Equipment Equipment { get; } = new Equipment(new SlotBase[] { new HandSlot(), new BackSlot() });
+
+        /// <summary>
+        /// 当前背包实例（背槽里的容器实例；<b>无包 = null</b>，合法状态）。
+        /// 由背槽<b>推导</b>、不缓存：换包后天然一致，不存在"第二份当前背包"。
+        /// </summary>
+        public ContainerInstance Bag => Equipment.GetInstance(BodySlotType.Back) as ContainerInstance;
+
+        /// <summary>
+        /// 当前背包的容器（<b>可空</b>）：名字沿用（DP2），语义变为"指向当前背包容器的引用"，
+        /// 无包时为 null。占用事实仍在槽与实例上，本属性只是推导——所以不预建、不注入、不缓存。
+        /// </summary>
+        public Inventory Inventory => Bag?.Store;
 
         /// <summary>装备行为（手）：五态 FSM，不认识容器来源与去向（EB 决议）。</summary>
         public EquipController EquipBehaviour { get; private set; }
@@ -47,9 +78,15 @@ namespace XeptGame.Game.Flow
 
         public GameplaySessionContext()
         {
+            Instances = new ItemInstanceFactory(InstanceIds, OnOverflowDiscarded);
+            WorldRecords = new WorldRecordStore(InstanceIds, 0, message => Log.Warning(message));
+            WorldDropFactory = new WorldDropFactory(WorldRecords);
             EquipBehaviour = new EquipController();
             EquipBehaviour.SetPaused(true); // 默认暂停：域根刚建、未进 Playing 门控
-            Operations = new ItemOperationCoordinator(Equipment, EquipBehaviour, PublishAcquired);
+            Operations = new ItemOperationCoordinator(
+                Equipment, EquipBehaviour, PublishAcquired,
+                removeRecord: WorldRecords.TryRemove,
+                worldDrop: () => WorldDrop);
         }
 
         /// <summary>
@@ -75,8 +112,9 @@ namespace XeptGame.Game.Flow
         private void PublishAcquired(ItemAcquiredEvent acquired) => EventBus.Publish(acquired);
 
         /// <summary>
-        /// 背包缩容溢出丢弃出口（SlotStore_Design.md §6）：v1 无世界 Drop，"静默消失"只指没有世界表现，
-        /// 数据上必须可见——聚合轨已按卸载发事件，这里补一条诊断；后期世界 Drop 在同一接缝落地。
+        /// 背包实例的缩容溢出丢弃出口（SlotStore_Design.md §6；Item_Instance_Design.md §9.4）：
+        /// v1 无世界 Drop，"静默消失"只指没有世界表现，数据上必须可见——聚合轨已按卸载发事件，这里补一条诊断；
+        /// 后期世界 Drop 在同一接缝落地（⏳ T5：载荷升级为携带实例句柄，做到整包落地）。
         /// </summary>
         private static void OnOverflowDiscarded(ItemDefinition item, int count)
             => Log.Info($"[Inventory] 缩容溢出丢弃 {item?.Id} × {count}（世界 Drop 未实现，按卸载处理）");

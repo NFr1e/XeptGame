@@ -40,6 +40,6 @@ MonoBehaviour:
       data:
         profile: {fileID: 11400000, guid: e0f7fd8c5d99a12409a6303f5f130780, type: 2}
     - rid: 135043351233953870
-      type: {class: InventoryFacet, ns: XeptGame.Items, asm: XeptGame}
+      type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: 5a8ad32653e7f0744806e656f01a2491, type: 2}

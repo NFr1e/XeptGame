@@ -46,21 +46,17 @@ namespace XeptGame.Core
             public const string ItemHoldableFacetProfileFileName = "HoldFacetProfile";
             public const int ItemHoldableFacetProfileOrder = 1;
 
-            public const string ItemInventoryFacetProfileMenuName = ItemFacetMenuRoot + "/InventoryFacetProfile";
-            public const string ItemInventoryFacetProfileFileName = "InventoryFacetProfile";
-            public const int ItemInventoryFacetProfileOrder = 2;
+            public const string InventoryItemFacetProfileMenuName = ItemFacetMenuRoot + "/InventoryItemFacetProfile";
+            public const string InventoryItemFacetProfileFileName = "InventoryItemFacetProfile";
+            public const int InventoryItemFacetProfileOrder = 2;
 
             public const string ItemContainerCapacityExpanderFacetProfileMenuName = ItemFacetMenuRoot + "/ContainerCapacityExpanderProfile";
             public const string ItemContainerCapacityExpanderFacetProfileFileName = "ContainerCapacityExpanderProfile";
             public const int ItemContainerCapacityExpanderFacetProfileOrder = 3;
-            #endregion
 
-            #region Inventory（背包域配置）
-            private const string InventoryMenuRoot = "XeptGame/Inventory";
-
-            public const string InventoryProfileMenuName = InventoryMenuRoot + "/InventoryProfile";
-            public const string InventoryProfileFileName = "InventoryProfile";
-            public const int InventoryProfileOrder = 0;
+            public const string ContainerFacetProfileMenuName = ItemFacetMenuRoot + "/ContainerFacetProfile";
+            public const string ContainerFacetProfileFileName = "ContainerFacetProfile";
+            public const int ContainerFacetProfileOrder = 4;
             #endregion
 
             #endregion
@@ -88,10 +84,21 @@ namespace XeptGame.Core
             public const float HoldPressThresholdSeconds = 0.35f;
         }
 
-        /// <summary>背包容器参数（SlotStore_Design.md §6；容量来源为**临时落点**，待背包侧 InventoryProfile 落地后改为多来源合成）。</summary>
+        /// <summary>世界记录层参数（Item_Instance_Design.md §5.1；不变量 I8：记录表必须有界）。</summary>
+        public struct World
+        {
+            /// <summary>单分组（当前 = 关卡）记录条目上限：超限拒绝写入并告警——无界追加会让存档烂掉（Valheim ZDO 反面教材）。</summary>
+            public const int MaxRecordsPerGroup = 256;
+        }
+
+        /// <summary>
+        /// 容器参数（SlotStore_Design.md §6）。基础格数的**权威来源**是物品侧的
+        /// <c>ContainerFacetProfile.ResolvedBaseSlots</c>（Item_Instance_Design.md §3）；本常量是
+        /// "未挂容器面配置资产/配置留空"时的兜底值。
+        /// </summary>
         public struct Inventory
         {
-            /// <summary>背包默认格数（临时值）：容量有限、装不下走全量拒绝；正常内容下不会触及。</summary>
+            /// <summary>容器默认格数（兜底值）：装不下走全量拒绝，正常内容下不会触及。</summary>
             public const int DefaultCapacity = 40;
         }
     }

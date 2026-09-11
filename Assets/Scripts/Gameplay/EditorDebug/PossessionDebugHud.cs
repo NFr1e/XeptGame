@@ -76,6 +76,13 @@ namespace XeptGame.Game
             }
 
             var occupiedCells = 0;
+            if (bag == null)
+            {
+                GUILayout.Label("-- 背包：无（背槽为空；放一个背包到背槽即可） --");
+                GUILayout.EndArea();
+                return;
+            }
+
             for (int i = 0; i < bag.Slots.Count; i++)
             {
                 if (!bag.Slots[i].IsEmpty)

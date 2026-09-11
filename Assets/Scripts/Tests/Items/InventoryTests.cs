@@ -251,35 +251,5 @@ namespace XeptGame.Tests
             Assert.AreEqual(2, discarded.Count, "细则经丢弃出口上报");
             Assert.AreEqual(2, changes.Count, "丢弃改总数 → 聚合轨逐物品可见");
         }
-
-        [Test]
-        public void 背包配置_驱动基础格数()
-        {
-            var profile = ScriptableObject.CreateInstance<InventoryProfile>();
-            _owned.Add(profile);
-            profile.baseSlots = 7;
-
-            var inv = new Inventory(profile);
-
-            Assert.AreEqual(7, inv.Capacity);
-        }
-
-        [Test]
-        public void 后置注入配置_幂等且可回退默认()
-        {
-            var inv = new Inventory(2);
-            var profile = ScriptableObject.CreateInstance<InventoryProfile>();
-            _owned.Add(profile);
-            profile.baseSlots = 9;
-
-            Assert.IsTrue(inv.ApplyProfile(profile), "装配点（基座场景模块）后置注入：配置变化 → 应用");
-            Assert.AreEqual(9, inv.Capacity);
-
-            Assert.IsFalse(inv.ApplyProfile(profile), "同值注入不动作（换关场景重载会重复走一遍）");
-            Assert.AreEqual(9, inv.Capacity);
-
-            Assert.IsTrue(inv.ApplyProfile(null), "配置留空 → 回退常量默认");
-            Assert.AreEqual(XeptGameConsts.Inventory.DefaultCapacity, inv.Capacity);
-        }
     }
 }

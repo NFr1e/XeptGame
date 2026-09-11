@@ -6,6 +6,7 @@ using XeptGame.Equip;
 using XeptGame.Inv;
 using XeptGame.Items;
 using XeptGame.Items.Operations;
+using XeptGame.World;
 
 namespace XeptGame.Tests
 {
@@ -34,7 +35,7 @@ namespace XeptGame.Tests
             _behavior.Dispose();
         }
 
-        private OperationReceipt Pickup(ItemDefinition item, int count = 1, PickupIntent intent = PickupIntent.Tap) => _ops.RequestPickup(new WorldItemContainer(item, count), item, count, intent, _bag);
+        private OperationReceipt Pickup(ItemDefinition item, int count = 1, PickupIntent intent = PickupIntent.Tap) => _ops.RequestPickup(new WorldStackSource(item, count), item, count, intent, _bag);
         private void Hold(ItemDefinition item)
         {
             Pickup(item);
@@ -96,7 +97,7 @@ namespace XeptGame.Tests
             Hold(held);
             _events.Clear();
             var item = NewDef("new", true);
-            var source = new WorldItemContainer(item, 2);
+            var source = new WorldStackSource(item, 2);
             var receipt = _ops.RequestPickup(source, item, 2, PickupIntent.ForceHold, _bag);
             Assert.AreSame(held, _body.Get(BodySlotType.Hand));
             Assert.AreEqual(0, _bag.CountOf(held));
@@ -147,7 +148,7 @@ namespace XeptGame.Tests
         public void 守卫零副作用()
         {
             var item = NewDef("stone", true);
-            var source = new WorldItemContainer(item, 1);
+            var source = new WorldStackSource(item, 1);
             Assert.IsFalse(_ops.RequestPickup(source, null, 1, PickupIntent.Tap, _bag).Accepted);
             Assert.IsFalse(_ops.RequestPickup(source, item, 0, PickupIntent.Tap, _bag).Accepted);
             Assert.IsFalse(_ops.RequestPickup(source, item, -1, PickupIntent.ForceHold, _bag).Accepted);
@@ -188,7 +189,7 @@ namespace XeptGame.Tests
             Hold(NewDef("held", true));
             var item = NewDef("new", true);
             bool available = true;
-            var source = new WorldItemContainer(item, 1, () => available);
+            var source = new WorldStackSource(item, 1, () => available);
             var receipt = _ops.RequestPickup(source, item, 1, PickupIntent.ForceHold, _bag);
             available = false;
             _ops.Tick(1);
@@ -218,7 +219,7 @@ namespace XeptGame.Tests
         public void 部分提交仅播实际量()
         {
             var item = NewDef("stone", true);
-            var source = new WorldItemContainer(item, 3);
+            var source = new WorldStackSource(item, 3);
             var receipt = _ops.RequestPickup(source, item, 3, PickupIntent.Tap, new RejectingContainer());
             Assert.AreEqual(OperationStatus.Failed, receipt.Status);
             Assert.AreEqual(2, source.Remaining);
@@ -251,7 +252,7 @@ namespace XeptGame.Tests
         {
             Hold(NewDef("held", true));
             var next = NewDef("next", true);
-            var source = new WorldItemContainer(next, 1);
+            var source = new WorldStackSource(next, 1);
             int finishes = 0;
             _ops.OperationFinished += _ => finishes++;
             var receipt = _ops.RequestPickup(source, next, 1, PickupIntent.ForceHold, _bag);
