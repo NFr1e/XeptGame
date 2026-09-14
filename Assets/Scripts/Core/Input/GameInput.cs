@@ -161,7 +161,7 @@ namespace XeptGame.Core.Input
                     ""name"": ""Reload"",
                     ""type"": ""Button"",
                     ""id"": ""a590eb6e6b1a4e0aa463b6dfb10b9aba"",
-                    ""expectedControlType"": ""Button"",
+                    ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
@@ -188,6 +188,15 @@ namespace XeptGame.Core.Input
                     ""name"": ""PutAway"",
                     ""type"": ""Button"",
                     ""id"": ""94af5a75-4d8f-41e9-8078-94b13e4c46c3"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Backpack"",
+                    ""type"": ""Button"",
+                    ""id"": ""da3ff67d-34c3-465c-9273-ad6f80a481e3"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -351,6 +360,17 @@ namespace XeptGame.Core.Input
                 },
                 {
                     ""name"": """",
+                    ""id"": ""7189260d-f4be-4f4e-a065-141ecb30b1f7"",
+                    ""path"": ""<Mouse>/forwardButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""f380a9e5831c4672898a40ecc3c762bb"",
                     ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
@@ -458,6 +478,17 @@ namespace XeptGame.Core.Input
                     ""action"": ""PutAway"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d0bdc326-5bc4-46a8-ac69-5b5825c0ad99"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Backpack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -544,6 +575,7 @@ namespace XeptGame.Core.Input
             m_Gameplay_Interact = m_Gameplay.FindAction("Interact", throwIfNotFound: true);
             m_Gameplay_InteractSecondary = m_Gameplay.FindAction("InteractSecondary", throwIfNotFound: true);
             m_Gameplay_PutAway = m_Gameplay.FindAction("PutAway", throwIfNotFound: true);
+            m_Gameplay_Backpack = m_Gameplay.FindAction("Backpack", throwIfNotFound: true);
             // UI
             m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
             m_UI_Pause = m_UI.FindAction("Pause", throwIfNotFound: true);
@@ -639,6 +671,7 @@ namespace XeptGame.Core.Input
         private readonly InputAction m_Gameplay_Interact;
         private readonly InputAction m_Gameplay_InteractSecondary;
         private readonly InputAction m_Gameplay_PutAway;
+        private readonly InputAction m_Gameplay_Backpack;
         /// <summary>
         /// Provides access to input actions defined in input action map "Gameplay".
         /// </summary>
@@ -694,6 +727,10 @@ namespace XeptGame.Core.Input
             /// Provides access to the underlying input action "Gameplay/PutAway".
             /// </summary>
             public InputAction @PutAway => m_Wrapper.m_Gameplay_PutAway;
+            /// <summary>
+            /// Provides access to the underlying input action "Gameplay/Backpack".
+            /// </summary>
+            public InputAction @Backpack => m_Wrapper.m_Gameplay_Backpack;
             /// <summary>
             /// Provides access to the underlying input action map instance.
             /// </summary>
@@ -753,6 +790,9 @@ namespace XeptGame.Core.Input
                 @PutAway.started += instance.OnPutAway;
                 @PutAway.performed += instance.OnPutAway;
                 @PutAway.canceled += instance.OnPutAway;
+                @Backpack.started += instance.OnBackpack;
+                @Backpack.performed += instance.OnBackpack;
+                @Backpack.canceled += instance.OnBackpack;
             }
 
             /// <summary>
@@ -797,6 +837,9 @@ namespace XeptGame.Core.Input
                 @PutAway.started -= instance.OnPutAway;
                 @PutAway.performed -= instance.OnPutAway;
                 @PutAway.canceled -= instance.OnPutAway;
+                @Backpack.started -= instance.OnBackpack;
+                @Backpack.performed -= instance.OnBackpack;
+                @Backpack.canceled -= instance.OnBackpack;
             }
 
             /// <summary>
@@ -1036,6 +1079,13 @@ namespace XeptGame.Core.Input
             /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
             /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
             void OnPutAway(InputAction.CallbackContext context);
+            /// <summary>
+            /// Method invoked when associated input action "Backpack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+            /// </summary>
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+            /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+            void OnBackpack(InputAction.CallbackContext context);
         }
         /// <summary>
         /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

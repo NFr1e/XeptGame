@@ -2,11 +2,11 @@
   <Project Path="KinematicCharacterController.csproj" />
   <Project Path="XeptKit.csproj" />
   <Project Path="UniTask.csproj" />
+  <Project Path="XeptGame.csproj" />
   <Project Path="UniTask.Linq.csproj" />
   <Project Path="XeptKit.Tests.csproj" />
   <Project Path="LeTai.TrueShadow.Demo.csproj" />
   <Project Path="LeTai.TrueShadow.csproj" />
-  <Project Path="XeptGame.csproj" />
   <Project Path="XeptGame.Tests.csproj" />
   <Project Path="LeTai.Common.csproj" />
   <Project Path="XeptKit.Editor.csproj" />

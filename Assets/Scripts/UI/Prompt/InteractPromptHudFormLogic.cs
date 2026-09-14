@@ -131,7 +131,7 @@ namespace XeptGame.UI
                 {
                     var action = actions[i];
                     var view = Instantiate(rowPrefab, rowsRoot);
-                    view.Bind(SlotKeyProvider.ToDisplayText(action.Slot), action.PromptText);
+                    view.Bind(SlotKeyProvider.ToDisplayText(action.Slot), InteractionPromptText.Resolve(action.PromptKey));
                     _rows.Add(new RowBinding { Action = action, View = view });
                 }
             }

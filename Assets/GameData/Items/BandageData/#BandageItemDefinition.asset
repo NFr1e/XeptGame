@@ -17,16 +17,11 @@ MonoBehaviour:
   iconSprite: {fileID: 21300000, guid: 9087183769e05814bb502406a80617a6, type: 3}
   iconTexture: {fileID: 0}
   facets:
-  - rid: 135043302236356693
   - rid: 135043351233953871
   - rid: 135043302236356694
   references:
     version: 2
     RefIds:
-    - rid: 135043302236356693
-      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
-      data:
-        profile: {fileID: 11400000, guid: bd93ff1ebd67a6044bb3f21f09193fd7, type: 2}
     - rid: 135043302236356694
       type: {class: ConsumableFacet, ns: XeptGame.Items, asm: XeptGame}
       data: 

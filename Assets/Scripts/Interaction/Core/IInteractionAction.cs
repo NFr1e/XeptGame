@@ -6,7 +6,8 @@ namespace XeptGame.Interaction
     /// 输入槽、提示文案与可用性门控——宿主（被选中节点）只负责聚合，不解释动作语义。
     /// <list type="bullet">
     /// <item><b>输入身份</b>：<see cref="Slot"/> 声明动作占用的语义槽（不持物理键，见 InputSlot）；</item>
-    /// <item><b>提示文案</b>：<see cref="PromptText"/> 供提示 UI 渲染（本版直显；Localization 键接入时替换）；</item>
+    /// <item><b>提示文案键</b>：<see cref="PromptKey"/> 供提示 UI 解析（键 → CSV 里的完整句子；
+    /// v5 修订，见 Interaction_Behaviour_Design.md §2 D3）；</item>
     /// <item><b>可用性</b>：<see cref="CanInteract"/> 每帧门控（冷却/状态/耗尽等，沿用 v2 语义，无副作用）；</item>
     /// <item><b>执行</b>：<see cref="Interact"/> 由输入命中该槽且门控通过时触发。</item>
     /// </list>
@@ -17,8 +18,8 @@ namespace XeptGame.Interaction
         /// <summary>动作占用的输入槽。</summary>
         InputSlot Slot { get; }
 
-        /// <summary>提示文案（如"熄灭"/"添柴"/"拾取"）。</summary>
-        string PromptText { get; }
+        /// <summary>文案键（如 <c>interaction.pickup</c>）；文本在 CSV，键本身不存文本。实现方一律转发自行为类。</summary>
+        string PromptKey { get; }
 
         /// <summary>当前是否可执行（每帧查询；不得产生副作用）。</summary>
         bool CanInteract(InteractionContext context);

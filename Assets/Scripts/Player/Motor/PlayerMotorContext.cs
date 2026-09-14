@@ -67,6 +67,13 @@ namespace XeptGame.Player
         /// <summary>通用加力通道（受击击退等；任意状态可注入）。</summary>
         public Vector3 AddVelocityAccumulator { get; set; }
 
+        /// <summary>
+        /// 滑铲起滑 boost 剩余时间（秒）：<see cref="SlideState.OnEnter"/> 写入
+        /// （= Profile.slideBoostDuration），<see cref="SlideState.ApplyVelocity"/> 每帧线性摊入并递减
+        /// （设计决议 §2.5）。会话数据放 Context 而非状态字段——Kit FSM 约定（状态实例复用）。
+        /// </summary>
+        public float SlideBoostRemaining { get; set; }
+
         // ============================================================
         // 着陆事件（观感层订阅；设计决议 docs/modules/3C_CameraFeel_Design.md §3.1）
         // ============================================================
@@ -96,11 +103,22 @@ namespace XeptGame.Player
         // 便捷判定（Sprint/Crouch 已在输入层折叠为 Held 持续值，直接读取）
         // ============================================================
 
-        /// <summary>冲刺激活（长按/切换语义在输入层折叠）。</summary>
-        public bool WantSprint => Input.SprintHeld;
+        /// <summary>冲刺**意图**激活（长按/点按输入模式的差异已在输入层折叠，本层不识别输入状态）。</summary>
+        public bool WantSprint => Input.SprintIntent;
 
-        /// <summary>蹲伏激活（长按/切换语义在输入层折叠）。</summary>
-        public bool WantCrouch => Input.CrouchHeld;
+        /// <summary>蹲伏**意图**激活（同上：决策层只识别意图，长按=按住、点按=切换由输入层折叠）。</summary>
+        public bool WantCrouch => Input.CrouchIntent;
+
+        /// <summary>
+        /// 能否起滑（动态门槛；**结构能力**由 <see cref="ISlidable"/> 表达，调度器两者取与）：
+        /// 想蹲 + 水平**自主**速度达到 <see cref="PlayerMotorProfile.slideEntryMinSpeed"/>。
+        /// 用自主速度（排除移动平台被动携带——站在平台上被动高速不应能起滑）；
+        /// 门槛不过时调度器退化为蹲伏（§2.5）。
+        /// </summary>
+        public bool CanStartSlide
+            => WantCrouch
+               && Vector3.ProjectOnPlane(Motor.OwnVelocity, Motor.CharacterUp).magnitude
+                  >= Profile.slideEntryMinSpeed;
 
         // ============================================================
         // 参考系 = body（设计决议 §2.2）

@@ -14,6 +14,7 @@ namespace XeptGame.Items
         menuName = XeptGameConsts.Editor.ItemHoldableFacetProfileMenuName,
         fileName = XeptGameConsts.Editor.ItemHoldableFacetProfileFileName,
         order = XeptGameConsts.Editor.ItemHoldableFacetProfileOrder)]
+    [Icon(XeptGameConsts.Editor.HoldableFacetProfileIconPath)]
     public sealed class HoldableFacetProfile : ScriptableObject
     {
         [Tooltip("握持类别：决定 FPV 挂点与默认握持姿势/动画层")]

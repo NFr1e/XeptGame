@@ -1,5 +1,7 @@
+using System;
 using XeptGame.Container;
 using XeptGame.Equip;
+using XeptGame.Interaction;
 using XeptGame.Inv;
 using XeptGame.Items;
 using XeptGame.Items.Operations;
@@ -26,7 +28,7 @@ namespace XeptGame.Game.Flow
     /// <c>Context.Equip</c> 窄口门面。</item>
     /// </list>
     /// </summary>
-    public sealed class GameplaySessionContext
+    public sealed class GameplaySessionContext : ICarryFacts
     {
         /// <summary>当前是否暂停（域根自持，由 <see cref="SetPaused"/> 单一入口维护；默认暂停等待进入游玩）。</summary>
         private bool _paused = true;
@@ -76,6 +78,15 @@ namespace XeptGame.Game.Flow
         /// <summary>操作编排（管家）：唯一认识来源/去向/路由与失败处理；广播经本总线（会话域）发出。</summary>
         public ItemOperationCoordinator Operations { get; private set; }
 
+        /// <summary>
+        /// 携带事实（v5 D6）：有没有背包 = 背槽里有没有容器实例。
+        /// 交互宿主据此决定"拾取"这类需要去处的动作要不要出现在清单里。
+        /// </summary>
+        public bool HasBag => Bag != null;
+
+        /// <summary>携带事实变化铃：**只在背槽变化时**发一次（手槽/背包内容变化不影响清单成员）。</summary>
+        public event Action Changed;
+
         public GameplaySessionContext()
         {
             Instances = new ItemInstanceFactory(InstanceIds, OnOverflowDiscarded);
@@ -86,7 +97,20 @@ namespace XeptGame.Game.Flow
             Operations = new ItemOperationCoordinator(
                 Equipment, EquipBehaviour, PublishAcquired,
                 removeRecord: WorldRecords.TryRemove,
-                worldDrop: () => WorldDrop);
+                worldDrop: () => WorldDrop,
+                publishConsumed: PublishConsumed);
+
+            // 背槽变化 → 携带事实铃（换包/背上/摘下都会经槽级轨报出）
+            Equipment.SlotChanged += OnBodySlotChanged;
+        }
+
+        /// <summary>身体槽变化 → 只把背槽的变化翻译成一次携带事实铃（其余槽与本事实无关）。</summary>
+        private void OnBodySlotChanged(SlotChangeArgs args)
+        {
+            if (args.Slot.Value == (int)BodySlotType.Back)
+            {
+                Changed?.Invoke();
+            }
         }
 
         /// <summary>
@@ -111,6 +135,9 @@ namespace XeptGame.Game.Flow
         /// <summary>会话域总线广播接缝：仅转发编排已决定的获得播报，不自行判断或补发（EB 单播纪律）。</summary>
         private void PublishAcquired(ItemAcquiredEvent acquired) => EventBus.Publish(acquired);
 
+        /// <summary>会话域总线广播接缝（使用播报；Backpack_UI_Design.md B2）：与获得播报同纪律，只转发不补发。</summary>
+        private void PublishConsumed(ItemConsumedEvent consumed) => EventBus.Publish(consumed);
+
         /// <summary>
         /// 背包实例的缩容溢出丢弃出口（SlotStore_Design.md §6；Item_Instance_Design.md §9.4）：
         /// v1 无世界 Drop，"静默消失"只指没有世界表现，数据上必须可见——聚合轨已按卸载发事件，这里补一条诊断；
@@ -122,6 +149,9 @@ namespace XeptGame.Game.Flow
         /// <summary>弃一轮：先终止操作/行为，再清引用（GameplaySession_Domain_Design.md R5）。</summary>
         public void Dispose()
         {
+            Equipment.SlotChanged -= OnBodySlotChanged;
+            Changed = null;
+
             Operations?.Dispose();
             Operations = null;
             EquipBehaviour?.Dispose();

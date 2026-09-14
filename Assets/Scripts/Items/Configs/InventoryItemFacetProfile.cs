@@ -22,6 +22,7 @@ namespace XeptGame.Items
         menuName = XeptGameConsts.Editor.InventoryItemFacetProfileMenuName,
         fileName = XeptGameConsts.Editor.InventoryItemFacetProfileFileName,
         order = XeptGameConsts.Editor.InventoryItemFacetProfileOrder)]
+    [Icon(XeptGameConsts.Editor.InventoryItemFacetProfileIconPath)]
     public sealed class InventoryItemFacetProfile : ScriptableObject
     {
         [Tooltip("背包归类（唯一标准）：决定物品默认陈列在哪一页；None = 未分类（落兜底页）")]

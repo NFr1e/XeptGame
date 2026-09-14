@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FireAxeHoldFacetProfile
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.HoldProfile
   category: 1
-  viewPrefab: {fileID: 2987206833793369439, guid: 467aea386657d124b8dd2e965e151f0b, type: 3}
+  viewPrefab: {fileID: 8390376310106564709, guid: e53d48c859934324f933dddded014c35, type: 3}
   timing:
     drawSeconds: 0.4
     stowSeconds: 0.3

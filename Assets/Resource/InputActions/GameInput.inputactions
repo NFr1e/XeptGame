@@ -73,7 +73,7 @@
                     "name": "Reload",
                     "type": "Button",
                     "id": "a590eb6e6b1a4e0aa463b6dfb10b9aba",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -100,6 +100,15 @@
                     "name": "PutAway",
                     "type": "Button",
                     "id": "94af5a75-4d8f-41e9-8078-94b13e4c46c3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Backpack",
+                    "type": "Button",
+                    "id": "da3ff67d-34c3-465c-9273-ad6f80a481e3",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -263,6 +272,17 @@
                 },
                 {
                     "name": "",
+                    "id": "7189260d-f4be-4f4e-a065-141ecb30b1f7",
+                    "path": "<Mouse>/forwardButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "f380a9e5831c4672898a40ecc3c762bb",
                     "path": "<Keyboard>/e",
                     "interactions": "",
@@ -368,6 +388,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "PutAway",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d0bdc326-5bc4-46a8-ac69-5b5825c0ad99",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Backpack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

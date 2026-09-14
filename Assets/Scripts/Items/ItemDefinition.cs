@@ -24,6 +24,7 @@ namespace XeptGame.Items
         menuName = XeptGameConsts.Editor.ItemDefinitionMenuName,
         fileName = XeptGameConsts.Editor.ItemDefinitionFileName,
         order = XeptGameConsts.Editor.ItemDefinitionOrder)]
+    [Icon(XeptGameConsts.Editor.ItemDefinitionIconPath)]
     public sealed class ItemDefinition : ScriptableObject
     {
         [SerializeField, PropertyOrder(0)] private string id;

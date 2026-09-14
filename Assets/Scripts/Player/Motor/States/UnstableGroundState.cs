@@ -75,7 +75,7 @@ namespace XeptGame.Player
             }
 
             // 滑动中起跳（沿地面法线方向）
-            if (Ctx.Profile.allowJumpingWhenUnstableGround && Ctx.Input.JumpPressed)
+            if (Ctx.Profile.allowJumpingWhenUnstableGround && Ctx.Input.JumpIntent)
             {
                 Ctx.PendingJumpImpulse = ground.GroundNormal * Ctx.Profile.jumpUpSpeed;
                 Ctx.Motor.ForceUnground();

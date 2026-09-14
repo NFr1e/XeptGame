@@ -56,7 +56,7 @@ namespace XeptGame.Player
             GUILayout.Label($"接地: Stable={ground.IsStableOnGround}   FoundAny={ground.FoundAnyGround}   法线角: {normalAngle:F1}°");
             GUILayout.Label($"Yaw: {_player.LookController.Yaw:F1}   Pitch: {_player.LookController.Pitch:F1}");
             GUILayout.Label($"土狼计时: {ctx.TimeSinceLastAbleToJump:F3}   JumpConsumed: {ctx.JumpConsumed}");
-            GUILayout.Label($"输入: Move=({ctx.Input.MoveInput.x:F2},{ctx.Input.MoveInput.y:F2})   Sprint={ctx.Input.SprintHeld}   Crouch={ctx.Input.CrouchHeld}");
+            GUILayout.Label($"输入: Move=({ctx.Input.MoveInput.x:F2},{ctx.Input.MoveInput.y:F2})   Sprint={ctx.Input.SprintIntent}   Crouch={ctx.Input.CrouchIntent}");
             GUILayout.Label($"LocalIntent: ({ctx.Input.LocalMoveIntent.x:F2},{ctx.Input.LocalMoveIntent.y:F2},{ctx.Input.LocalMoveIntent.z:F2})   World: ({ctx.WorldMoveIntent.x:F2},{ctx.WorldMoveIntent.z:F2})");
 
             GUILayout.EndArea();

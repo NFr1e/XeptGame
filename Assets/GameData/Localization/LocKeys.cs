@@ -11,6 +11,17 @@ namespace XeptKit.Localization
     {
         public const string ItemRockName = "item.rock.name";
         public const string ItemDrugName = "item.drug.name";
+        public const string ItemFireaxeName = "item.fireaxe.name";
+        public const string ItemBandgaeName = "item.bandgae.name";
         public const string ItemStoneName = "item.stone.name";
+        public const string ItemBackpackName = "item.backpack.name";
+        public const string InteractionPickup = "interaction.pickup";
+        public const string InteractionIgnite = "interaction.ignite";
+        public const string InteractionExtinguish = "interaction.extinguish";
+        public const string InteractionAddfuel = "interaction.addfuel";
+        public const string InteractionDebug = "interaction.debug";
+        public const string InteractionWear = "interaction.wear";
+        public const string InteractionEquip = "interaction.equip";
+        public const string CampfireName = "campfire.name";
     }
 }

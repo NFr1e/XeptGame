@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b61950acfd8c4441b6cedfee02c97b0, type: 3}
   m_Name: '#FireAxeItemDeinition'
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.ItemDefinition
-  id: item.axe
+  id: item.fireAxe
   iconKind: 1
   iconSprite: {fileID: 21300000, guid: d3bbfe59a437f78408e8eabb693e62a9, type: 3}
   iconTexture: {fileID: 0}
   facets:
   - rid: 135043308456247373
   - rid: 135043351233953872
-  - rid: 135043370555539659
+  - rid: 135043442431754335
   references:
     version: 2
     RefIds:
@@ -31,7 +31,7 @@ MonoBehaviour:
       type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: 3ecf9ee519527cb4e9012afc7605ca3a, type: 2}
-    - rid: 135043370555539659
-      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
+    - rid: 135043442431754335
+      type: {class: WorldDropViewFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: fca537192752a0f46a5d341801088257, type: 2}

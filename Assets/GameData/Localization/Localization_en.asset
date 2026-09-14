@@ -19,5 +19,27 @@ MonoBehaviour:
     Value: Rock
   - Key: item.drug.name
     Value: Drug
+  - Key: item.fireaxe.name
+    Value: Fireaxe
+  - Key: item.bandgae.name
+    Value: Bandage
   - Key: item.stone.name
     Value: Stone
+  - Key: item.backpack.name
+    Value: Backpack
+  - Key: interaction.pickup
+    Value: Pick up
+  - Key: interaction.ignite
+    Value: Ignite
+  - Key: interaction.extinguish
+    Value: Extinguish
+  - Key: interaction.addfuel
+    Value: Add fuel ({0}/{1})
+  - Key: interaction.debug
+    Value: Interact
+  - Key: interaction.wear
+    Value: Wear
+  - Key: interaction.equip
+    Value: Equip
+  - Key: campfire.name
+    Value: Campfire

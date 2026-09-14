@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53e4f9c2e3df1a545aa3dd7af22d347a, type: 3}
+  m_Name: InventoryMenuFormEntry
+  m_EditorClassIdentifier: XeptKit::XeptKit.UI.Manager.FormEntry
+  Prefab: {fileID: 7963325789292858369, guid: f5b7a42aef06a7445b43b9d6b1397732, type: 3}
+  Group: {fileID: 11400000, guid: 63e18181102ee5b4298a19a92ba39381, type: 2}
+  AutoCloseSeconds: 0

@@ -18,6 +18,7 @@ namespace XeptGame.Items
         menuName = XeptGameConsts.Editor.ItemContainerCapacityExpanderFacetProfileMenuName,
         fileName = XeptGameConsts.Editor.ItemContainerCapacityExpanderFacetProfileFileName,
         order = XeptGameConsts.Editor.ItemContainerCapacityExpanderFacetProfileOrder)]
+    [Icon(XeptGameConsts.Editor.ContainerCapacityExpanderProfileIconPath)]
     public sealed class ContainerCapacityExpanderProfile : ScriptableObject
     {
         [Tooltip("扩容格数（≥1）：多件扩容者加法叠加")]

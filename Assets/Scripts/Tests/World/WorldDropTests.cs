@@ -197,6 +197,111 @@ namespace XeptGame.Tests
         }
 
         [Test]
+        public void 收起_无包_有世界掉落口_丢到世界()
+        {
+            var records = NewStore();
+            var destination = new WorldDropDestination(new WorldDropFactory(records), () => new Vector3(0f, 0f, 1f), "level.a");
+            var (body, coordinator) = NewRig(records, destination);
+            var axeDef = NewDef("item.axe", container: false);
+
+            // 无包态长按拿取：一单位到手（没有背包可入，余量留在世界源里）
+            coordinator.RequestPickup(new WorldStackSource(axeDef, 1), axeDef, 1, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+            Assert.AreSame(axeDef, body.Get(BodySlotType.Hand), "前提：无包，手上拿着误拾的斧头");
+
+            var receipt = coordinator.RequestUnequip(null); // 无包 = 没有容器收货
+            Pump(coordinator);
+
+            Assert.AreEqual(OperationStatus.Completed, receipt.Status, "无包时收起 → 直接落地，不该被拒");
+            Assert.AreEqual("StowedToWorld", receipt.Reason);
+            Assert.IsTrue(body.IsEmpty(BodySlotType.Hand), "东西已离开手槽");
+            var dropped = records.RecordsIn("level.a");
+            Assert.AreEqual(1, dropped.Count, "落成一条世界记录");
+            Assert.AreSame(axeDef, dropped[0].Definition);
+            Assert.AreEqual(1, dropped[0].Count);
+        }
+
+        [Test]
+        public void 收起_无包_无世界掉落口_失败且留在手上()
+        {
+            var records = NewStore();
+            var body = new Equipment(new SlotBase[] { new HandSlot(), new BackSlot() });
+            var behavior = new EquipController();
+            behavior.SetPaused(false);
+            var coordinator = new ItemOperationCoordinator(body, behavior, removeRecord: records.TryRemove);
+            _coordinators.Add(coordinator);
+            var axeDef = NewDef("item.axe", container: false);
+
+            coordinator.RequestPickup(new WorldStackSource(axeDef, 1), axeDef, 1, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+
+            var receipt = coordinator.RequestUnequip(null);
+            Pump(coordinator);
+
+            Assert.AreEqual(OperationStatus.Failed, receipt.Status, "未装配掉落口 → 明确失败");
+            Assert.AreEqual("DestinationRejected", receipt.Reason);
+            Assert.AreSame(axeDef, body.Get(BodySlotType.Hand), "东西仍在手上（不静默丢）");
+            Assert.AreEqual(0, records.CountIn("level.a"));
+        }
+
+        [Test]
+        public void 无包_手上有物_长按拿取_旧物落世界_新物到手()
+        {
+            var records = NewStore();
+            var destination = new WorldDropDestination(new WorldDropFactory(records), () => new Vector3(0f, 0f, 1f), "level.a");
+            var (body, coordinator) = NewRig(records, destination);
+            var axeDef = NewDef("item.axe", container: false);
+            var woodDef = NewDef("item.wood", container: false);
+
+            // 无包先拿一手斧头
+            coordinator.RequestPickup(new WorldStackSource(axeDef, 1), axeDef, 1, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+            Assert.AreSame(axeDef, body.Get(BodySlotType.Hand), "前提：无包，手上拿着斧头");
+
+            // 无包再长按拿木头：旧物（斧头）落到世界，新物（木头）到手
+            var receipt = coordinator.RequestPickup(new WorldStackSource(woodDef, 2), woodDef, 2, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+
+            Assert.AreEqual(OperationStatus.Completed, receipt.Status, "旧物落世界 + 新物到手，不该被拒");
+            Assert.IsTrue(receipt.OldItemTransferred, "回执标明旧物已转出");
+            Assert.AreSame(woodDef, body.Get(BodySlotType.Hand), "新物到手");
+            var dropped = records.RecordsIn("level.a");
+            Assert.AreEqual(1, dropped.Count, "旧物落成一条世界记录");
+            Assert.AreSame(axeDef, dropped[0].Definition);
+            Assert.AreEqual(1, dropped[0].Count);
+        }
+
+        [Test]
+        public void 无包_手上有同定义可持物_长按拿取_旧物落世界_新物到手()
+        {
+            var records = NewStore();
+            var destination = new WorldDropDestination(new WorldDropFactory(records), () => new Vector3(0f, 0f, 1f), "level.a");
+            var (body, coordinator) = NewRig(records, destination);
+            var axeDef = NewDef("item.axe", container: false);
+
+            // 无包先拿一手斧头
+            coordinator.RequestPickup(new WorldStackSource(axeDef, 1), axeDef, 1, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+            Assert.AreSame(axeDef, body.Get(BodySlotType.Hand), "前提：无包，手上拿着一把斧头");
+
+            // 无包再长按另一把**同款**斧头：旧的那把落世界，新的那把到手
+            var secondSource = new WorldStackSource(axeDef, 2);
+            var receipt = coordinator.RequestPickup(secondSource, axeDef, 2, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+
+            Assert.AreEqual(OperationStatus.Completed, receipt.Status, "同定义换手也应成立");
+            Assert.IsTrue(receipt.OldItemTransferred, "回执标明旧物已转出");
+            Assert.AreSame(axeDef, body.Get(BodySlotType.Hand), "手上仍是一把斧头（无状态堆叠只按定义判定）");
+            Assert.AreEqual(1, body.CountOf(axeDef), "手上仍只有一把");
+
+            var dropped = records.RecordsIn("level.a");
+            Assert.AreEqual(1, dropped.Count, "旧的那一把落成一条世界记录");
+            Assert.AreSame(axeDef, dropped[0].Definition);
+            Assert.AreEqual(1, dropped[0].Count);
+            Assert.AreEqual(1, secondSource.Remaining, "新的那把被取走一个，余量留在源里");
+        }
+
+        [Test]
         public void 拿取一堆_背包满_一手到手_余量落成一条堆叠记录()
         {
             var records = NewStore();

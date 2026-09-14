@@ -82,10 +82,36 @@ namespace XeptGame.Player
         [Tooltip("滑动输入加速度（每帧输入带来的速度增量；小于地面/空中加速度体现受限感）。注意：受限运动是合成而非钳制——不设目标速度，保留原有速度动量")]
         public float slidingAcceleration = 8f;
 
-        [Tooltip("true=长按冲刺（按住激活/松开复位）；false=点按切换")]
+        [Header("滑铲（主动高速蹲伏姿态，设计决议 §2.5）")]
+        [Tooltip("起滑门槛（水平自主速度，m/s）：冲刺中按蹲时低于此值则**退化为蹲伏**（避免低速滑铲）")]
+        public float slideEntryMinSpeed = 6f;
+
+        [Tooltip("起滑速度增量（总增量，m/s）：在 slideBoostDuration 窗口内线性摊入；0 = 无起滑加速（纯动量连续）")]
+        public float slideStartBoost = 2f;
+
+        [Tooltip("起滑加速窗口（秒）：把 slideStartBoost 摊开施加，避免瞬时加速/瞬移感")]
+        public float slideBoostDuration = 0.1f;
+
+        [Tooltip("滑铲摩擦（m/s²，线性减速；滑铲的主导衰减）。滑铲时长 ≈ (入口速度 + 起滑增量 − slideExitSpeed) / 本值，目标 0.7~1.0s")]
+        public float slideFriction = 10f;
+
+        [Tooltip("滑铲退出速度下限（m/s）：水平自主速度低于此值 → 退出到蹲伏")]
+        public float slideExitSpeed = 1.5f;
+
+        [Tooltip("滑铲转向角速度上限（度/秒）：速度方向朝输入方向限速旋转（**只改方向、不改模长**，不产生转向续速）")]
+        public float slideSteerSpeed = 150f;
+
+        [Tooltip("滑铲切向转向加速（m/s²，备选）：沿输入切向附加弱加速（会改变速度大小）；0 = 仅限角速度转向（默认）")]
+        public float slideSteerAcceleration = 0f;
+
+        [Tooltip("滑铲坡面影响（0~1）：重力切向对滑铲速度的影响——下坡加速、上坡减速；独立于地面移动的 slopeGravityInfluence。0=坡面不影响滑铲")]
+        [Range(0f, 1f)]
+        public float slideSlopeInfluence = 0.5f;
+
+        [Tooltip("true=长按冲刺（按住激活/松开终止意图）；false=点按切换。仅影响输入层如何折叠出冲刺意图，决策层不区分模式")]
         public bool pressToSprint = true;
 
-        [Tooltip("true=长按蹲伏（按住激活/松开复位）；false=点按切换")]
+        [Tooltip("true=长按蹲伏（按住激活/松开终止意图）；false=点按切换（再按一次终止）。仅影响输入层如何折叠出蹲伏意图，决策层不区分模式——滑铲的'意图终止即退出'因此在两种模式下都成立")]
         public bool pressToCrouch = true;
 
         /// <summary>运行时默认配置（未挂资产时使用）。非资产实例，不可在资源库中编辑。</summary>

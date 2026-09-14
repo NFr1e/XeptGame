@@ -12,6 +12,7 @@ namespace XeptGame.Items
     [CreateAssetMenu(menuName = XeptGameConsts.Editor.ContainerFacetProfileMenuName,
                      fileName = XeptGameConsts.Editor.ContainerFacetProfileFileName,
                      order = XeptGameConsts.Editor.ContainerFacetProfileOrder)]
+    [Icon(XeptGameConsts.Editor.ContainerFacetProfileIconPath)]
     public sealed class ContainerFacetProfile : ScriptableObject
     {
         [Tooltip("容器基础格数：负数视为坏数据 → 回退常量默认；0 合法（容量下限 0，SlotStore_Design.md §6）")]

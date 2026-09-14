@@ -60,16 +60,39 @@ namespace XeptGame.Items
     }
 
     /// <summary>
-    /// 世界可拾取能力面：条目存在 = 物品可在世界中以可拾取载体出现（WorldItem 接线阶段消费）。
-    /// 配置 = 对共享配置资产 <see cref="WorldFacetProfile"/>（SO）的引用（null = 未配置）；
-    /// worldPrefab 空 = 无模板可实例化（Object 引用判空可靠）。
-    /// 生成密度/权重属关卡生成器配置，不进本条目（ItemLoop_Design.md §3.3）。
+    /// 世界**生成态**表现面（W10）：条目存在 = 该物品可被世界生成器以"**静态资源**"形态放进世界——
+    /// **无刚体、无物理碰撞体**，只有 `Interactable` 层上的探测碰撞体，可被 `WorldItem` 交互。
+    /// 配置 = 共享资产 <see cref="WorldViewFacetProfile"/>（其 `viewPrefab` 即模板）。
+    /// <list type="bullet">
+    /// <item><b>它只答"生成态在世界里长什么样"</b>：不表达"能否被拾取"（结构事实），也不表达"能否被抛出"（位置/系统事实）；</item>
+    /// <item>面不存在或 profile 为空 → 消费方退化为**占位方块 + 告警**（I6 定义缺失可逆）；</item>
+    /// <item>生成密度/权重属生成器配置，不进本条目（ItemLoop_Design.md §3.3）。</item>
+    /// </list>
+    /// 消费者：世界生成器（大世界资源，**尚未实现**）。分工与迁移见 WorldRepresentation_Facet_Design.md（W10）。
     /// </summary>
     [System.Serializable]
-    public sealed class WorldFacet : IItemFacet
+    public sealed class WorldViewFacet : IItemFacet
     {
-        /// <summary>世界载体配置资产引用（null = 未配置）。</summary>
-        [InlineEditor] public WorldFacetProfile profile;
+        /// <summary>生成态世界表现配置资产引用（null = 未配置 → 退化占位方块）。</summary>
+        [InlineEditor] public WorldViewFacetProfile profile;
+    }
+
+    /// <summary>
+    /// 世界**掉落态**表现面（W10）：条目存在 = 该物品被抛出到世界时以"**物理掉落物**"形态表现——
+    /// **有刚体与物理碰撞体**（在 `DynamicProp` 层，会与地面/玩家碰撞），同时可被 `WorldItem` 交互。
+    /// 配置 = 共享资产 <see cref="WorldDropViewFacetProfile"/>（其 `viewPrefab` 即模板）。
+    /// <list type="bullet">
+    /// <item>触发场景：收起失败落地、拾取余量落地、换包交接（都经世界记录 → 视图生成器）；</item>
+    /// <item>面不存在或 profile 为空 → 生成器退化为**占位方块 + 告警**；</item>
+    /// <item>与 <see cref="WorldViewFacet"/> 的分工见 WorldRepresentation_Facet_Design.md（W10）。</item>
+    /// </list>
+    /// 消费者：`WorldViewSpawner`（记录驱动）。
+    /// </summary>
+    [System.Serializable]
+    public sealed class WorldDropViewFacet : IItemFacet
+    {
+        /// <summary>掉落态世界表现配置资产引用（null = 未配置 → 退化占位方块）。</summary>
+        [InlineEditor] public WorldDropViewFacetProfile profile;
     }
 
     /// <summary>

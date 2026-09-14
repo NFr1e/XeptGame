@@ -4,9 +4,10 @@ namespace XeptGame.Player
 {
     /// <summary>
     /// 冲刺（高速档）。规则：蹲伏与冲刺互斥——冲刺中按蹲直接转移 Crouch（视为冲刺取消，
-    /// 由 MotorActionDispatcher 判定）。能力：可蹲可跳（<see cref="ICrouchable"/>/<see cref="IJumpable"/>）。
+    /// 由 MotorActionDispatcher 判定）；速度达到门槛时按蹲**起滑**（<see cref="ISlidable"/> → SlideState）。
+    /// 能力：可蹲可跳（<see cref="ICrouchable"/>/<see cref="IJumpable"/>）、可起滑（<see cref="ISlidable"/>）。
     /// </summary>
-    public sealed class SprintState : MotorStateBase, ICrouchable, IJumpable
+    public sealed class SprintState : MotorStateBase, ICrouchable, IJumpable, ISlidable
     {
         public override void ApplyVelocity(ref Vector3 velocity, float deltaTime)
         {

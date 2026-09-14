@@ -42,6 +42,9 @@ namespace XeptGame.Items.Operations
         private readonly Equipment _body;
         private readonly EquipController _behavior;
         private readonly Action<ItemAcquiredEvent> _publish;
+
+        /// <summary>使用播报接缝（Backpack_UI_Design.md B2；与获得播报同层同纪律）。</summary>
+        private readonly Action<ItemConsumedEvent> _publishConsumed;
         private Operation _active;
         private long _nextId;
         private long _version;
@@ -85,11 +88,13 @@ namespace XeptGame.Items.Operations
             Action<ItemAcquiredEvent> publish = null,
             Func<ItemDefinition, EquipTiming> timingResolver = null,
             Func<long, bool> removeRecord = null,
-            Func<IWorldDropPort> worldDrop = null)
+            Func<IWorldDropPort> worldDrop = null,
+            Action<ItemConsumedEvent> publishConsumed = null)
         {
             _body = body ?? throw new ArgumentNullException(nameof(body));
             _behavior = behavior ?? throw new ArgumentNullException(nameof(behavior));
             _publish = publish;
+            _publishConsumed = publishConsumed;
             _timingResolver = timingResolver ?? ResolveTimingFromContent;
             _removeRecord = removeRecord;
             _worldDrop = worldDrop;
@@ -356,7 +361,11 @@ namespace XeptGame.Items.Operations
             return Begin(source, item, 1, displacedDestination, null, true, false, PickupIntent.ForceHold);
         }
 
-        /// <summary>收回完成后转入指定容器；失败保持 Stowed，G 可接管尚未提交的换物意图。</summary>
+        /// <summary>
+        /// 收回完成后转入指定容器；<paramref name="destination"/> 为 <c>null</c> = <b>没有容器可收</b>
+        /// （无包态误拾后按 G）→ 走"放到世界"的落地路径（与"背包满"同一条路：有掉落口就落地，
+        /// 没有则失败且东西留在手上，绝不静默丢）。失败保持 Stowed，G 可接管尚未提交的换物意图。
+        /// </summary>
         public OperationReceipt RequestUnequip(IItemContainer destination)
         {
             if (Blocked)
@@ -364,7 +373,7 @@ namespace XeptGame.Items.Operations
                 return Reject("BusyOrPaused");
             }
 
-            if (destination == null || ReferenceEquals(destination, _body))
+            if (ReferenceEquals(destination, _body))
             {
                 return Reject("InvalidDestination");
             }
@@ -402,6 +411,181 @@ namespace XeptGame.Items.Operations
             {
                 _busy = false;
             }
+        }
+
+        /// <summary>
+        /// 使用（Backpack_UI_Design.md B2）：从 <paramref name="source"/> 扣掉 <paramref name="count"/> 个单位，
+        /// 成功后发一次<b>会话域</b>使用播报。<b>效果域后置</b>——v1 只扣数与播报，"吃了回血/喝了解渴"
+        /// 由将来的效果域订阅 <see cref="ItemConsumedEvent"/> 实现。
+        /// <list type="bullet">
+        /// <item>按<b>定义</b>寻址（"用掉一个这东西"本就与格子无关）；未挂 <see cref="ConsumableFacet"/> → <c>NotConsumable</c>；</item>
+        /// <item>实例行不可消费（有状态载荷不参与按定义扣减，不变量 I2）→ 一并归入 <c>NotConsumable</c> 之外的 <c>ItemNotFound</c>；</item>
+        /// <item><b>同步命令</b>（不占活动操作位，与 <see cref="RequestSwapCarrier"/> 同一形态）：失败零改动，成功即终局。</item>
+        /// </list>
+        /// </summary>
+        public OperationReceipt RequestConsume(SlotContainer source, ItemDefinition item, int count)
+        {
+            if (Blocked)
+            {
+                return Reject("BusyOrPaused");
+            }
+
+            if (source == null || item == null || count <= 0)
+            {
+                return Reject("InvalidRequest");
+            }
+
+            if (!item.HasFacet<ConsumableFacet>())
+            {
+                return Reject("NotConsumable");
+            }
+
+            _busy = true;
+            try
+            {
+                if (!source.TryRemove(item, count))
+                {
+                    return Reject("ItemNotFound");
+                }
+
+                _publishConsumed?.Invoke(new ItemConsumedEvent(item, count));
+                return Complete("Consumed");
+            }
+            finally
+            {
+                _busy = false;
+            }
+        }
+
+        /// <summary>
+        /// 丢弃（Backpack_UI_Design.md B2；定义寻址）：<b>先从容器移除 → 再交世界掉落口落成记录 → 失败原样放回容器</b>
+        /// （沿既有"先移除、再落地、失败回滚"顺序纪律，绝不出现"既在背包又在世界"）。
+        /// 界面主路径用<b>格寻址</b>重载（能丢实例行）；本重载供无格上下文的调用方使用。
+        /// <para>
+        /// <b>为什么源类型是 <see cref="SlotContainer"/> 而不是 <see cref="IItemContainer"/></b>：
+        /// 这两个动作都由<b>格界面</b>发起——丢弃必须按格寻址才有"丢哪一个实例行"的语义，
+        /// 而 <c>IItemContainer</c> 是"物品面"端口、没有格的概念，承载不了它。
+        /// </para>
+        /// </summary>
+        public OperationReceipt RequestDrop(SlotContainer source, ItemDefinition item, int count)
+            => DropCore(source, null, item, count);
+
+        /// <summary>
+        /// 丢弃（<b>格寻址</b>；背包界面主路径）：以格内<b>实际内容</b>为准（不信任调用方给的物品），
+        /// 因而<b>能丢实例行</b>（"丢掉这个背包"走整包落地），这是定义寻址做不到的。
+        /// </summary>
+        public OperationReceipt RequestDrop(SlotContainer source, SlotId cell, int count)
+            => DropCore(source, cell, null, count);
+
+        /// <summary>
+        /// 丢弃单一实现。两条载荷各走各的落地形态：无状态行 → <c>TryAcceptStack</c>（一堆，一条记录）；
+        /// 实例行 → <c>TryAccept</c>（整包，携带同一实例）。两者都是"先取出来、落地失败就原样放回"。
+        /// </summary>
+        private OperationReceipt DropCore(SlotContainer source, SlotId? cell, ItemDefinition item, int count)
+        {
+            if (Blocked)
+            {
+                return Reject("BusyOrPaused");
+            }
+
+            if (source == null || count <= 0)
+            {
+                return Reject("InvalidRequest");
+            }
+
+            var port = _worldDrop?.Invoke();
+            if (port == null)
+            {
+                return Reject("NoWorldDrop");
+            }
+
+            // 格寻址：以槽为真相（调用方说的"里面是什么"不作数）
+            SlotBase slot = null;
+            if (cell.HasValue)
+            {
+                slot = FindSlotById(source, cell.Value);
+                if (slot == null || slot.IsEmpty)
+                {
+                    return Reject("CellEmpty");
+                }
+
+                item = slot.Item;
+                count = Math.Min(count, slot.Count);
+            }
+
+            if (item == null)
+            {
+                return Reject("InvalidRequest");
+            }
+
+            _busy = true;
+            try
+            {
+                // 实例行（有状态载荷，数量恒 1）：整包落地（I1/I7——实例只能有一个位置）
+                if (slot is { HasInstance: true })
+                {
+                    // 世界掉落口的实例形态只认容器实例（ICarrierDestination 的载荷形状）。
+                    // 当前唯一会产生实例行的载荷就是容器（Item_Instance_Design.md §2.2）；出现别种实例时在此扩展。
+                    if (slot.Instance is not ContainerInstance carrier)
+                    {
+                        return Reject("UnsupportedInstanceKind");
+                    }
+
+                    var store = source;
+                    if (!store.TryTakeInstanceAt(cell.Value, out var taken))
+                    {
+                        return Reject("ItemNotFound");
+                    }
+
+                    if (port.TryAccept(carrier, out var carrierReason))
+                    {
+                        return Complete("Dropped");
+                    }
+
+                    if (!store.TryPlaceInstanceAt(cell.Value, taken))
+                    {
+                        throw new InvalidOperationException("丢弃失败且无法放回原格，必须停止后续操作并检查占用事实。");
+                    }
+
+                    return Reject(string.IsNullOrEmpty(carrierReason) ? "DropRejected" : carrierReason);
+                }
+
+                if (!source.TryRemove(item, count))
+                {
+                    return Reject("ItemNotFound");
+                }
+
+                if (port.TryAcceptStack(item, count, out var reason))
+                {
+                    return Complete("Dropped");
+                }
+
+                // 掉落被拒 → 原样放回（不丢、不复制）
+                if (!source.TryAdd(item, count))
+                {
+                    throw new InvalidOperationException("丢弃失败且无法放回容器，必须停止后续操作并检查占用事实。");
+                }
+
+                return Reject(string.IsNullOrEmpty(reason) ? "DropRejected" : reason);
+            }
+            finally
+            {
+                _busy = false;
+            }
+        }
+
+        /// <summary>按槽身份查格（容器自带的是 protected，协调器是外部消费者，故本地实现）。</summary>
+        private static SlotBase FindSlotById(SlotContainer store, SlotId cell)
+        {
+            for (int i = 0; i < store.Slots.Count; i++)
+            {
+                if (store.Slots[i].Id == cell)
+                {
+                    return store.Slots[i];
+                }
+            }
+
+            return null;
         }
 
         private bool Blocked => _disposed || _faulted || _busy || _behavior.Snapshot.Paused;
@@ -462,9 +646,19 @@ namespace XeptGame.Items.Operations
             equip = accepts && (!pickup ||
                 (intent == PickupIntent.Tap ? held == null : !ReferenceEquals(held, item)));
 
-            // 无包态：只有"手上空着、把一单位拿到手"这条路径能在没有背包时完成；
-            // 需要收起手上旧物（Stow）或需要把余量入包时没有别的去向 → 明确拒绝（不静默改路由）。
-            if (bagless && (!equip || held != null))
+            // 无包态没有"直接入包"这回事：手上已持**同一定义**时也必须按"换手"处理
+            // （旧物落世界、新物到手）。否则"斧子换斧子"会被误判成无事可做而被拒。
+            // 注意：无状态堆叠只按定义判等，所以"同一把"与"另一把同款"在这里无从区分，
+            // 一律走换手——两者对玩家是同一件事（手上还是一把斧头，地上多一条记录）。
+            if (bagless && pickup && accepts && intent == PickupIntent.ForceHold)
+            {
+                equip = true;
+            }
+
+            // 无包态：只要求"新物能进手"——进不了手就没有任何去处 → 明确拒绝。
+            // 手上已有旧物时**不再拒绝**：旧物的去向 = 世界（"换手"语义，与按 G 收起同一条落地路径），
+            // 由 Stow 步处理；世界掉落口缺失时该步失败，旧物原样留在手上（不静默丢）。
+            if (bagless && !equip)
             {
                 return Reject("NoBag");
             }
@@ -564,25 +758,35 @@ namespace XeptGame.Items.Operations
 
                     if (!StowHeld(operation))
                     {
-                        // 目的地拒绝（典型：背包满）→ "收起 = 把手上的东西放走"：有世界掉落口就落地，
+                        // 目的地拒绝（典型：背包满 / 无包）→ "收起 = 把手上的东西放走"：有世界掉落口就落地，
                         // 没有则维持原语义（失败且仍在手上，绝不静默丢）。
-                        if (TryStowHeldToWorld(operation))
+                        if (!TryStowHeldToWorld(operation))
+                        {
+                            Finish(OperationStatus.Failed, "DestinationRejected");
+                            return;
+                        }
+
+                        operation.Receipt.OldItemTransferred = true;
+
+                        // 纯收起（没有新东西要拿）→ 落地即终局
+                        if (operation.Source == null)
                         {
                             Finish(OperationStatus.Completed, "StowedToWorld");
                             return;
                         }
-
-                        Finish(OperationStatus.Failed, "DestinationRejected");
-                        return;
                     }
-
-                    operation.Receipt.OldItemTransferred = true;
-                    if (operation.Source == null)
+                    else
                     {
-                        Finish(OperationStatus.Completed);
-                        return;
+                        operation.Receipt.OldItemTransferred = true;
+
+                        if (operation.Source == null)
+                        {
+                            Finish(OperationStatus.Completed);
+                            return;
+                        }
                     }
 
+                    // 还有新东西要拿（无包时的"换手"也走这里）→ 继续
                     operation.Step = Step.Transfer;
                 }
 
@@ -744,6 +948,12 @@ namespace XeptGame.Items.Operations
             var held = _body.Get(BodySlotType.Hand);
             var hint = _returnHint;
             _returnHint = null; // 提示一次性：无论成功与否都消费掉
+
+            // 没有容器收货（无包态）→ 不放回任何容器，交给调用方的"落地"分支处理
+            if (operation.Destination == null)
+            {
+                return false;
+            }
 
             if (hint is { } target && ReferenceEquals(target.Store, operation.Destination)
                 && ContainerTransfer.MoveAt(_body, target.Store, held, 1, target.Cell))

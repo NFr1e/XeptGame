@@ -5,10 +5,11 @@ namespace XeptGame.Player
 {
     /// <summary>
     /// 电机离散动作调度器（独立类：不寄生状态类/父状态；设计决议 §2.4）。
-    /// 把"动作级/姿态级"输入（蹲伏、接地跳跃）从父状态（GroundedState）解耦为**集中准入 + 转移请求**：
-    /// 每帧对当前叶子状态按能力 Marker 判定——叶子实现 <see cref="ICrouchable"/> → 请求蹲伏；
-    /// 叶子实现 <see cref="IJumpable"/> → 执行统一接地跳。判定不依赖具体状态类型
-    /// （消除 <c>is CrouchState</c> 硬编码），新增"可蹲/可跳"能力只须在状态上实现 Marker。
+    /// 把"动作级/姿态级"输入（滑铲、蹲伏、接地跳跃）从父状态（GroundedState）解耦为**集中准入 + 转移请求**：
+    /// 每帧对当前叶子状态按能力 Marker 判定——叶子实现 <see cref="ISlidable"/> 且动态门槛
+    /// <see cref="PlayerMotorContext.CanStartSlide"/> 通过 → 请求滑铲；叶子实现 <see cref="ICrouchable"/>
+    /// → 请求蹲伏；叶子实现 <see cref="IJumpable"/> → 执行统一接地跳。判定不依赖具体状态类型
+    /// （消除 <c>is CrouchState</c> 硬编码），新增能力只须在状态上实现 Marker。
     ///
     /// 能力边界（与 Marker 设计一致，见 <see cref="ICrouchable"/>/<see cref="IJumpable"/>）：
     /// - Marker 表达**结构性能力**（本状态类别允许该动作）——准入在调度器集中判定；
@@ -21,8 +22,9 @@ namespace XeptGame.Player
     /// 接地态动作（空中按蹲会收缩胶囊、或与父级转移在两级机器上并发竞态）。Tick 后判定保证
     /// "叶子实现 IJumpable/ICrouchable ⇔ 决策层确认接地"，与旧父状态语义逐帧一致。
     ///
-    /// 同帧蹲+跳：蹲伏优先（先评估蹲伏，命中即本帧不再评估跳跃）——与旧父状态
-    /// "先蹲后跳、蹲中禁跳"语义一致；蹲伏保持中（叶子=CrouchState）请求幂等跳过。
+    /// 动作优先级：**滑铲 > 蹲伏 > 跳跃**——同帧"冲刺+蹲+跳" = 起滑；冲刺中按蹲但速度不足门槛时
+    /// 滑铲不成立、继续评估蹲伏（**退化为蹲伏**，§2.5）；蹲伏保持中（叶子=CrouchState）请求幂等跳过；
+    /// 滑铲保持中（叶子=SlideState，非 ICrouchable）不会被蹲伏动作打断，其保持/退出由 SlideState 自行处理。
     /// </summary>
     public sealed class MotorActionDispatcher
     {
@@ -43,13 +45,36 @@ namespace XeptGame.Player
                 return; // 未进入初始状态 / 已终止
             }
 
-            // 蹲伏优先：同帧蹲+跳 = 先蹲（蹲中禁跳，需先起身；起身由 CrouchState 内部处理）
+            // 动作优先级：滑铲 > 蹲伏 > 跳跃（任一命中即本帧结束，不再评估后续动作）
+            if (TrySlide())
+            {
+                return; // 起滑
+            }
+
             if (TryCrouch())
             {
-                return;
+                return; // 蹲伏（含"冲刺中按蹲但速度不足门槛"的退化路径）
             }
 
             TryJump();
+        }
+
+        /// <summary>
+        /// 滑铲动作（§2.5）：准入 = 叶子实现 <see cref="ISlidable"/> 且
+        /// <see cref="PlayerMotorContext.CanStartSlide"/>（想蹲 + 水平自主速度达门槛）
+        /// → 在叶子所属机器（Grounded 子机器）内请求 SlideState。
+        /// 返回 true = 本帧起滑（不再评估蹲伏/跳跃）；门槛不过时返回 false，交由蹲伏动作接住（退化蹲伏）。
+        /// </summary>
+        private bool TrySlide()
+        {
+            var leaf = _fsm.CurrentState;
+            if (leaf is not ISlidable || !_ctx.CanStartSlide)
+            {
+                return false;
+            }
+
+            leaf.Fsm.RequestChange<SlideState>();
+            return true;
         }
 
         /// <summary>
@@ -83,7 +108,7 @@ namespace XeptGame.Player
         private void TryJump()
         {
             var leaf = _fsm.CurrentState;
-            if (leaf is not IJumpable || !_ctx.Input.JumpPressed || _ctx.JumpConsumed)
+            if (leaf is not IJumpable || !_ctx.Input.JumpIntent || _ctx.JumpConsumed)
             {
                 return;
             }

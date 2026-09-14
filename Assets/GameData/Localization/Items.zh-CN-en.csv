@@ -1,4 +1,28 @@
 key,zh-CN,en
 item.rock.name,石头,Rock
 item.drug.name,药品,Drug
+item.fireaxe.name,消防斧,Fireaxe
+item.bandgae.name,绷带,Bandage
 item.stone.name,小石头,Stone
+item.backpack.name,背包,Backpack
+
+interaction.pickup,拾取,Pick up
+interaction.ignite,点燃,Ignite
+interaction.extinguish,熄灭,Extinguish
+interaction.addfuel,添柴（{0}/{1}）,Add fuel ({0}/{1})
+interaction.debug,交互,Interact
+interaction.wear,背上,Wear
+interaction.equip,装备,Equip
+
+campfire.name,火堆,Campfire
+
+backpack.title,背包,Backpack
+backpack.capacity,容量 {0}/{1},Capacity {0}/{1}
+backpack.cell.count,×{0},×{0}
+backpack.detail.count,数量 {0},Count {0}
+backpack.detail.stacklimit,每格上限 {0},Stack limit {0}
+backpack.detail.nolimit,不限制每格上限,No per-cell limit
+backpack.detail.none,选择一格查看,Select a cell
+backpack.action.use,使用,Use
+backpack.action.drop,丢弃,Drop
+backpack.action.use.disabled,{0} 不能使用,{0} can't be used

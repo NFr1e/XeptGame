@@ -14,7 +14,9 @@ namespace XeptGame.Tests
     /// <summary>
     /// 无包态拾取分流测试（Item_Instance_Design.md §3；Hand 槽与背包解耦）：
     /// <b>长按拿取</b>=先上一手、余量入包 → 无包时不受影响（一单位到手，余量留在世界源）；
-    /// <b>点按拾取</b>=整批入包 → 无包时拒绝 <c>NoBag</c>；手上有别的物/不可持物时也没有余量去向 → 同样拒绝。
+    /// <b>点按拾取</b>=整批入包 → 无包时拒绝 <c>NoBag</c>；<b>不可持物</b>进不了手 → 同样拒绝。
+    /// 手上已有别的可持物时不再直接拒绝：旧物去向 = 世界（有掉落口则落地、新物到手；
+    /// 无掉落口则失败且旧物留在手上——落地路径见 <see cref="WorldDropTests"/>）。
     /// 另回归：有包时长按仍是"一手 + 余量入包"，且一次拒绝不会把协调器打成一致性故障。
     /// </summary>
     public class NoBagPickupTests
@@ -77,20 +79,45 @@ namespace XeptGame.Tests
         }
 
         [Test]
-        public void 无包_手上有别的可持物_长按拿取_拒绝NoBag()
+        public void 无包_手上有别的可持物_长按拿取_无掉落口_失败且旧物留在手上()
         {
             var (body, coordinator) = NewRig();
             var axe = NewDef("item.axe", holdable: true);
             var wood = NewDef("item.wood", holdable: true);
-            Assert.IsTrue(body.TryAdd(axe, 1), "手上先拿着别的东西");
-            var world = NewWorldSource(wood, 3);
+            var woodSource = NewWorldSource(wood, 3);
 
-            var receipt = coordinator.RequestPickup(world, wood, world.Remaining, PickupIntent.ForceHold, null);
+            // 旧物也必须经真实拾取上手：直接 body.TryAdd 会被协调器的"外部占用巡检"判成 ExternalOccupancyChange
+            coordinator.RequestPickup(NewWorldSource(axe, 1), axe, 1, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+            Assert.AreSame(axe, body.Get(BodySlotType.Hand), "前提：无包，手上拿着斧头");
 
-            Assert.AreEqual(OperationStatus.Rejected, receipt.Status);
-            Assert.AreEqual("NoBag", receipt.Reason, "收起旧物需要背包 → 明确拒绝（不静默改路由）");
-            Assert.AreSame(axe, body.Get(BodySlotType.Hand), "手上旧物未被动");
-            Assert.AreEqual(3, world.Remaining);
+            var receipt = coordinator.RequestPickup(woodSource, wood, woodSource.Remaining, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+
+            Assert.AreEqual(OperationStatus.Failed, receipt.Status, "旧物去向=世界，但本夹具没有掉落口 → 明确失败");
+            Assert.AreEqual("DestinationRejected", receipt.Reason);
+            Assert.AreSame(axe, body.Get(BodySlotType.Hand), "手上旧物未被动（不静默丢）");
+            Assert.AreEqual(3, woodSource.Remaining, "新物仍在世界源里");
+        }
+
+        [Test]
+        public void 无包_手上有同定义可持物_长按拿取_无掉落口_失败且零改动()
+        {
+            var (body, coordinator) = NewRig();
+            var axe = NewDef("item.axe", holdable: true);
+
+            coordinator.RequestPickup(NewWorldSource(axe, 1), axe, 1, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+            Assert.AreSame(axe, body.Get(BodySlotType.Hand), "前提：无包，手上拿着一把斧头");
+
+            var second = NewWorldSource(axe, 2);
+            var receipt = coordinator.RequestPickup(second, axe, 2, PickupIntent.ForceHold, null);
+            Pump(coordinator);
+
+            Assert.AreEqual(OperationStatus.Failed, receipt.Status, "同定义也按换手处理；本夹具无掉落口 → 明确失败");
+            Assert.AreEqual("DestinationRejected", receipt.Reason);
+            Assert.AreEqual(1, body.CountOf(axe), "手上仍只有一把（不静默丢）");
+            Assert.AreEqual(2, second.Remaining, "源零改动");
         }
 
         [Test]

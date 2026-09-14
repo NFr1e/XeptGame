@@ -19,5 +19,27 @@ MonoBehaviour:
     Value: "\u77F3\u5934"
   - Key: item.drug.name
     Value: "\u836F\u54C1"
+  - Key: item.fireaxe.name
+    Value: "\u6D88\u9632\u65A7"
+  - Key: item.bandgae.name
+    Value: "\u7EF7\u5E26"
   - Key: item.stone.name
     Value: "\u5C0F\u77F3\u5934"
+  - Key: item.backpack.name
+    Value: "\u80CC\u5305"
+  - Key: interaction.pickup
+    Value: "\u62FE\u53D6"
+  - Key: interaction.ignite
+    Value: "\u70B9\u71C3"
+  - Key: interaction.extinguish
+    Value: "\u7184\u706D"
+  - Key: interaction.addfuel
+    Value: "\u6DFB\u67F4\uFF08{0}/{1}\uFF09"
+  - Key: interaction.debug
+    Value: "\u4EA4\u4E92"
+  - Key: interaction.wear
+    Value: "\u80CC\u4E0A"
+  - Key: interaction.equip
+    Value: "\u88C5\u5907"
+  - Key: campfire.name
+    Value: "\u706B\u5806"

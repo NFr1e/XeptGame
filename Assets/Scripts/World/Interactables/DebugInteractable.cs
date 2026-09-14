@@ -1,16 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 using XeptGame.Interaction;
+using XeptGame.Interaction.Behaviours;
 using XeptKit.Core;
 
 namespace XeptGame.World.Interactables
 {
     /// <summary>
-    /// 调试用交互对照物（v3.1 宿主模型）：同时是**宿主（ISelectable + IInteractionActionsHost）**，
-    /// 唯一动作 = 内部纯 C# <see cref="DebugAction"/>（Primary"交互"，构造注入宿主）。覆盖验证面：
-    /// CanSelect 门控（maxInteractions 耗尽不可选）/ 动作冷却门控（cooldown 期间灰态/按下重判）/ 选中高亮。
+    /// 调试用交互对照物（v3.1 宿主模型 + v5 目标端口）：同时是**可交互目标（<see cref="IDebugTarget"/>）**与
+    /// **宿主（ISelectable + IInteractionActionsHost）**；动作从总名单筛出（当前只有"交互"一件，成员恒定，
+    /// 故不实现成员变化通知）。覆盖验证面：CanSelect 门控（maxInteractions 耗尽不可选）/
+    /// 动作冷却门控（cooldown 期间灰态、按下重判）/ 选中高亮。
     /// </summary>
-    public sealed class DebugInteractable : MonoBehaviour, ISelectable, IInteractionActionsHost
+    public sealed class DebugInteractable : MonoBehaviour, ISelectable, IInteractionActionsHost, IDebugTarget
     {
         [Header("CanSelect 门控（目标性：耗尽后不可选）")]
         [Tooltip("最大交互次数；< 0 = 不限")]
@@ -48,7 +50,14 @@ namespace XeptGame.World.Interactables
 
         private void Awake()
         {
-            _actions.Add(new DebugAction(this));
+            for (int i = 0; i < InteractionBehaviourCatalog.All.Count; i++)
+            {
+                var behaviour = InteractionBehaviourCatalog.All[i];
+                if (behaviour.CanBuildOn(this, null))
+                {
+                    _actions.Add(new BoundAction(behaviour, this));
+                }
+            }
 
             if (highlightRenderer != null)
             {
@@ -93,7 +102,7 @@ namespace XeptGame.World.Interactables
             }
         }
 
-        /// <summary>执行交互（动作 Interact 收口）。</summary>
+        /// <inheritdoc />
         public bool TryInteract()
         {
             if (IsCoolingDown)
@@ -107,25 +116,6 @@ namespace XeptGame.World.Interactables
             var remaining = maxInteractions < 0 ? "∞" : (maxInteractions - _interactCount).ToString();
             Log.Info($"[DebugInteractable] {name} 第 {_interactCount} 次交互（剩余 {remaining}）");
             return true;
-        }
-
-        /// <summary>交互动作（纯 C#，构造注入宿主）。</summary>
-        private sealed class DebugAction : IInteractionAction
-        {
-            private readonly DebugInteractable _host;
-
-            public DebugAction(DebugInteractable host)
-            {
-                _host = host;
-            }
-
-            public InputSlot Slot => InputSlot.Primary;
-
-            public string PromptText => "交互";
-
-            public bool CanInteract(InteractionContext context) => !_host.IsCoolingDown;
-
-            public void Interact(InteractionContext context) => _host.TryInteract();
         }
     }
 }

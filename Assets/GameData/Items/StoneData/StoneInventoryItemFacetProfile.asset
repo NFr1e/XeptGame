@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: StoneInventoryItemFacetProfile
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.InventoryItemFacetProfile
   category: 1
-  maxStack: 24
+  maxStack: 12

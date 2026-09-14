@@ -58,9 +58,11 @@ namespace XeptGame.Player
         }
         private void HandleLayerBlock()
         {
+            // 输入层被阻断（UI/暂停/失去控制权）→ 意图全部终止（两类模式同样适用）；
+            // 决策层因此看到"意图终止"，滑铲/蹲伏/冲刺按各自规则退出
             _motorInput.MoveInput = Vector2.zero;
-            _motorInput.SprintHeld = false;
-            _motorInput.CrouchHeld = false;
+            _motorInput.SprintIntent = false;
+            _motorInput.CrouchIntent = false;
             _lookInput.Delta = Vector2.zero;
         }
 
@@ -72,47 +74,47 @@ namespace XeptGame.Player
         {
             if (ctx.performed)
             {
-                _motorInput.JumpPressed = true;
+                _motorInput.JumpIntent = true;
             }
         }
         private void OnSprint(InputAction.CallbackContext ctx)
         {
-            // 折叠为 Held 语义（Motor 只读 SprintHeld 持续值，无切换保持/边沿时序问题）：
-            // PressToSprint=true 长按（按住激活/松开复位）；false 切换（按下翻转）
+            // 折叠为**意图状态**（决策层只识别"是否想冲刺"，不识别长按/点按输入模式）：
+            // PressToSprint=true 长按（按住激活/松开终止）；false 切换（按下翻转）
             if (ctx.performed)
             {
                 if (_settings.PressToSprint.Value)
                 {
-                    _motorInput.SprintHeld = true;
+                    _motorInput.SprintIntent = true;
                 }
                 else
                 {
-                    _motorInput.SprintHeld = !_motorInput.SprintHeld;
+                    _motorInput.SprintIntent = !_motorInput.SprintIntent;
                 }
             }
             else if (ctx.canceled && _settings.PressToSprint.Value)
             {
-                _motorInput.SprintHeld = false;
+                _motorInput.SprintIntent = false;
             }
         }
         private void OnCrouch(InputAction.CallbackContext ctx)
         {
-            // 折叠为 Held 语义（同 OnSprint）：
-            // PressToCrouch=true 长按；false 切换（按下翻转）
+            // 折叠为**意图状态**（同 OnSprint）：两种模式产出的都是同一个"想蹲伏"意图，
+            // 差异只在"谁把意图终止"——长按=松开，点按=下一次按下翻转。
             if (ctx.performed)
             {
                 if (_settings.PressToCrouch.Value)
                 {
-                    _motorInput.CrouchHeld = true;
+                    _motorInput.CrouchIntent = true;
                 }
                 else
                 {
-                    _motorInput.CrouchHeld = !_motorInput.CrouchHeld;
+                    _motorInput.CrouchIntent = !_motorInput.CrouchIntent;
                 }
             }
             else if (ctx.canceled && _settings.PressToCrouch.Value)
             {
-                _motorInput.CrouchHeld = false;
+                _motorInput.CrouchIntent = false;
             }
         }
 

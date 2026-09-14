@@ -4,6 +4,19 @@ namespace XeptGame.Core
     {
         public struct Editor
         {
+            #region Item 资产图标
+            // 图标目录迁移时只需修改此根路径；文件名变化时修改对应常量。
+            private const string ItemIconRoot = "Assets/Editor/Icons/Items/";
+
+            public const string ItemDefinitionIconPath = ItemIconRoot + "ItemDefinition.png";
+            public const string InventoryItemFacetProfileIconPath = ItemIconRoot + "InventoryItemFacetProfile.png";
+            public const string ContainerFacetProfileIconPath = ItemIconRoot + "ContainerFacetProfile.png";
+            public const string HoldableFacetProfileIconPath = ItemIconRoot + "HoldableFacetProfile.png";
+            public const string WorldViewFacetProfileIconPath = ItemIconRoot + "WorldViewFacetProfile.png";
+            public const string WorldDropViewFacetProfileIconPath = ItemIconRoot + "WorldDropViewFacetProfile.png";
+            public const string ContainerCapacityExpanderProfileIconPath = ItemIconRoot + "ContainerCapacityExpanderProfile.png";
+            #endregion
+
             #region CreateAssetMenu 配置
 
             #region Player
@@ -38,25 +51,29 @@ namespace XeptGame.Core
             public const string ItemDefinitionFileName = "ItemDefinition";
             public const int ItemDefinitionOrder = 0;
 
-            public const string ItemWorldFacetProfileMenuName = ItemFacetMenuRoot + "/WorldFacetProfile";
-            public const string ItemWorldFacetProfileFileName = "WorldFacetProfile";
-            public const int ItemWorldFacetProfileOrder = 0;
+            public const string ItemWorldViewFacetProfileMenuName = ItemFacetMenuRoot + "/WorldViewFacetProfile";
+            public const string ItemWorldViewFacetProfileFileName = "WorldViewFacetProfile";
+            public const int ItemWorldViewFacetProfileOrder = 0;
+
+            public const string ItemWorldDropViewFacetProfileMenuName = ItemFacetMenuRoot + "/WorldDropViewFacetProfile";
+            public const string ItemWorldDropViewFacetProfileFileName = "WorldDropViewFacetProfile";
+            public const int ItemWorldDropViewFacetProfileOrder = 1;
 
             public const string ItemHoldableFacetProfileMenuName = ItemFacetMenuRoot + "/HoldFacetProfile";
             public const string ItemHoldableFacetProfileFileName = "HoldFacetProfile";
-            public const int ItemHoldableFacetProfileOrder = 1;
+            public const int ItemHoldableFacetProfileOrder = 2;
 
             public const string InventoryItemFacetProfileMenuName = ItemFacetMenuRoot + "/InventoryItemFacetProfile";
             public const string InventoryItemFacetProfileFileName = "InventoryItemFacetProfile";
-            public const int InventoryItemFacetProfileOrder = 2;
+            public const int InventoryItemFacetProfileOrder = 3;
 
             public const string ItemContainerCapacityExpanderFacetProfileMenuName = ItemFacetMenuRoot + "/ContainerCapacityExpanderProfile";
             public const string ItemContainerCapacityExpanderFacetProfileFileName = "ContainerCapacityExpanderProfile";
-            public const int ItemContainerCapacityExpanderFacetProfileOrder = 3;
+            public const int ItemContainerCapacityExpanderFacetProfileOrder = 4;
 
             public const string ContainerFacetProfileMenuName = ItemFacetMenuRoot + "/ContainerFacetProfile";
             public const string ContainerFacetProfileFileName = "ContainerFacetProfile";
-            public const int ContainerFacetProfileOrder = 4;
+            public const int ContainerFacetProfileOrder = 5;
             #endregion
 
             #endregion

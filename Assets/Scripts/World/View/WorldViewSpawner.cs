@@ -13,8 +13,10 @@ namespace XeptGame.World
     /// 世界视图生成器（Item_Instance_Design.md §5.2）：订阅记录表，按记录<b>生成/回收</b>场景视图。
     /// <list type="bullet">
     /// <item><b>记录是真相、视图是表现</b>（不变量 I3）：Added 生成、Removed 回收；<b>视图绝不删记录</b>；</item>
-    /// <item>prefab 取物品的 <see cref="WorldFacet"/> 配置；<b>未配置则退化为可见占位方块</b> + 告警——
+    /// <item>prefab 取物品的**掉落态世界表现面**（<see cref="WorldDropViewFacet"/>；它只答"掉落时在世界里长什么样"，
+    /// 不答"能否拾取/能否抛出"）；<b>未配置则退化为可见占位方块</b> + 告警——
     /// 保证"掉落物看得见、拾得回"，不因内容缺配置而静默失灵（I6 的运行时一面）；</item>
+    /// <item>**生成态**外观（<see cref="WorldViewFacet"/>，无物理可交互）由**世界生成器**消费，不走本生成器（W10）。</item>
     /// <item>同时承担<b>世界层装配缝</b>：把 <see cref="WorldDropDestination"/> 注入会话（DP6 的"旧包去向"）。</item>
     /// </list>
     /// 前提：随玩法基座场景激活（晚于会话创建）；会话不存在时失活并报错，不轮询。
@@ -112,7 +114,7 @@ namespace XeptGame.World
             }
 
             var prefab = record.Definition != null
-                ? record.Definition.GetFacet<WorldFacet>()?.profile?.worldPrefab
+                ? record.Definition.GetFacet<WorldDropViewFacet>()?.profile?.viewPrefab
                 : null;
 
             GameObject view;
@@ -123,7 +125,7 @@ namespace XeptGame.World
             else
             {
                 view = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                Log.Warning($"[WorldViewSpawner] {record.Definition?.Id} 未配置 WorldFacetProfile.worldPrefab → 用占位方块表现（内容待补）。");
+                Log.Warning($"[WorldViewSpawner] {record.Definition?.Id} 未配置 WorldDropViewFacetProfile.viewPrefab → 用占位方块表现（内容待补）。");
             }
 
             // 先挂到"世界稳定的视图根"，再写**世界**位置——顺序反了会把记录坐标当成父节点下的局部坐标，
@@ -131,26 +133,41 @@ namespace XeptGame.World
             view.transform.SetParent(ViewRoot, false);
             view.transform.SetPositionAndRotation(record.Position, Quaternion.identity);
             view.name = "WorldView_" + record.Id;
-            var item = view.GetComponent<WorldItem>();
+
+            // 取组件：**含自身、深度优先**——根上有就用根，挂在子物体上（如 InteractableProbe）就用子级；
+            // 旧写法只认根，会在子级已挂组件的 prefab 上于根再补一个（两个 WorldItem 打架）。
+            var items = view.GetComponentsInChildren<WorldItem>(true);
+            WorldItem item = items.Length > 0 ? items[0] : null;
             if (item == null)
             {
                 item = view.AddComponent<WorldItem>();
+                Log.Warning($"[WorldViewSpawner] 世界载体 prefab「{(prefab != null ? prefab.name : "占位方块")}」上没有 WorldItem：" +
+                            "已在根上补一个（建议把 WorldItem 放进 prefab 并配好视图根）。");
+            }
+            else if (items.Length > 1)
+            {
+                Log.Error($"[WorldViewSpawner] 世界载体 prefab「{prefab.name}」里有 {items.Length} 个 WorldItem：" +
+                          $"取最近的「{item.name}」，其余需清理（否则视图/可用性判据会打架）。");
             }
 
-            item.Initialize(BuildSource(record, view));
+            item.Initialize(BuildSource(record, item));
             _views.Add(record.Id, view);
         }
 
-        /// <summary>按记录类型造数据面：实例记录（背包）走实例源，堆叠记录走堆叠源。</summary>
-        private static IWorldSource BuildSource(WorldRecord record, GameObject view)
+        /// <summary>
+        /// 按记录类型造数据面：实例记录（背包）走实例源，堆叠记录走堆叠源。
+        /// 视图的可用性与隐藏**交给 WorldItem 自己的视图语义**（<c>IsViewAvailable</c> / <c>RefreshView</c>）——
+        /// 生成器不再假设"prefab 根就是视图"（W8，WorldItem_Design.md §7）。
+        /// </summary>
+        private static IWorldSource BuildSource(WorldRecord record, WorldItem item)
         {
             IWorldSource source = null;
-            Func<bool> available = () => view != null && view.activeInHierarchy;
+            Func<bool> available = () => item != null && item.IsViewAvailable;
             Action refresh = () =>
             {
-                if (view != null && source != null && !source.HasContent)
+                if (item != null)
                 {
-                    view.SetActive(false);
+                    item.RefreshView();
                 }
             };
 

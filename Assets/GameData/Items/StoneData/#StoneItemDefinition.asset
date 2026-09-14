@@ -17,7 +17,7 @@ MonoBehaviour:
   iconSprite: {fileID: 21300000, guid: cf33e55e7d19c2842b1235cd7d3bcb82, type: 3}
   iconTexture: {fileID: 0}
   facets:
-  - rid: 135043234695217160
+  - rid: 135043442431754337
   - rid: 135043234695217158
   - rid: 135043351233953870
   - rid: 135043234695217157
@@ -35,11 +35,11 @@ MonoBehaviour:
     - rid: 135043234695217159
       type: {class: ResourceFacet, ns: XeptGame.Items, asm: XeptGame}
       data: 
-    - rid: 135043234695217160
-      type: {class: WorldFacet, ns: XeptGame.Items, asm: XeptGame}
-      data:
-        profile: {fileID: 11400000, guid: e0f7fd8c5d99a12409a6303f5f130780, type: 2}
     - rid: 135043351233953870
       type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: 5a8ad32653e7f0744806e656f01a2491, type: 2}
+    - rid: 135043442431754337
+      type: {class: WorldDropViewFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: e0f7fd8c5d99a12409a6303f5f130780, type: 2}

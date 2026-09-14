@@ -30,6 +30,13 @@ namespace XeptGame
         public static IUIManager UIManager { get; private set; }
         public static CameraManager CameraManager { get; private set; }
 
+        /// <summary>
+        /// 时间权威（App 域服务，Time_Authority_Design.md T3）：暂停请求口 + 全工程唯一写 <c>Time.timeScale</c> 的地方。
+        /// <b>注意名字遮蔽</b>：本属性遮蔽同名的 <c>UnityEngine.Time</c>，因此本类内不得再引用引擎时钟
+        /// （引擎时钟的读写收口在 <see cref="EnginePauseEffect"/>）。误用会直接编译失败，不会静默出错。
+        /// </summary>
+        public static TimeAuthority Time { get; private set; }
+
 #if UNITY_EDITOR
         private static IAssetLoader _editorLoader;
 #endif
@@ -65,6 +72,7 @@ namespace XeptGame
             UIManager = new UIManager(EventBus);
             GlobalInput = new GameInput();
             CameraManager = new CameraManager(); // 跨场景相机栈仲裁（CameraNotifier 自报，见 CameraManager）
+            Time = new TimeAuthority(new EnginePauseEffect(InputManager)); // 暂停请求口（timeScale 唯一写者）
 
             #endregion
 
@@ -126,6 +134,7 @@ namespace XeptGame
             InputManager?.Clear();
             ScenesManager?.Clear();
             CameraManager?.Clear();
+            Time?.ForceResume(); // 退出前还原全局时基与输入层（否则编辑器会停在 timeScale = 0）
             AppManager?.Dispose();
 
             KitLifecycle.Shutdown();
