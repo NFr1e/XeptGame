@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7bf76e0e75c8f2e419b6af2e5f61e421
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2655988077585873504
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 148410
+  packageName: RPG Poly Pack - Lite
+  packageVersion: 1.0.1
+  assetPath: Assets/RPGPP_LT/Presets/FBXImporter.preset
+  uploadId: 766582

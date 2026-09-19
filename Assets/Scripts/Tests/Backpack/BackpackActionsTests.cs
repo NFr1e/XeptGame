@@ -174,6 +174,84 @@ namespace XeptGame.Tests
             Assert.AreSame(stowed, bag.Slots[0].Instance, "放回**原格**且是同一个实例对象");
         }
 
+        [Test]
+        public void 丢弃_同定义两格_只动选中的那一格()
+        {
+            var (_, coordinator, bag, _) = NewRig(out var records);
+            var stone = NewDef("item.stone");
+            bag.TryPlaceAt(new SlotId(0), stone, 12); // 前格满
+            bag.TryPlaceAt(new SlotId(1), stone, 5);  // 后格 5 个
+
+            var receipt = coordinator.RequestDrop(bag, new SlotId(1), 1);
+
+            Assert.AreEqual(OperationStatus.Completed, receipt.Status);
+            Assert.AreEqual(12, bag.Slots[0].Count, "前格必须一个不动");
+            Assert.AreEqual(4, bag.Slots[1].Count, "只扣选中的后格");
+            Assert.AreEqual(1, records.RecordsIn("level.a").Count);
+        }
+
+        [Test]
+        public void 丢弃_同定义两格_落地被拒_放回原格且前格不动()
+        {
+            var records = new WorldRecordStore(new InstanceIdAllocator(), 0, _ => { });
+            var (_, coordinator, bag, _) = NewRigCore(() => new RejectingDropPort(), records);
+            var stone = NewDef("item.stone");
+            bag.TryPlaceAt(new SlotId(0), stone, 12);
+            bag.TryPlaceAt(new SlotId(1), stone, 5);
+
+            var receipt = coordinator.RequestDrop(bag, new SlotId(1), 1);
+
+            Assert.AreEqual("DropRejected", receipt.Reason);
+            Assert.AreEqual(12, bag.Slots[0].Count, "回滚不得把东西塞到前格去");
+            Assert.AreEqual(5, bag.Slots[1].Count, "原样放回**原格**");
+        }
+
+        [Test]
+        public void 使用_同定义两格_只扣选中的那一格()
+        {
+            var (_, coordinator, bag, consumed) = NewRig(out _);
+            var drug = NewDef("item.drug", new ConsumableFacet());
+            bag.TryPlaceAt(new SlotId(0), drug, 12);
+            bag.TryPlaceAt(new SlotId(1), drug, 5);
+
+            var receipt = coordinator.RequestConsume(bag, new SlotId(1), 1);
+
+            Assert.AreEqual(OperationStatus.Completed, receipt.Status);
+            Assert.AreEqual(12, bag.Slots[0].Count, "前格必须一个不动");
+            Assert.AreEqual(4, bag.Slots[1].Count, "只扣选中的后格");
+            Assert.AreEqual(1, consumed.Count);
+        }
+
+        [Test]
+        public void 使用_格寻址_选中实例行_拒绝()
+        {
+            var (_, coordinator, bag, consumed) = NewRig(out _);
+            var bagDef = NewDef("item.backpack", null, container: true);
+            bag.TryPlaceInstance(NewBag(bagDef, 4));
+
+            var receipt = coordinator.RequestConsume(bag, new SlotId(0), 1);
+
+            Assert.AreEqual("NotConsumable", receipt.Reason, "实例行不是'能吃掉的东西'");
+            Assert.AreEqual(1, bag.CountOf(bagDef), "零改动");
+            CollectionAssert.IsEmpty(consumed);
+        }
+
+        [Test]
+        public void 使用_定义寻址_仍然可用_从最靠前的同物格扣()
+        {
+            var (_, coordinator, bag, _) = NewRig(out _);
+            var drug = NewDef("item.drug", new ConsumableFacet());
+            bag.TryPlaceAt(new SlotId(0), drug, 12);
+            bag.TryPlaceAt(new SlotId(1), drug, 5);
+
+            // 无格上下文的调用方（将来的快捷栏"直接用掉一个"）走定义寻址，语义就是"最靠前的那格"
+            var receipt = coordinator.RequestConsume(bag, drug, 1);
+
+            Assert.AreEqual(OperationStatus.Completed, receipt.Status);
+            Assert.AreEqual(11, bag.Slots[0].Count);
+            Assert.AreEqual(5, bag.Slots[1].Count);
+        }
+
         // ---- 丢弃：格寻址（界面主路径） ----
 
         [Test]

@@ -30,6 +30,13 @@ namespace XeptGame.Player
         public readonly bool IsSprinting;
 
         /// <summary>
+        /// 是否滑铲中（滑铲是独立的 `Grounded` 子状态：此时 <see cref="IsCrouching"/>/<see cref="IsSprinting"/>
+        /// **均为 false**，故需要独立标志）。消费者：FovController（滑铲取**冲刺档** FOV）、
+        /// HeadBob（滑铲**抑制**摆头）、SlideTilt（滑铲倾斜）。
+        /// </summary>
+        public readonly bool IsSliding;
+
+        /// <summary>
         /// 垂直**自主**速度（dot(Motor.OwnVelocity, up)，正 = 向上；不含平台被动运动）。
         /// JumpInertia 用：起跳 v_y&gt;0 → 相机下偏（惯性滞后），下落 v_y&lt;0 → 上偏。
         /// </summary>
@@ -43,7 +50,7 @@ namespace XeptGame.Player
 
         public FeelSnapshot(float horizontalSpeed, float verticalVelocity,
             float targetEyeHeight, float standingEyeHeight,
-            bool isGrounded, Type leafState, bool isCrouching, bool isSprinting)
+            bool isGrounded, Type leafState, bool isCrouching, bool isSprinting, bool isSliding)
         {
             HorizontalSpeed = horizontalSpeed;
             VerticalVelocity = verticalVelocity;
@@ -53,6 +60,7 @@ namespace XeptGame.Player
             LeafState = leafState;
             IsCrouching = isCrouching;
             IsSprinting = isSprinting;
+            IsSliding = isSliding;
         }
     }
 }

@@ -338,6 +338,17 @@ namespace XeptGame.Core.Input
                 },
                 {
                     ""name"": """",
+                    ""id"": ""88b76e8b-b0bd-4aac-b800-204557b609c2"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""21393a6bd7a548ba8d3654fa7379b1b1"",
                     ""path"": ""<Keyboard>/leftCtrl"",
                     ""interactions"": """",
@@ -349,22 +360,22 @@ namespace XeptGame.Core.Input
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9bca05c19f2445708794bc19daf0faba"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""id"": ""7189260d-f4be-4f4e-a065-141ecb30b1f7"",
+                    ""path"": ""<Mouse>/forwardButton"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Gamepad"",
+                    ""groups"": """",
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""7189260d-f4be-4f4e-a065-141ecb30b1f7"",
-                    ""path"": ""<Mouse>/forwardButton"",
+                    ""id"": ""9bca05c19f2445708794bc19daf0faba"",
+                    ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": ""Gamepad"",
                     ""action"": ""Crouch"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false

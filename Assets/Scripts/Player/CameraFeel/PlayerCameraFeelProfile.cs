@@ -130,6 +130,17 @@ namespace XeptGame.Player
             public float transitionTime = 0.12f;
         }
 
+        [System.Serializable]
+        public class SlideTiltSection
+        {
+            [Header("倾斜（固定方向，v1）")]
+            [Tooltip("滑铲时的相机倾斜角（度；v1 固定方向、不区分左右——后续可改为按侧向输入定方向）")]
+            public float tiltAngle = 2f;
+
+            [Tooltip("倾斜过渡时间（秒；SmoothDamp，进入与退出共用）")]
+            public float transitionTime = 0.15f;
+        }
+
         [Header("FOV")]
         public FovSection fov = new();
 
@@ -144,6 +155,9 @@ namespace XeptGame.Player
 
         [Header("CrouchEye")]
         public CrouchEyeSection crouchEye = new();
+
+        [Header("SlideTilt")]
+        public SlideTiltSection slideTilt = new();
 
         /// <summary>运行时默认配置（未挂资产时使用）。非资产实例，不可在资源库中编辑。</summary>
         public static PlayerCameraFeelProfile Default

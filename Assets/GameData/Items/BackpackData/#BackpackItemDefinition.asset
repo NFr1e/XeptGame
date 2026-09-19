@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.ItemDefinition
   id: item.backpack
   iconKind: 1
-  iconSprite: {fileID: 21300000, guid: 48e18dcda57bde84482def79eafdc45f, type: 3}
+  iconSprite: {fileID: 21300000, guid: cdd3ef208f80ffb4da0b811c8a54029d, type: 3}
   iconTexture: {fileID: 0}
   facets:
   - rid: 135043442431754330

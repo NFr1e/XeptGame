@@ -51,6 +51,7 @@ namespace XeptGame.Tests
         {
             var fsm = NewSprintingFsm(8f);
             Input.CrouchIntent = true;
+            Input.SlideIntent = true;
 
             NewDispatcher(fsm).Dispatch();
 
@@ -59,15 +60,29 @@ namespace XeptGame.Tests
         }
 
         [Test]
-        public void 冲刺但速度不足门槛_退化为Crouch()
+        public void 冲刺中速度不足门槛_不滑也不蹲_保持奔跑()
         {
+            // 意图优先级：奔跑 > 蹲伏（蹲伏不接入）；同时滑铲因速度不足不成立 → 保持奔跑
             var fsm = NewSprintingFsm(Profile.slideEntryMinSpeed - 1f);
             Input.CrouchIntent = true;
+            Input.SlideIntent = true;
 
             NewDispatcher(fsm).Dispatch();
 
-            Assert.IsTrue(fsm.IsInHierarchy(typeof(CrouchState)), "门槛不过应退化为蹲伏");
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(SprintState)));
             Assert.IsFalse(fsm.IsInHierarchy(typeof(SlideState)));
+            Assert.IsFalse(fsm.IsInHierarchy(typeof(CrouchState)), "奔跑意图激活时不接入蹲伏");
+        }
+
+        [Test]
+        public void 奔跑意图激活_持续蹲伏意图不接入()
+        {
+            var fsm = NewSprintingFsm(8f);
+            Input.CrouchIntent = true; // 持续意图（无滑铲请求）
+
+            NewDispatcher(fsm).Dispatch();
+
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(SprintState)), "意图优先级：奔跑 > 蹲伏");
         }
 
         [Test]

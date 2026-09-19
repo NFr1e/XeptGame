@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: item.drug
   iconKind: 1
-  iconSprite: {fileID: 21300000, guid: 37c36681f69a4174da69372cd305417d, type: 3}
+  iconSprite: {fileID: 21300000, guid: e93ceb327e569e8489aa3a267de65e5e, type: 3}
   iconTexture: {fileID: 0}
   facets:
   - rid: 135043351233953869

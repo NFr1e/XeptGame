@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 89b6598081b77294182ccec3f26615c2, type: 3}
-  m_Name: BaseBallBatInventoryItemFacetProfile
+  m_Name: BaseballBatInventoryItemFacetProfile
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.InventoryItemFacetProfile
   category: 3
   maxStack: 1

@@ -8,6 +8,8 @@ namespace XeptGame.Player
     /// 故叶子用自身 <c>Fsm</c> 发起转移即正确；已处于 Crouch 时请求幂等跳过）。
     /// 边界：Marker 只表达结构性能力，动态行为留在状态内——蹲伏的保持/起身（WantCrouch 释放 +
     /// 站立尺寸 overlap 检查）在 <see cref="CrouchState.Update"/>，调度器不重复。
+    /// **意图优先级：奔跑 &gt; 蹲伏**——奔跑意图（<see cref="PlayerMotorContext.CanSprint"/>）激活时
+    /// 调度器**不接入**蹲伏（蹲伏意图被暂时压制、并未终止），该规则与 CrouchState 的起身触发共用同一谓词。
     /// 注意：**SlideState 不实现本接口**——滑铲中蹲伏键保持为 true，若实现，调度器的蹲伏动作
     /// 会把滑铲立刻打断（Slide→Crouch 非同状态、非幂等）；滑铲的保持/退出由 SlideState 自行处理。
     /// </summary>
@@ -35,10 +37,12 @@ namespace XeptGame.Player
     /// 滑铲能力 Marker（结构性能力，无行为）：当前叶子状态是否允许"起滑"。
     /// 由 <see cref="MotorActionDispatcher"/> 做准入判定：叶子实现 <see cref="ISlidable"/>
     /// 且动态门槛 <see cref="PlayerMotorContext.CanStartSlide"/> 通过 → 在叶子所属机器内请求 SlideState
-    /// （实现类 SprintState 与 SlideState 同处 Grounded 子机器）。门槛不过时**退化为蹲伏**
-    /// （调度器继续评估蹲伏动作），避免低速滑铲的怪异手感。
+    /// （实现类 SprintState 与 SlideState 同处 Grounded 子机器）。
     /// 实现：v1 仅 Sprint（冲刺档）——将来放宽"够快就能滑"只需给 WalkState 也标注。
-    /// 边界：Marker 只表达结构性能力；动态门槛（想蹲 + 水平自主速度 ≥ 门槛）在 Context 谓词（§2.5）。
+    /// 边界：Marker 只表达结构性能力；动态门槛在 Context 谓词（§2.5）——**滑铲请求是瞬时意图**
+    /// （<see cref="PlayerMotorContext.WantSlide"/>，蹲伏意图 0→1 那一帧）+ 水平自主速度 ≥ 门槛；
+    /// 用瞬时意图而非持续蹲伏意图，是为了避免"蹲伏→奔跑→到速→滑铲→回蹲→又奔跑"的自激循环。
+    /// 门槛不过时不接入滑铲；若奔跑意图仍在则保持奔跑（奔跑意图压制蹲伏）。
     /// 注意：**SlideState 不实现本接口**（否则滑铲中会重复请求自身）。
     /// </summary>
     public interface ISlidable

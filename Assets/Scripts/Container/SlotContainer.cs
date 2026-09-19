@@ -184,6 +184,48 @@ namespace XeptGame.Container
         }
 
         /// <summary>
+        /// 定向移除指定数量（<b>格寻址</b>；原子：格不存在、格内是<b>实例行</b>或数量不足则整笔失败且不改动）。
+        /// <list type="bullet">
+        /// <item>与 <see cref="TryRemove(ItemDefinition,int)"/> 的区别是<b>只从那一格扣</b>——后者从槽序
+        /// <b>最靠前的同物格</b>开始扣（见 <see cref="TakeOut"/>）；界面"选中哪一格就动哪一格"必须用本口，
+        /// 否则会出现"选中后格、扣的却是前格"；</item>
+        /// <item>实例行不受理（按数量扣减对有状态载荷无意义，不变量 I2）→ 用
+        /// <see cref="TryTakeInstanceAt"/> 整包取；</item>
+        /// <item>扣空即清格（与按定义移除同一语义），聚合轨按聚合口径报告前后总数。</item>
+        /// </list>
+        /// </summary>
+        public bool TryRemoveAt(SlotId cell, int count)
+        {
+            if (count <= 0 || !TryBeginMutation())
+            {
+                return false;
+            }
+
+            try
+            {
+                var slot = FindSlot(cell);
+                if (slot == null || slot.HasInstance || slot.Count < count)
+                {
+                    return false;
+                }
+
+                var item = slot.Item;
+                var before = TotalCountOfCore(item);
+                if (!slot.TryTake(count))
+                {
+                    return false;
+                }
+
+                PublishChanged(item, before, before - count);
+                return true;
+            }
+            finally
+            {
+                EndMutation();
+            }
+        }
+
+        /// <summary>
         /// 定向放入指定槽（归位用；原子：槽不存在、不接纳或余量不足则整笔失败且不改动）。
         /// </summary>
         public bool TryPlaceAt(SlotId cell, ItemDefinition definition, int count)

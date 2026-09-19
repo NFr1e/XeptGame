@@ -148,7 +148,8 @@ namespace XeptGame.Player
                 MotorFsm.IsInHierarchy(typeof(GroundedState)),
                 MotorFsm.CurrentStateType,
                 MotorFsm.IsInHierarchy(typeof(CrouchState)),
-                MotorFsm.IsInHierarchy(typeof(SprintState)));
+                MotorFsm.IsInHierarchy(typeof(SprintState)),
+                MotorFsm.IsInHierarchy(typeof(SlideState)));
         }
 
         private void OnDestroy()

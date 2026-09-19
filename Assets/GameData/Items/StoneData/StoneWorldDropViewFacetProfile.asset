@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55ce6ef875a960e4cb745a16ddf648cc, type: 3}
   m_Name: StoneWorldDropViewFacetProfile
   m_EditorClassIdentifier: 
-  viewPrefab: {fileID: 4419307696812114649, guid: f418bec603792a54fa538c19b4851cc1, type: 3}
+  viewPrefab: {fileID: 1079536012956788390, guid: 571fde5505c8f4949bb52847d62024c6, type: 3}

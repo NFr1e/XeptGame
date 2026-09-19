@@ -278,6 +278,7 @@ GameObject:
   - component: {fileID: 189390580}
   - component: {fileID: 189390579}
   - component: {fileID: 189390578}
+  - component: {fileID: 189390583}
   m_Layer: 10
   m_Name: CameraRig
   m_TagString: Untagged
@@ -392,6 +393,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 248064363e674b95b3f3fea9c65f255b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  viewProfile: {fileID: 11400000, guid: c1db6473e7802f84c9248ec408404275, type: 2}
+  player: {fileID: 1212482829}
+  rig: {fileID: 189390577}
+--- !u!114 &189390583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 189390575}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bca915f78d6f19143b2244e37fb28ff6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: XeptGame::XeptGame.Player.SlideTilt
   viewProfile: {fileID: 11400000, guid: c1db6473e7802f84c9248ec408404275, type: 2}
   player: {fileID: 1212482829}
   rig: {fileID: 189390577}
@@ -556,7 +572,7 @@ MonoBehaviour:
   MaxStableSlopeAngle: 60
   StableGroundLayers:
     serializedVersion: 2
-    m_Bits: 65601
+    m_Bits: 65
   DiscreteCollisionEvents: 0
   StepHandling: 1
   MaxStepHeight: 0.5
@@ -1462,7 +1478,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 0
+  m_Antialiasing: 2
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0

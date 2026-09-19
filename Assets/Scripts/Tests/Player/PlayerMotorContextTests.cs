@@ -75,6 +75,29 @@ namespace XeptGame.Tests
         }
 
         [Test]
+        public void 动态道具_不算可滑面()
+        {
+            // §5.5 单向碰撞：动态道具是"纯障碍"——不在可站立集合，但也**不是**可滑面
+            Motor.GroundState = new MotorGroundState(true, true, Vector3.up);
+            Motor.GroundColliderLayerValue = 16; // DynamicProp
+            Motor.GroundIsDynamicBodyValue = true;
+
+            Assert.IsTrue(Ctx.IsOnNonStableLayer, "道具层不在可站立集合");
+            Assert.IsFalse(Ctx.IsUnstableGroundSurface, "但动态道具不算可滑面（落上去保持 Fall，不吸附、不滑）");
+        }
+
+        [Test]
+        public void 道具上的陡坡_仍按坡面滑动()
+        {
+            // 几何优先：道具上的陡坡仍走坡面规则（滑下去），不因"是道具"而被排除
+            Motor.GroundState = new MotorGroundState(true, false, Quaternion.Euler(60f, 0f, 0f) * Vector3.up);
+            Motor.GroundColliderLayerValue = 16;
+            Motor.GroundIsDynamicBodyValue = true;
+
+            Assert.IsTrue(Ctx.IsUnstableGroundSurface);
+        }
+
+        [Test]
         public void WantSprint_WantCrouch_读意图状态()
         {
             Assert.IsFalse(Ctx.WantSprint);
@@ -88,24 +111,26 @@ namespace XeptGame.Tests
         }
 
         [Test]
-        public void CanStartSlide_需蹲伏意图与速度门槛()
+        public void CanStartSlide_需滑铲请求与速度门槛()
         {
             Motor.SetVelocity(Vector3.forward * 8f);
-            Input.CrouchIntent = false;
-            Assert.IsFalse(Ctx.CanStartSlide, "无蹲伏意图不可起滑");
 
+            // 回归护栏：**持续蹲伏意图不构成滑铲请求**——滑铲进入看瞬时意图，
+            // 否则"蹲伏→奔跑→到速"会再次命中滑铲规则而自激循环（§2.5）
             Input.CrouchIntent = true;
-            Motor.SetVelocity(Vector3.forward * (Profile.slideEntryMinSpeed - 0.01f));
-            Assert.IsFalse(Ctx.CanStartSlide, "低于门槛不可起滑（应退化为蹲伏）");
+            Assert.IsFalse(Ctx.CanStartSlide, "只有持续蹲伏意图不可起滑");
 
-            Motor.SetVelocity(Vector3.forward * Profile.slideEntryMinSpeed);
-            Assert.IsTrue(Ctx.CanStartSlide, "达到门槛即可起滑");
+            Input.SlideIntent = true;
+            Assert.IsTrue(Ctx.CanStartSlide, "滑铲请求 + 速度达门槛即可起滑");
+
+            Motor.SetVelocity(Vector3.forward * (Profile.slideEntryMinSpeed - 0.01f));
+            Assert.IsFalse(Ctx.CanStartSlide, "低于门槛不可起滑");
         }
 
         [Test]
         public void CanStartSlide_排除移动平台被动携带()
         {
-            Input.CrouchIntent = true;
+            Input.SlideIntent = true;
             // 平台带着玩家高速移动：合成速度很大，但自主速度为零
             Motor.SetVelocity(Vector3.zero, Vector3.forward * 20f);
 
@@ -116,10 +141,34 @@ namespace XeptGame.Tests
         [Test]
         public void CanStartSlide_只看水平分量()
         {
-            Input.CrouchIntent = true;
+            Input.SlideIntent = true;
             // 垂直高速 + 水平静止：不应起滑
             Motor.SetVelocity(Vector3.up * 30f);
             Assert.IsFalse(Ctx.CanStartSlide);
+        }
+
+        [Test]
+        public void CanSprint_需冲刺意图移动输入与前向()
+        {
+            Input.LocalMoveIntent = Vector3.forward;
+            Input.MoveInput = new Vector2(0f, 1f); // 前向（只有前半球可冲刺）
+            Assert.IsFalse(Ctx.CanSprint, "无冲刺意图不可奔跑");
+
+            Input.SprintIntent = true;
+            Assert.IsTrue(Ctx.CanSprint);
+
+            Input.LocalMoveIntent = Vector3.zero;
+            Assert.IsFalse(Ctx.CanSprint, "无移动输入不算可奔跑（奔跑意图不能停在原地生效）");
+        }
+
+        [Test]
+        public void WantSlide_读瞬时滑铲请求()
+        {
+            Assert.IsFalse(Ctx.WantSlide);
+
+            Input.SlideIntent = true;
+
+            Assert.IsTrue(Ctx.WantSlide);
         }
 
         [Test]

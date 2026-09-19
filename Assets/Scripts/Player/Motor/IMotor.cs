@@ -83,6 +83,13 @@ namespace XeptGame.Player
         /// <summary>可站立地面层（KCC StableGroundLayers）：接地对象层不在此集合内 = 不可站立（UnstableGround）。</summary>
         LayerMask StableGroundLayers { get; }
 
+        /// <summary>
+        /// 当前接地碰撞体是否为**动态刚体**（可推动道具）——此类表面**不作为地面**（单向碰撞，§5.5）：
+        /// 命中仍阻挡移动/参与推动，但不吸附、不接地、不触发着陆，也不进入"可滑面"。
+        /// 判据与 <see cref="MotorGroundPolicy.IsStandableSurface"/> 同源；kinematic 刚体（移动平台）返回 false。
+        /// </summary>
+        bool GroundIsDynamicBody { get; }
+
         // —— 操作 ——
 
         /// <summary>设置胶囊尺寸（Crouch 进出）。</summary>

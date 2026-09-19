@@ -3,7 +3,8 @@ using UnityEngine;
 namespace XeptGame.Player
 {
     /// <summary>
-    /// 行走（默认速度档）。转移：无意图 → Idle；冲刺意图 → Sprint（档位级输入留在子状态）。
+    /// 行走（默认速度档）。转移：无意图 → Idle；奔跑准入（<see cref="PlayerMotorContext.CanSprint"/>，
+    /// 冲刺意图 + 移动意图）→ Sprint（档位级输入留在子状态）。
     /// 蹲伏为姿态级动作，由 MotorActionDispatcher 统一判定（<see cref="ICrouchable"/>）。
     /// 能力：可蹲可跳（<see cref="ICrouchable"/>/<see cref="IJumpable"/>）。
     /// </summary>
@@ -26,7 +27,7 @@ namespace XeptGame.Player
                 return;
             }
 
-            if (Ctx.WantSprint)
+            if (Ctx.CanSprint)
             {
                 Fsm.RequestChange<SprintState>();
             }

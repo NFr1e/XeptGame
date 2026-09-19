@@ -64,9 +64,19 @@ namespace XeptGame.Player
         {
         }
 
+        /// <summary>
+        /// KCC 原生"逐命中稳定性"钩子（在 <c>EvaluateHitStability</c> 末尾回调）：
+        /// **单向碰撞**（设计决议 §5.5）——可推动道具（动态刚体）不是地面。
+        /// 命中仍会阻挡移动、参与推动（移动 sweep 与交互刚体处理照旧），但把稳定性判为 false ⇒
+        /// 不吸附、`IsStableOnGround=false`、不进入 Grounded（因此不触发着陆事件）。
+        /// </summary>
         public void ProcessHitStabilityReport(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint,
             Vector3 atCharacterPosition, Quaternion atCharacterRotation, ref HitStabilityReport hitStabilityReport)
         {
+            if (!MotorGroundPolicy.IsStandableSurface(hitCollider))
+            {
+                hitStabilityReport.IsStable = false;
+            }
         }
 
         public void OnDiscreteCollisionDetected(Collider hitCollider)

@@ -1,15 +1,16 @@
 key,zh-CN,en
-item.rock.name,石头,Rock
 item.drug.name,药品,Drug
-item.fireaxe.name,消防斧,Fireaxe
+item.fireAxe.name,消防斧,Fireaxe
 item.bandgae.name,绷带,Bandage
 item.stone.name,小石头,Stone
 item.backpack.name,背包,Backpack
+item.baseBallBat.name,棒球棍,BaseBallBat
+item.tacticalAxe.name,战术斧头,TacticalAxe
 
 interaction.pickup,拾取,Pick up
 interaction.ignite,点燃,Ignite
 interaction.extinguish,熄灭,Extinguish
-interaction.addfuel,添柴（{0}/{1}）,Add fuel ({0}/{1})
+interaction.addfuel,添柴 {0}/{1},Add fuel {0}/{1}
 interaction.debug,交互,Interact
 interaction.wear,背上,Wear
 interaction.equip,装备,Equip

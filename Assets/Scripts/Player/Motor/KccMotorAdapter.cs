@@ -45,6 +45,16 @@ namespace XeptGame.Player
         /// <inheritdoc />
         public LayerMask StableGroundLayers => _motor.StableGroundLayers;
 
+        /// <inheritdoc />
+        public bool GroundIsDynamicBody
+        {
+            get
+            {
+                var groundCollider = _motor.GroundingStatus.GroundCollider;
+                return groundCollider != null && !MotorGroundPolicy.IsStandableSurface(groundCollider);
+            }
+        }
+
         // —— 操作 ——
 
         public void SetCapsuleDimensions(float radius, float height, float yOffset)

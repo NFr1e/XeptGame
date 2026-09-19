@@ -312,7 +312,9 @@ namespace XeptGame.UI.Backpack
                 return;
             }
 
-            var receipt = _ctx.Operations.RequestConsume(_ctx.Store, snapshot.Value.Item, 1);
+            // 格寻址：**选中的那一格**才该动。按定义扣会从槽序最靠前的同物格开始扣，
+            // 于是"选中后格却扣了前格"——这与界面的心智模型不符（格视图 = 槽位）。
+            var receipt = _ctx.Operations.RequestConsume(_ctx.Store, new SlotId(_selected), 1);
             ReportReceipt("使用", receipt);
         }
 
@@ -323,7 +325,7 @@ namespace XeptGame.UI.Backpack
                 return;
             }
 
-            // 格寻址：以格为真相，且能丢实例行（"丢掉这个背包"）
+            // 格寻址：以格为真相、只动这一格，且能丢实例行（"丢掉这个背包"）
             var receipt = _ctx.Operations.RequestDrop(_ctx.Store, new SlotId(_selected), 1);
             ReportReceipt("丢弃", receipt);
         }

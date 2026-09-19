@@ -15,11 +15,9 @@ MonoBehaviour:
   LanguageCode: zh-CN
   FallbackLanguageCode: en
   Entries:
-  - Key: item.rock.name
-    Value: "\u77F3\u5934"
   - Key: item.drug.name
     Value: "\u836F\u54C1"
-  - Key: item.fireaxe.name
+  - Key: item.fireAxe.name
     Value: "\u6D88\u9632\u65A7"
   - Key: item.bandgae.name
     Value: "\u7EF7\u5E26"
@@ -27,6 +25,10 @@ MonoBehaviour:
     Value: "\u5C0F\u77F3\u5934"
   - Key: item.backpack.name
     Value: "\u80CC\u5305"
+  - Key: item.baseBallBat.name
+    Value: "\u68D2\u7403\u68CD"
+  - Key: item.tacticalAxe.name
+    Value: "\u6218\u672F\u65A7\u5934"
   - Key: interaction.pickup
     Value: "\u62FE\u53D6"
   - Key: interaction.ignite
@@ -34,7 +36,7 @@ MonoBehaviour:
   - Key: interaction.extinguish
     Value: "\u7184\u706D"
   - Key: interaction.addfuel
-    Value: "\u6DFB\u67F4\uFF08{0}/{1}\uFF09"
+    Value: "\u6DFB\u67F4 {0}/{1}"
   - Key: interaction.debug
     Value: "\u4EA4\u4E92"
   - Key: interaction.wear
@@ -43,3 +45,23 @@ MonoBehaviour:
     Value: "\u88C5\u5907"
   - Key: campfire.name
     Value: "\u706B\u5806"
+  - Key: backpack.title
+    Value: "\u80CC\u5305"
+  - Key: backpack.capacity
+    Value: "\u5BB9\u91CF {0}/{1}"
+  - Key: backpack.cell.count
+    Value: "\xD7{0}"
+  - Key: backpack.detail.count
+    Value: "\u6570\u91CF {0}"
+  - Key: backpack.detail.stacklimit
+    Value: "\u6BCF\u683C\u4E0A\u9650 {0}"
+  - Key: backpack.detail.nolimit
+    Value: "\u4E0D\u9650\u5236\u6BCF\u683C\u4E0A\u9650"
+  - Key: backpack.detail.none
+    Value: "\u9009\u62E9\u4E00\u683C\u67E5\u770B"
+  - Key: backpack.action.use
+    Value: "\u4F7F\u7528"
+  - Key: backpack.action.drop
+    Value: "\u4E22\u5F03"
+  - Key: backpack.action.use.disabled
+    Value: "{0} \u4E0D\u80FD\u4F7F\u7528"

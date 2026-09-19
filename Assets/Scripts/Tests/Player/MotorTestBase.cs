@@ -94,10 +94,11 @@ namespace XeptGame.Tests
         /// <summary>当前叶子状态（KCC 回调在运行时就是分发给它的）。</summary>
         protected static MotorStateBase LeafOf(Fsm fsm) => (MotorStateBase)fsm.CurrentState;
 
-        /// <summary>驱动到 Grounded/Sprint：移动意图 + 冲刺意图 + 自主速度。</summary>
+        /// <summary>驱动到 Grounded/Sprint：移动意图 + **前向输入**（只有前半球可冲刺）+ 冲刺意图 + 自主速度。</summary>
         protected Fsm NewSprintingFsm(float speed = 8f)
         {
             var fsm = NewGroundedFsm();
+            Input.MoveInput = new Vector2(0f, 1f); // 前向（冲刺方向准入）
             Input.LocalMoveIntent = Vector3.forward;
             Input.SprintIntent = true;
             Motor.SetVelocity(Vector3.forward * speed);
@@ -105,15 +106,36 @@ namespace XeptGame.Tests
             return fsm;
         }
 
-        /// <summary>驱动到 Grounded/Slide（冲刺 + 蹲伏意图 + 速度达门槛，经调度器准入）。</summary>
+        /// <summary>驱动到 Grounded/Slide（冲刺 + **滑铲请求瞬时意图** + 速度达门槛，经调度器准入）。</summary>
         protected Fsm NewSlidingFsm(float speed = 8f)
         {
             var fsm = NewSprintingFsm(speed);
             Input.CrouchIntent = true;
+            Input.SlideIntent = true; // 瞬时意图：模拟"蹲伏意图 0→1 的那一帧"
             NewDispatcher(fsm).Dispatch();
 
             Assert.IsTrue(fsm.IsInHierarchy(typeof(SlideState)),
                 $"未进入滑铲（当前 {fsm.CurrentStateType?.Name}）");
+            return fsm;
+        }
+
+        /// <summary>
+        /// 驱动到 Grounded/Crouch（蹲伏意图 + 前向蹲走移动意图；无奔跑意图），并模拟帧末清除滑铲请求，
+        /// 以便测试"随后表达奔跑意图"时的**意图优先级**行为。
+        /// </summary>
+        protected Fsm NewCrouchingFsm()
+        {
+            var fsm = NewGroundedFsm();
+            Input.MoveInput = new Vector2(0f, 1f); // 前向（否则后续"蹲伏中按奔跑"不满足冲刺方向准入）
+            Input.LocalMoveIntent = Vector3.forward;
+            Input.CrouchIntent = true;
+            Input.SlideIntent = true;
+            NewDispatcher(fsm).Dispatch();
+
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(CrouchState)),
+                $"未进入蹲伏（当前 {fsm.CurrentStateType?.Name}）");
+
+            Input.SlideIntent = false; // 帧末清除（瞬时意图）
             return fsm;
         }
 
@@ -141,6 +163,9 @@ namespace XeptGame.Tests
             /// <summary>当前接地碰撞体层（-1 = 无接地对象）。</summary>
             public int GroundColliderLayerValue = -1;
 
+            /// <summary>当前接地碰撞体是否为动态刚体（可推动道具；§5.5 单向碰撞）。</summary>
+            public bool GroundIsDynamicBodyValue;
+
             /// <summary>起身重叠检查结果（true = 头顶被阻挡）。</summary>
             public bool OverlapBlocked;
 
@@ -163,6 +188,7 @@ namespace XeptGame.Tests
             public bool MustUnground { get; private set; }
             public float MaxStableSlopeAngle => 45f;
             public int GroundColliderLayer => GroundColliderLayerValue;
+            public bool GroundIsDynamicBody => GroundIsDynamicBodyValue;
             public LayerMask StableGroundLayers { get; set; } = 1 << 6;
 
             /// <summary>按"自主速度 + 平台速度"设置（与生产一致：Velocity = Own + AttachedRigidbody）。</summary>

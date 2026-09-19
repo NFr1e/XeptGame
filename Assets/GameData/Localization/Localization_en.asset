@@ -15,11 +15,9 @@ MonoBehaviour:
   LanguageCode: en
   FallbackLanguageCode: zh-CN
   Entries:
-  - Key: item.rock.name
-    Value: Rock
   - Key: item.drug.name
     Value: Drug
-  - Key: item.fireaxe.name
+  - Key: item.fireAxe.name
     Value: Fireaxe
   - Key: item.bandgae.name
     Value: Bandage
@@ -27,6 +25,10 @@ MonoBehaviour:
     Value: Stone
   - Key: item.backpack.name
     Value: Backpack
+  - Key: item.baseBallBat.name
+    Value: BaseBallBat
+  - Key: item.tacticalAxe.name
+    Value: TacticalAxe
   - Key: interaction.pickup
     Value: Pick up
   - Key: interaction.ignite
@@ -34,7 +36,7 @@ MonoBehaviour:
   - Key: interaction.extinguish
     Value: Extinguish
   - Key: interaction.addfuel
-    Value: Add fuel ({0}/{1})
+    Value: Add fuel {0}/{1}
   - Key: interaction.debug
     Value: Interact
   - Key: interaction.wear
@@ -43,3 +45,23 @@ MonoBehaviour:
     Value: Equip
   - Key: campfire.name
     Value: Campfire
+  - Key: backpack.title
+    Value: Backpack
+  - Key: backpack.capacity
+    Value: Capacity {0}/{1}
+  - Key: backpack.cell.count
+    Value: "\xD7{0}"
+  - Key: backpack.detail.count
+    Value: Count {0}
+  - Key: backpack.detail.stacklimit
+    Value: Stack limit {0}
+  - Key: backpack.detail.nolimit
+    Value: No per-cell limit
+  - Key: backpack.detail.none
+    Value: Select a cell
+  - Key: backpack.action.use
+    Value: Use
+  - Key: backpack.action.drop
+    Value: Drop
+  - Key: backpack.action.use.disabled
+    Value: '{0} can''t be used'

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b61950acfd8c4441b6cedfee02c97b0, type: 3}
+  m_Name: '#BaseballBatItemDeinition'
+  m_EditorClassIdentifier: XeptGame::XeptGame.Items.ItemDefinition
+  id: item.baseBallBat
+  iconKind: 1
+  iconSprite: {fileID: 21300000, guid: 589e575ee3a9b1d4a99c53a021d1a334, type: 3}
+  iconTexture: {fileID: 0}
+  facets:
+  - rid: 135043308456247373
+  - rid: 135043351233953872
+  - rid: 135043442431754332
+  - rid: 135043442431754333
+  references:
+    version: 2
+    RefIds:
+    - rid: 135043308456247373
+      type: {class: HoldableFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 046467e75e085e64bacf8b7bf5716bd1, type: 2}
+    - rid: 135043351233953872
+      type: {class: InventoryItemFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 14b7aedb26a490147ba3014ebf0fe989, type: 2}
+    - rid: 135043442431754332
+      type: {class: WorldViewFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: b92c0357039227d4fb8f0e0f16fcda80, type: 2}
+    - rid: 135043442431754333
+      type: {class: WorldDropViewFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: dfa34f006107f414f81a1c2815a1f072, type: 2}

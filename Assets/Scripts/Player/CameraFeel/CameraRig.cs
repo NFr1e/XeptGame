@@ -47,9 +47,20 @@ namespace XeptGame.Player
         /// <inheritdoc />
         public Quaternion RotationOffset => _rotationOffset;
 
-        private void Awake()
+        private void Awake() => Initialize(viewProfile);
+
+        /// <summary>
+        /// 装配入口（Awake 调用）。**测试可直接调用**：EditMode 下 `AddComponent` 不触发 Awake，
+        /// 故测试先 `Initialize(profile, cameraTransform)` 再驱动 <see cref="ComposeFrame"/>。
+        /// </summary>
+        public void Initialize(PlayerCameraFeelProfile profile, Transform camera = null)
         {
-            _profile = viewProfile != null ? viewProfile : PlayerCameraFeelProfile.Default;
+            _profile = profile != null ? profile : PlayerCameraFeelProfile.Default;
+
+            if (camera != null)
+            {
+                cameraTransform = camera;
+            }
 
             if (cameraTransform == null)
             {
@@ -70,9 +81,16 @@ namespace XeptGame.Player
             }
         }
 
-        private void LateUpdate()
+        private void LateUpdate() => ComposeFrame(Time.deltaTime);
+
+        /// <summary>
+        /// 帧合成（**唯一写相机 transform + FOV 的地方**；LateUpdate 调用，测试可直接驱动）：
+        /// 位置 = 眼位基准 + ΣPos；旋转 = BaseRotation × ΣRot；FOV 帧率无关指数平滑到 OverrideValue 当前值；
+        /// 应用后**清空偏移**（供下一帧效果源重新累积）。
+        /// </summary>
+        public void ComposeFrame(float deltaTime)
         {
-            if (cameraTransform == null)
+            if (cameraTransform == null || _profile == null)
             {
                 return;
             }
@@ -85,7 +103,7 @@ namespace XeptGame.Player
             // FOV：帧率无关指数平滑到目标（OverrideValue 最高优先级）
             if (cameras.Count > 0)
             {
-                var smooth = 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(_profile.fov.fovSmoothTime, 0.001f));
+                var smooth = 1f - Mathf.Exp(-deltaTime / Mathf.Max(_profile.fov.fovSmoothTime, 0.001f));
                 _currentFov = Mathf.Lerp(_currentFov, Fov.Value, smooth);
 
                 foreach (var cam in cameras)
@@ -101,6 +119,9 @@ namespace XeptGame.Player
             _positionOffset = Vector3.zero;
             _rotationOffset = Quaternion.identity;
         }
+
+        /// <summary>当前平滑后的 FOV（调试/断言用；应用目标见 <see cref="Fov"/>）。</summary>
+        public float CurrentFov => _currentFov;
 
         /// <inheritdoc />
         public void AddPositionOffset(Vector3 offset) => _positionOffset += offset;

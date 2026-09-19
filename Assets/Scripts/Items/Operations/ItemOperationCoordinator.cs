@@ -422,15 +422,46 @@ namespace XeptGame.Items.Operations
         /// <item>实例行不可消费（有状态载荷不参与按定义扣减，不变量 I2）→ 一并归入 <c>NotConsumable</c> 之外的 <c>ItemNotFound</c>；</item>
         /// <item><b>同步命令</b>（不占活动操作位，与 <see cref="RequestSwapCarrier"/> 同一形态）：失败零改动，成功即终局。</item>
         /// </list>
+        /// 界面主路径用<b>格寻址</b>重载（见下）——按定义扣减会从<b>槽序最靠前</b>的同物格开始扣，
+        /// 界面上"选中后格却扣了前格"就是这个差异造成的。
         /// </summary>
         public OperationReceipt RequestConsume(SlotContainer source, ItemDefinition item, int count)
+            => ConsumeCore(source, null, item, count);
+
+        /// <summary>
+        /// 使用（<b>格寻址</b>；背包界面主路径）：<b>只从选中的那一格扣</b>，且以格内实际内容为准
+        /// （不信任调用方给的物品）。空格 / 实例行 → 拒绝（实例行不是"能吃掉的东西"）。
+        /// </summary>
+        public OperationReceipt RequestConsume(SlotContainer source, SlotId cell, int count)
+            => ConsumeCore(source, cell, null, count);
+
+        /// <summary>使用单一实现：两种情况都先解析出"扣什么、扣几个"，再走同一条扣减与播报。</summary>
+        private OperationReceipt ConsumeCore(SlotContainer source, SlotId? cell, ItemDefinition item, int count)
         {
             if (Blocked)
             {
                 return Reject("BusyOrPaused");
             }
 
-            if (source == null || item == null || count <= 0)
+            if (source == null || count <= 0)
+            {
+                return Reject("InvalidRequest");
+            }
+
+            SlotBase slot = null;
+            if (cell.HasValue)
+            {
+                slot = FindSlotById(source, cell.Value);
+                if (slot == null || slot.IsEmpty || slot.HasInstance)
+                {
+                    return Reject("NotConsumable");
+                }
+
+                item = slot.Item;
+                count = Math.Min(count, slot.Count);
+            }
+
+            if (item == null)
             {
                 return Reject("InvalidRequest");
             }
@@ -443,7 +474,10 @@ namespace XeptGame.Items.Operations
             _busy = true;
             try
             {
-                if (!source.TryRemove(item, count))
+                var removed = cell.HasValue
+                    ? source.TryRemoveAt(cell.Value, count)
+                    : source.TryRemove(item, count);
+                if (!removed)
                 {
                     return Reject("ItemNotFound");
                 }
@@ -472,7 +506,8 @@ namespace XeptGame.Items.Operations
 
         /// <summary>
         /// 丢弃（<b>格寻址</b>；背包界面主路径）：以格内<b>实际内容</b>为准（不信任调用方给的物品），
-        /// 因而<b>能丢实例行</b>（"丢掉这个背包"走整包落地），这是定义寻址做不到的。
+        /// <b>只从选中的那一格移除</b>，因而<b>能丢实例行</b>（"丢掉这个背包"走整包落地）——
+        /// 这两件事定义寻址都做不到（它从槽序最靠前的同物格开始扣）。
         /// </summary>
         public OperationReceipt RequestDrop(SlotContainer source, SlotId cell, int count)
             => DropCore(source, cell, null, count);
@@ -550,7 +585,14 @@ namespace XeptGame.Items.Operations
                     return Reject(string.IsNullOrEmpty(carrierReason) ? "DropRejected" : carrierReason);
                 }
 
-                if (!source.TryRemove(item, count))
+                if (cell.HasValue)
+                {
+                    if (!source.TryRemoveAt(cell.Value, count))
+                    {
+                        return Reject("ItemNotFound");
+                    }
+                }
+                else if (!source.TryRemove(item, count))
                 {
                     return Reject("ItemNotFound");
                 }
@@ -560,8 +602,12 @@ namespace XeptGame.Items.Operations
                     return Complete("Dropped");
                 }
 
-                // 掉落被拒 → 原样放回（不丢、不复制）
-                if (!source.TryAdd(item, count))
+                // 掉落被拒 → 原样放回（不丢、不复制）。**格寻址必须放回原格**：
+                // 用 TryAdd 会把它塞进"最靠前的可用格"，于是"丢后格、失败"会变成"东西跑到前格去了"。
+                var restored = cell.HasValue
+                    ? source.TryPlaceAt(cell.Value, item, count)
+                    : source.TryAdd(item, count);
+                if (!restored)
                 {
                     throw new InvalidOperationException("丢弃失败且无法放回容器，必须停止后续操作并检查占用事实。");
                 }

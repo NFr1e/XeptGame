@@ -74,6 +74,12 @@ namespace XeptGame.Player
         /// </summary>
         public float SlideBoostRemaining { get; set; }
 
+        /// <summary>
+        /// 滑铲**起滑方向锁定**（会话数据：<see cref="SlideState.OnEnter"/> 写入 = 入口水平自主速度方向）。
+        /// 用途：转向时以它为"前半球"基准**剔除后向分量** ⇒ 滑铲结构上不可能被转向背向（§2.5）。
+        /// </summary>
+        public Vector3 SlideDirection { get; set; }
+
         // ============================================================
         // 着陆事件（观感层订阅；设计决议 docs/modules/3C_CameraFeel_Design.md §3.1）
         // ============================================================
@@ -110,13 +116,36 @@ namespace XeptGame.Player
         public bool WantCrouch => Input.CrouchIntent;
 
         /// <summary>
+        /// 滑铲**请求**（**瞬时意图**：蹲伏意图 0→1 的那一帧为真，帧末清除，与 <see cref="PlayerMotorInputState.JumpIntent"/> 同类）。
+        /// 注意：滑铲进入**不看持续蹲伏意图**——否则"蹲伏 → 按奔跑 → 到达冲刺速度"会因蹲伏意图仍为真而再次命中滑铲规则，
+        /// 自激成 滑铲↔奔跑 循环（§2.5）。
+        /// </summary>
+        public bool WantSlide => Input.SlideIntent;
+
+        /// <summary>
+        /// 奔跑准入（"允许奔跑"的当前全部条件，也是**意图优先级**的判定量）：
+        /// 想冲刺 **且** 有移动意图 **且 前向意图（只有前半球可冲刺）**。
+        /// 方向规则（用户决议，取代早期"后半球禁止、侧向允许"版本）：**仅前半球（含前斜向）可冲刺**；
+        /// **纯侧向（y≈0）与后向（y&lt;0）一律降级 Walk**。依据《孤岛惊魂 6》一手实测（其禁止后向冲刺）。
+        /// 副作用：侧向/后向只能走（`walkSpeed` 4 &lt; 起滑门槛 `slideEntryMinSpeed` 6）⇒
+        /// **侧向与后向滑铲在速度上不可能**（滑铲侧零特判）；滑铲中仍可侧向转向（受前半球约束，§2.5）。
+        /// 未来体力/武器状态等门控应在此扩展（单一挂点）。用途：
+        /// ① WalkState → Sprint 与 Sprint 的维持；② **奔跑意图压制蹲伏**（意图优先级：奔跑 &gt; 蹲伏——
+        /// CrouchState 起身触发 与 调度器蹲伏准入 两侧共用本谓词，防逐帧翻转）。
+        /// </summary>
+        public bool CanSprint
+            => WantSprint
+               && WorldMoveIntent.sqrMagnitude > 0f
+               && Input.MoveForwardIntent;
+
+        /// <summary>
         /// 能否起滑（动态门槛；**结构能力**由 <see cref="ISlidable"/> 表达，调度器两者取与）：
-        /// 想蹲 + 水平**自主**速度达到 <see cref="PlayerMotorProfile.slideEntryMinSpeed"/>。
-        /// 用自主速度（排除移动平台被动携带——站在平台上被动高速不应能起滑）；
-        /// 门槛不过时调度器退化为蹲伏（§2.5）。
+        /// **滑铲请求**（瞬时意图 <see cref="WantSlide"/>）+ 水平**自主**速度达到
+        /// <see cref="PlayerMotorProfile.slideEntryMinSpeed"/>——用自主速度（排除移动平台被动携带）。
+        /// 请求不成立或速度不足时不接入滑铲；此时若奔跑意图仍在，则保持奔跑（奔跑意图压制蹲伏，§2.2）。
         /// </summary>
         public bool CanStartSlide
-            => WantCrouch
+            => WantSlide
                && Vector3.ProjectOnPlane(Motor.OwnVelocity, Motor.CharacterUp).magnitude
                   >= Profile.slideEntryMinSpeed;
 
@@ -147,13 +176,18 @@ namespace XeptGame.Player
         /// 是否为"可滑面"（UnstableGround 进入条件）：坡面（法线超稳定角）**或**
         /// 不可站立层对象（接地碰撞体不在 StableGroundLayers——互斥语义，见设计决议 §5.4）。
         /// 悬崖边缘（稳定层 + 法线≈up）不满足 → 保持 Fall。
+        /// **排除动态道具**（§5.5）：动态刚体（可推动道具）是"纯障碍"——不吸附、不接地、**也不当滑面**
+        /// ⇒ 落在道具上保持 Fall（不触发着陆、不进 UnstableGround）。道具上的陡坡仍按坡面规则处理（几何优先）。
         /// </summary>
-        public bool IsUnstableGroundSurface => IsSlopeSlide || IsOnNonStableLayer;
+        public bool IsUnstableGroundSurface
+            => IsSlopeSlide || (IsOnNonStableLayer && !Motor.GroundIsDynamicBody);
 
         /// <summary>
         /// 当前接地对象是否"不可站立"：接地碰撞体 Layer **不在** StableGroundLayers。
         /// 依赖 KCC 接地探测填充 GroundCollider（KCC 已改为探测全部碰撞层，见修改点）；
-        /// 互斥语义：StableGroundLayers = 可站立（Grounded），非 StableGroundLayers = 不可站立（UnstableGround）。
+        /// 互斥语义：StableGroundLayers = 可站立（Grounded）；非 StableGroundLayers = 不可站立
+        /// ——地形层（如 `UnstableGround`）= 可滑面（§5.4）；**动态道具层 = 非地面**（§5.5，见
+        /// <see cref="IsUnstableGroundSurface"/> 的排除）。
         /// </summary>
         public bool IsOnNonStableLayer
             => Motor.GroundColliderLayer >= 0

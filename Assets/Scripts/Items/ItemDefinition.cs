@@ -36,10 +36,10 @@ namespace XeptGame.Items
         [Space(20)]
         [SerializeField, PropertyOrder(2)] private IconKind iconKind;
 
-        [ShowIf(nameof(iconKind), IconKind.Sprite), PropertyOrder(3)]
+        [ShowIf(nameof(iconKind), IconKind.Sprite), PreviewField, PropertyOrder(3)]
         [SerializeField] private Sprite iconSprite;
 
-        [ShowIf(nameof(iconKind), IconKind.Texture), PropertyOrder(3)]
+        [ShowIf(nameof(iconKind), IconKind.Texture), PreviewField, PropertyOrder(3)]
         [SerializeField] private Texture iconTexture;
 
         [Space(20)]

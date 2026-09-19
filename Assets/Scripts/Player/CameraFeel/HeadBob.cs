@@ -27,6 +27,7 @@ namespace XeptGame.Player
 
         private PlayerCameraFeelProfile _profile;
         private PlayerMotorContext _ctx;
+        private ICameraEffectTarget _target;
 
         private float _phase;          // 位移积分相位
         private float _offsetX;        // 平滑后当前偏移（SmoothDamp 输出）
@@ -35,11 +36,18 @@ namespace XeptGame.Player
         private float _smoothVelY;
         private float _timeSinceLanding = float.MaxValue; // 落地恢复窗口计时（未落地过则恒允许 bob）
 
+        /// <summary>装配（Awake 调用；**测试可注入假目标**后直接驱动 <see cref="Tick"/>）。</summary>
+        public void Initialize(ICameraEffectTarget target, PlayerCameraFeelProfile profile)
+        {
+            _target = target;
+            _profile = profile != null ? profile : PlayerCameraFeelProfile.Default;
+        }
+
         private void Awake()
         {
-            _profile = viewProfile != null ? viewProfile : PlayerCameraFeelProfile.Default;
             player ??= GetComponentInParent<PlayerController>();
             rig ??= GetComponent<CameraRig>();
+            Initialize(rig, viewProfile);
         }
 
         private void Start()
@@ -68,18 +76,31 @@ namespace XeptGame.Player
 
         private void Update()
         {
-            if (player == null || rig == null)
+            if (_target == null || player == null)
             {
                 return;
             }
 
-            var snapshot = player.GetFeelSnapshot();
+            Tick(Time.deltaTime, player.GetFeelSnapshot());
+        }
+
+        /// <summary>每帧求解（可测：给定快照与 dt 直接驱动）。</summary>
+        public void Tick(float deltaTime, in FeelSnapshot snapshot)
+        {
+            if (_target == null)
+            {
+                return;
+            }
+
             var bob = _profile.headBob;
 
-            _timeSinceLanding += Time.deltaTime;
+            _timeSinceLanding += deltaTime;
 
-            // 激活条件：稳定接地 + 超出落地恢复窗口 + 水平速度超过阈值（Idle 天然排除）
+            // 激活条件：稳定接地 + **非滑铲** + 超出落地恢复窗口 + 水平速度超过阈值（Idle 天然排除）。
+            // 滑铲抑制的动机：滑铲是平滑滑行（速度可达 10 m/s，比冲刺还快），若继续按"档位基准"摆头会抖；
+            // 且滑铲同时叠加 SlideTilt 倾斜，保持相机稳定观感更好。目标归零后经 SmoothDamp 惯性滑停。
             bool bobActive = snapshot.IsGrounded
+                && !snapshot.IsSliding
                 && _timeSinceLanding > bob.landingRecoveryTime
                 && snapshot.HorizontalSpeed > bob.speedThreshold;
 
@@ -103,19 +124,19 @@ namespace XeptGame.Player
                 }
 
                 // 位移积分相位（速度驱动；频率倍率作用在相位累积上，快跑自然摆得更快）
-                _phase += snapshot.HorizontalSpeed * bob.frequencyPerMeter * freqScale * Time.deltaTime;
+                _phase += snapshot.HorizontalSpeed * bob.frequencyPerMeter * freqScale * deltaTime;
 
                 targetX = Mathf.Sin(_phase) * bob.walkAmplitude * ampScale;
                 targetY = Mathf.Abs(Mathf.Sin(_phase * 2f)) * bob.walkAmplitude * ampScale;
             }
 
-            // SmoothDamp 平滑（停步/抑制时目标为零 → 惯性滑停回零）
-            _offsetX = Mathf.SmoothDamp(_offsetX, targetX, ref _smoothVelX, bob.smoothTime);
-            _offsetY = Mathf.SmoothDamp(_offsetY, targetY, ref _smoothVelY, bob.smoothTime);
+            // SmoothDamp 平滑（停步/抑制时目标为零 → 惯性滑停回零）；显式传 dt 便于测试确定性驱动
+            _offsetX = Mathf.SmoothDamp(_offsetX, targetX, ref _smoothVelX, bob.smoothTime, Mathf.Infinity, deltaTime);
+            _offsetY = Mathf.SmoothDamp(_offsetY, targetY, ref _smoothVelY, bob.smoothTime, Mathf.Infinity, deltaTime);
 
             if (Mathf.Abs(_offsetX) > 0.0001f || Mathf.Abs(_offsetY) > 0.0001f)
             {
-                rig.AddPositionOffset(new Vector3(_offsetX, _offsetY, 0f));
+                _target.AddPositionOffset(new Vector3(_offsetX, _offsetY, 0f));
             }
         }
     }

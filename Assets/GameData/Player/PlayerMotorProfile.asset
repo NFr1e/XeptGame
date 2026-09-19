@@ -32,5 +32,13 @@ MonoBehaviour:
   allowJumpingWhenUnstableGround: 1
   slidingControl: 0.5
   slidingAcceleration: 8
+  slideEntryMinSpeed: 6
+  slideStartBoost: 6
+  slideBoostDuration: 0.1
+  slideFriction: 10
+  slideExitSpeed: 4
+  slideSteerSpeed: 150
+  slideSteerAcceleration: 0
+  slideSlopeInfluence: 0.5
   pressToSprint: 1
   pressToCrouch: 1

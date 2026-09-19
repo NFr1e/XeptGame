@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 028656bed0401a545878b005c9b9fe15, type: 3}
-  m_Name: BaseBallBatHoldableFacetProfile
+  m_Name: BaseballBatHoldableFacetProfile
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.HoldProfile
   category: 1
   viewPrefab: {fileID: 6491929445378723370, guid: 1df8d7d266f62774fa81458da6482d58, type: 3}

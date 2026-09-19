@@ -21,36 +21,61 @@ namespace XeptGame.Player
         [SerializeField] private CameraRig rig;
 
         private PlayerCameraFeelProfile _profile;
+        private ICameraEffectTarget _target;
+
+        /// <summary>装配（Awake 调用；**测试可注入假目标**后直接驱动 <see cref="Tick"/>）。</summary>
+        public void Initialize(ICameraEffectTarget target, PlayerCameraFeelProfile profile)
+        {
+            _target = target;
+            _profile = profile != null ? profile : PlayerCameraFeelProfile.Default;
+        }
 
         private void Awake()
         {
-            _profile = viewProfile != null ? viewProfile : PlayerCameraFeelProfile.Default;
+            player ??= GetComponentInParent<PlayerController>();
+            rig ??= GetComponent<CameraRig>();
+            Initialize(rig, viewProfile);
         }
 
         private void Update()
         {
-            if (player == null || rig == null)
+            if (_target == null || player == null)
             {
                 return;
             }
 
-            // 目标 FOV：蹲伏 > 疾跑 > 默认（蹲伏与冲刺互斥；切换由 CameraRig 平滑过渡）。
-            var snapshot = player.GetFeelSnapshot();
-            var target = snapshot.IsCrouching
+            Tick(Time.deltaTime, player.GetFeelSnapshot());
+        }
+
+        /// <summary>
+        /// 每帧求解（可测：给定快照与 dt 直接驱动）——按状态选择目标 FOV 写入 Effect 优先级。
+        /// **滑铲取冲刺档**（用户决议：滑铲保持 Sprint FOV）；注意滑铲时
+        /// <see cref="FeelSnapshot.IsCrouching"/>/<see cref="FeelSnapshot.IsSprinting"/> **均为 false**，
+        /// 必须显式分支，否则会错误回落到 `fovIdle`（比冲刺还窄）。
+        /// </summary>
+        public void Tick(float deltaTime, in FeelSnapshot snapshot)
+        {
+            if (_target == null)
+            {
+                return;
+            }
+
+            // 目标 FOV：蹲伏 > 滑铲(= 冲刺档) > 疾跑 > 默认（蹲伏与滑铲/冲刺互斥；切换由 CameraRig 平滑过渡）
+            float target = snapshot.IsCrouching
                 ? _profile.fov.fovCrouch
-                : snapshot.IsSprinting
+                : snapshot.IsSprinting || snapshot.IsSliding
                     ? _profile.fov.fovSprint
                     : _profile.fov.fovIdle;
 
-            rig.Fov.Set(target, OverridePriority.Effect);
+            _target.Fov.Set(target, OverridePriority.Effect);
         }
 
         private void OnDestroy()
         {
             // 移除本组件的 FOV 覆盖：禁用/销毁后不再冻结目标 FOV，恢复 CameraRig 默认基线
-            if (rig != null)
+            if (_target != null)
             {
-                rig.Fov.Clear(OverridePriority.Effect);
+                _target.Fov.Clear(OverridePriority.Effect);
             }
         }
     }

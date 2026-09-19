@@ -22,9 +22,12 @@ namespace XeptGame.Player
     /// 接地态动作（空中按蹲会收缩胶囊、或与父级转移在两级机器上并发竞态）。Tick 后判定保证
     /// "叶子实现 IJumpable/ICrouchable ⇔ 决策层确认接地"，与旧父状态语义逐帧一致。
     ///
-    /// 动作优先级：**滑铲 > 蹲伏 > 跳跃**——同帧"冲刺+蹲+跳" = 起滑；冲刺中按蹲但速度不足门槛时
-    /// 滑铲不成立、继续评估蹲伏（**退化为蹲伏**，§2.5）；蹲伏保持中（叶子=CrouchState）请求幂等跳过；
-    /// 滑铲保持中（叶子=SlideState，非 ICrouchable）不会被蹲伏动作打断，其保持/退出由 SlideState 自行处理。
+    /// **意图优先级：奔跑 > 蹲伏**——奔跑意图（<see cref="PlayerMotorContext.CanSprint"/>）激活时
+    /// **不接入蹲伏**（蹲伏意图被暂时压制、并未终止；奔跑结束后按意图重新生效，见 CrouchState）。
+    /// 该判断与 CrouchState 的起身触发共用同一 Context 谓词（单一规则来源，防逐帧翻转）。
+    /// 动作优先级：**滑铲 > 蹲伏 > 跳跃**——同帧"冲刺+蹲+跳" = 起滑；蹲伏保持中（叶子=CrouchState）
+    /// 请求幂等跳过；滑铲保持中（叶子=SlideState，非 ICrouchable）不会被蹲伏动作打断，
+    /// 其保持/退出由 SlideState 自行处理。
     /// </summary>
     public sealed class MotorActionDispatcher
     {
@@ -53,7 +56,7 @@ namespace XeptGame.Player
 
             if (TryCrouch())
             {
-                return; // 蹲伏（含"冲刺中按蹲但速度不足门槛"的退化路径）
+                return; // 蹲伏
             }
 
             TryJump();
@@ -61,9 +64,9 @@ namespace XeptGame.Player
 
         /// <summary>
         /// 滑铲动作（§2.5）：准入 = 叶子实现 <see cref="ISlidable"/> 且
-        /// <see cref="PlayerMotorContext.CanStartSlide"/>（想蹲 + 水平自主速度达门槛）
+        /// <see cref="PlayerMotorContext.CanStartSlide"/>（**滑铲请求瞬时意图** + 水平自主速度达门槛）
         /// → 在叶子所属机器（Grounded 子机器）内请求 SlideState。
-        /// 返回 true = 本帧起滑（不再评估蹲伏/跳跃）；门槛不过时返回 false，交由蹲伏动作接住（退化蹲伏）。
+        /// 返回 true = 本帧起滑（不再评估蹲伏/跳跃）。
         /// </summary>
         private bool TrySlide()
         {
@@ -87,6 +90,14 @@ namespace XeptGame.Player
         {
             var leaf = _fsm.CurrentState;
             if (leaf is not ICrouchable || !_ctx.WantCrouch)
+            {
+                return false;
+            }
+
+            // **意图优先级：奔跑 > 蹲伏**——奔跑意图激活时不接入蹲伏。
+            // 必需（非仅语义）：否则 CrouchState 因奔跑意图起身进 Sprint 后，本帧调度器又会把叶子
+            // 按回 Crouch → Crouch⇄Sprint 逐帧翻转。与 CrouchState 的起身触发共用 Context.CanSprint。
+            if (_ctx.CanSprint)
             {
                 return false;
             }

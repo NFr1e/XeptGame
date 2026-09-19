@@ -292,6 +292,58 @@ namespace XeptGame.Tests
         }
 
         // ============================================================
+        // 单向碰撞：可推动道具不是地面（§5.5）
+        // ============================================================
+
+        [Test]
+        public void 动态道具上_保持Fall_且不触发着陆()
+        {
+            var fsm = NewGroundedFsm();
+            SetAirborneGround();
+            Tick(fsm);
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(FallState)));
+
+            MotorLandingInfo? landing = null;
+            Ctx.Landing += info => landing = info;
+
+            // 接地探测"碰到"道具：FoundAnyGround=true（KCC 探测到）、IsStableOnGround=false（钩子判不稳定）、动态刚体
+            Motor.GroundState = new MotorGroundState(true, false, Vector3.up);
+            Motor.GroundColliderLayerValue = 16;
+            Motor.GroundIsDynamicBodyValue = true;
+
+            Tick(fsm);
+
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(FallState)), "道具不算地面：既不进 Grounded 也不进 UnstableGround");
+            Assert.IsFalse(landing.HasValue, "落在道具上不应触发着陆事件（不影响着地判定）");
+
+            // 离开道具、落到真实地面：正常落地 + 触发着陆
+            SetStableGround(Vector3.up);
+            Motor.GroundIsDynamicBodyValue = false;
+            Motor.ClearForceUnground();
+            Tick(fsm);
+
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(GroundedState)));
+            Assert.IsTrue(landing.HasValue, "真实地面仍应正常触发着陆");
+        }
+
+        [Test]
+        public void 动态道具上的陡坡_落UnstableGround()
+        {
+            var fsm = NewGroundedFsm();
+            SetAirborneGround();
+            Tick(fsm);
+
+            Motor.GroundState = new MotorGroundState(true, false, Quaternion.Euler(60f, 0f, 0f) * Vector3.up);
+            Motor.GroundColliderLayerValue = 16;
+            Motor.GroundIsDynamicBodyValue = true;
+            Motor.ClearForceUnground();
+
+            Tick(fsm);
+
+            Assert.IsTrue(fsm.IsInHierarchy(typeof(UnstableGroundState)), "道具上的陡坡仍按坡面规则滑落");
+        }
+
+        // ============================================================
         // Fall：土狼跳
         // ============================================================
 

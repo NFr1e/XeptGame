@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55ce6ef875a960e4cb745a16ddf648cc, type: 3}
-  m_Name: BaseBallBatWorldDropViewFacetProfile
+  m_Name: BaseballBatWorldDropViewFacetProfile
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.WorldDropViewFacetProfile
   viewPrefab: {fileID: 7444739571343403502, guid: fff0cd7e66fcf424bbb13c56d0fd99fc, type: 3}

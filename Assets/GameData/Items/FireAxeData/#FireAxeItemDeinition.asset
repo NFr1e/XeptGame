@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: XeptGame::XeptGame.Items.ItemDefinition
   id: item.fireAxe
   iconKind: 1
-  iconSprite: {fileID: 21300000, guid: d3bbfe59a437f78408e8eabb693e62a9, type: 3}
+  iconSprite: {fileID: 21300000, guid: 96d23acd84f6b284a87a86310dae3312, type: 3}
   iconTexture: {fileID: 0}
   facets:
   - rid: 135043308456247373

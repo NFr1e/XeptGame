@@ -14,20 +14,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: item.stone
   iconKind: 1
-  iconSprite: {fileID: 21300000, guid: cf33e55e7d19c2842b1235cd7d3bcb82, type: 3}
+  iconSprite: {fileID: 21300000, guid: a3472e19911defd4fa4948d3b356ae97, type: 3}
   iconTexture: {fileID: 0}
   facets:
+  - rid: 135043490733097074
   - rid: 135043442431754337
   - rid: 135043234695217158
   - rid: 135043351233953870
-  - rid: 135043234695217157
   - rid: 135043234695217159
   references:
     version: 2
     RefIds:
-    - rid: 135043234695217157
-      type: {class: ConsumableFacet, ns: XeptGame.Items, asm: XeptGame}
-      data: 
     - rid: 135043234695217158
       type: {class: HoldableFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
@@ -43,3 +40,7 @@ MonoBehaviour:
       type: {class: WorldDropViewFacet, ns: XeptGame.Items, asm: XeptGame}
       data:
         profile: {fileID: 11400000, guid: e0f7fd8c5d99a12409a6303f5f130780, type: 2}
+    - rid: 135043490733097074
+      type: {class: WorldViewFacet, ns: XeptGame.Items, asm: XeptGame}
+      data:
+        profile: {fileID: 11400000, guid: 3d3646f32f0daca418dcadee6a2b0417, type: 2}

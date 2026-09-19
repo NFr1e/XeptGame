@@ -9,12 +9,13 @@ namespace XeptKit.Localization
     /// </summary>
     public static class LocKeys
     {
-        public const string ItemRockName = "item.rock.name";
         public const string ItemDrugName = "item.drug.name";
-        public const string ItemFireaxeName = "item.fireaxe.name";
+        public const string ItemFireaxeName = "item.fireAxe.name";
         public const string ItemBandgaeName = "item.bandgae.name";
         public const string ItemStoneName = "item.stone.name";
         public const string ItemBackpackName = "item.backpack.name";
+        public const string ItemBaseballbatName = "item.baseBallBat.name";
+        public const string ItemTacticalaxeName = "item.tacticalAxe.name";
         public const string InteractionPickup = "interaction.pickup";
         public const string InteractionIgnite = "interaction.ignite";
         public const string InteractionExtinguish = "interaction.extinguish";
@@ -23,5 +24,15 @@ namespace XeptKit.Localization
         public const string InteractionWear = "interaction.wear";
         public const string InteractionEquip = "interaction.equip";
         public const string CampfireName = "campfire.name";
+        public const string BackpackTitle = "backpack.title";
+        public const string BackpackCapacity = "backpack.capacity";
+        public const string BackpackCellCount = "backpack.cell.count";
+        public const string BackpackDetailCount = "backpack.detail.count";
+        public const string BackpackDetailStacklimit = "backpack.detail.stacklimit";
+        public const string BackpackDetailNolimit = "backpack.detail.nolimit";
+        public const string BackpackDetailNone = "backpack.detail.none";
+        public const string BackpackActionUse = "backpack.action.use";
+        public const string BackpackActionDrop = "backpack.action.drop";
+        public const string BackpackActionUseDisabled = "backpack.action.use.disabled";
     }
 }

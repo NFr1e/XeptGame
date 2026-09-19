@@ -63,6 +63,7 @@ namespace XeptGame.Player
             _motorInput.MoveInput = Vector2.zero;
             _motorInput.SprintIntent = false;
             _motorInput.CrouchIntent = false;
+            _motorInput.SlideIntent = false;
             _lookInput.Delta = Vector2.zero;
         }
 
@@ -110,6 +111,14 @@ namespace XeptGame.Player
                 else
                 {
                     _motorInput.CrouchIntent = !_motorInput.CrouchIntent;
+                }
+
+                // 蹲伏意图 0→1 的那一帧同时置**滑铲请求**（瞬时意图，与跳跃边沿同类）：
+                // 滑铲进入看"意图到达"而非"意图为真"，否则蹲伏中按奔跑会在到达冲刺速度后
+                // 自激成 滑铲↔奔跑 循环（设计决议 §2.5）
+                if (_motorInput.CrouchIntent)
+                {
+                    _motorInput.SlideIntent = true;
                 }
             }
             else if (ctx.canceled && _settings.PressToCrouch.Value)
